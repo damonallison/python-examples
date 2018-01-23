@@ -51,6 +51,8 @@ from exceptions.custom_derived_error import CustomDerivedError
 #
 # This will traverse up to this package's parent and traverse down.
 #
+# Each "." brings you up a parent directory. You do not use "../.." to refer to parents.
+#
 # from ..package.child import Object
 #
 class TestModules(unittest.TestCase):
