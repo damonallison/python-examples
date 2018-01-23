@@ -48,6 +48,13 @@ class ListTests(unittest.TestCase):
         lst.extend(["grace", 13])
         self.assertEqual(expected, lst)
 
+    def test_slicing_sequences(self):
+        """Strings are sequences and can be indexed."""
+
+        s = "Damon"
+        self.assertEqual(len(s), 5, msg="Use len() to determine sequence length")
+        self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")
+
     def test_iteration(self):
         """`for` iterates over the elements in a sequence."""
 

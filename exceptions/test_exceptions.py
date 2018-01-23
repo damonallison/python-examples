@@ -73,5 +73,5 @@ class TestExceptions(unittest.TestCase):
 
         self.assertEqual(["start", "middle", "end", "finally"], result)
 
-
-
+if __name__ == '__main__':
+    unittest.main()
