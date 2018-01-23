@@ -20,6 +20,8 @@
 * Heterogeneous lists.
 
 * Exceptions are all named with `Error` rather than `Exception`.
+* Mutliple base classes
+* `self`
 
 ## Comments
 

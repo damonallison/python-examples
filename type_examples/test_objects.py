@@ -1,22 +1,26 @@
+"""Examples of creating classes in python."""
+
 import unittest
 
-class ObjectTests(unittest.TestCase):
+from .custom_objects.person import Person
 
+class ObjectTests(unittest.TestCase):
+    """Examples of creating and using `custom` objects."""
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         pass
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         pass
 
     def setUp(self):
         pass
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         pass
 
-    def test_none(self):
+    def test_none(self) -> None:
         """There are two ways to check for `None`. Always use `is None`
 
         1. `obj is None`
@@ -26,14 +30,13 @@ class ObjectTests(unittest.TestCase):
         variable is truly `None`, use `is None`.
         """
         x = None
-        self.assertTrue(x is None, msg="Always use `is None` to check for None");
+        self.assertTrue(x is None, msg="Always use `is None` to check for None")
 
-    def test_sequences(self):
-        """Strings are sequences and can be indexed."""
+    def test_type(self) -> None:
+        """Type check variables"""
 
-        s = "Damon"
-        self.assertEqual(len(s), 5, msg="Use len() to determine sequence length")
-        self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")
+        p = Person("damon", "allison")
+        self.assertEqual("damon", p.first_name)
 
 
 if __name__ == '__main__':
