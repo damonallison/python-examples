@@ -1,4 +1,5 @@
-#
+#!/usr/bin/env python3
+
 # Welcome to python!
 #
 # Damon Allison
@@ -10,6 +11,7 @@ import sys
 from algorithms.fibonacci import fib
 
 def print_environment():
+    """Prints relevant information about the current runtime environment"""
     print("argv == " + str(sys.argv))
     #
     # The module search path is the list of:
