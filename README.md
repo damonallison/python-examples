@@ -19,6 +19,7 @@
     * `enumerate`
 * Heterogeneous lists.
 
+* Exceptions are all named with `Error` rather than `Exception`.
 
 ## Comments
 

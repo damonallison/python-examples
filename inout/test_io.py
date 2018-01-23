@@ -1,7 +1,8 @@
+"""Tests for Python I/O"""
 import unittest
 import os.path
 
-class IOTests(unittest.TestCase):
+class TestIO(unittest.TestCase):
     """Tests for Python I/O."""
 
     testFileName = "test.txt"
