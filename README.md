@@ -23,6 +23,12 @@
 * Mutliple base classes
 * `self`
 
+* Data encapsulation is impossible in python. It's done by convention. Yuk
+
+> `In fact, nothing in Python makes it possible to enforce data hiding — it is all based upon convention.`
+
+> `“Private” instance variables that cannot be accessed except from inside an object don’t exist in Python. However, there is a convention that is followed by most Python code: a name prefixed with an underscore (e.g. _spam) should be treated as a non-public part of the API (whether it is a function, a method or a data member). It should be considered an implementation detail and subject to change without notice.`
+
 ## Comments
 
 * Primary Collection Types : List, Tuple (immutable), Set, Dictionary

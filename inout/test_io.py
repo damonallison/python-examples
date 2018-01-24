@@ -2,6 +2,7 @@
 import unittest
 import os.path
 
+
 class TestIO(unittest.TestCase):
     """Tests for Python I/O."""
 
@@ -27,17 +28,22 @@ class TestIO(unittest.TestCase):
     def test_basic_printing(self) -> None:
         """str() == human readable output. repr() == interpreter readable output"""
 
-        fname = "damon"
-        lname = "allison"
+        first_name = "damon"
+        last_name = "allison"
 
-        self.assertTrue(str(fname) == "damon")
-        self.assertTrue(repr(fname) == "'damon'")
+        self.assertTrue(str(first_name) == "damon")
+        self.assertTrue(repr(first_name) == "'damon'")
 
+        #
         # format using positional arguments
-        self.assertEqual("damon allison", "{0} {1}".format(fname, lname))
+        #
+        self.assertEqual("damon allison", "{0} {1}".format(first_name, last_name))
 
+        #
         # format using keyword arguments
-        self.assertEqual("damon allison", "{first} {last}".format(first=fname, last=lname))
+        #
+        self.assertEqual("damon allison", "{first} {last}".format(first=first_name, last=last_name))
+        self.assertEqual("$100 is $100.00", "${var} is ${var:.2f}".format(var=100))
 
     def test_reading_writing_files(self) -> None:
         """With will automatically close the file"""
@@ -52,7 +58,6 @@ class TestIO(unittest.TestCase):
             readLines = f.readlines()
 
         self.assertEqual(lines, [x for x in readLines])
-
 
 
 if __name__ == '__main__':
