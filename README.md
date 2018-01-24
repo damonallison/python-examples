@@ -27,3 +27,25 @@
 
 * Primary Collection Types : List, Tuple (immutable), Set, Dictionary
     * Any hashable object can be a dictionary key. (How does it enforce?)
+
+## Namespaces
+
+* Built-ins (`abs()`)
+* Module global
+* Function
+
+### Scopes (Lexical)
+
+* Innermost scope (block or function)
+* Enclosing scope (outer function or class)
+* Module global scope
+* Built-ins
+
+* `nonlocal` binds a variable higher in the enclosing scope to the current scope.
+* `global` binds a variable in the global scope to the current scope.
+
+
+## Classes
+
+* Visibility rules / modification.
+*

@@ -1,5 +1,10 @@
 import unittest
 
+#
+# Module level (global) scope
+#
+value = 100
+
 class FunctionTests(unittest.TestCase):
 
     @classmethod
@@ -15,6 +20,46 @@ class FunctionTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         pass
+
+    #
+    # Class level (enclosing scope) variable
+    #
+    value = 10
+
+    def test_scopes(self) -> None:
+        """Python has 3 scopes. This test shows how scoping works."""
+        def local_scope():
+            """ Here, value is created locally. Class and module level `value` objects are not touched."""
+            value = 10
+        def nonlocal_scope():
+            """Here, value is bound to the class level (enclosing scope) `value` instance."""
+            self.value = self.value + 1
+
+        def global_scope():
+            """Here, value is bound to the module level (global) `value` instance."""
+            global value
+            value = value + 1
+
+        # Initial values
+        self.assertTrue(10, self.value)
+        self.assertTrue(100, value)
+
+        # Local scope does not touch class or module level `value`.
+        local_scope()
+        self.assertTrue(10, self.value)
+        self.assertTrue(100, value)
+
+        # Nonlocal updates class level `value`.
+        nonlocal_scope()
+        self.assertTrue(11, self.value)
+        self.assertTrue(100, value)
+
+        # Global updates module level `value`.
+        global_scope()
+        self.assertTrue(11, self.value)
+        self.assertTrue(101, value)
+
+
 
     def fun_defaults(self, name: str, num: int=5) -> [str]:
         """Function arguments can have default values."""
