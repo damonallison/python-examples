@@ -1,13 +1,16 @@
 """Module / package documentation and tests.
 
-* Modules are simply files. A module name is it's file name.
-* Packages are directory of modules (files) with an __init__.py file
-    * __init__.py can be empty or initialize the __all__ variable.
-    * __all__ : a list of module names that should be imported when importing *.
-        * pkg.py defines
-            `__all__ = ["Test", "Test2"]`
-        * The following statement will import the Test1 and Test2 modules.
-            `from pkg import *`
+
+Modules are simply files. A module name is it's file name.
+
+Packages are directory of modules (files) with an __init__.py file.
+
+__init__.py can be empty or initialize the __all__ variable.
+
+__all__ : a list of module names that should be imported when importing *.
+    * `__all__ = ["Test", "Test2"]`
+    * The following statement will import the Test1 and Test2 modules.
+        `from pkg import *`
 
 * Generally, don't use `from pkg import *` unless you are on the command line!
 * It can have unwanted side effects.
@@ -45,6 +48,7 @@ import exceptions.custom_error
 # err = CustomDerivedError(state="oops")
 #
 from exceptions.custom_derived_error import CustomDerivedError
+
 
 #
 # If you are in a module, you can use an "intra package import"
@@ -96,7 +100,6 @@ class TestModules(unittest.TestCase):
                 CustomDerivedError),
             msg="Unable to find the CustomDerivedError module"
         )
-
 
 if __name__ == '__main__':
     unittest.main()
