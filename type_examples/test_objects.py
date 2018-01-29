@@ -5,6 +5,7 @@ import unittest
 from .custom_objects.person import Person
 from .custom_objects.manager import Manager
 
+
 class ObjectTests(unittest.TestCase):
     """Examples of creating and using `custom` objects."""
     @classmethod
@@ -32,15 +33,12 @@ class ObjectTests(unittest.TestCase):
         """
         x = None
         self.assertTrue(x is None, msg="Always use `is None` to check for None")
-        self.assertTrue(x == None)
 
     def test_type_check(self) -> None:
         """Use isinstance() to check for a type. issubclass(obj,"""
 
-
         p = Person("test", "user")
         self.assertTrue(isinstance(p, Person))
-
 
     def test_object_creation(self) -> None:
         """Shows creating objects and calling methods."""
@@ -77,9 +75,8 @@ class ObjectTests(unittest.TestCase):
         #
         self.assertEqual("cole allison", p2.full_name())
 
-
     def test_inheritance(self) -> None:
-
+        """Example showing how to check for type instances using isinstance() and issubclass()"""
         m = Manager("damon", "allison")
 
         self.assertTrue(isinstance(m, Manager))
@@ -127,7 +124,11 @@ class ObjectTests(unittest.TestCase):
         self.assertEqual("lily", names[1])
         self.assertEqual("cole", names[2])
 
+    def test_context_manager(self) -> None:
+        """Python's context managers allow you to support python's `with` statement."""
 
+        with Person("damon", "allison") as p:
+            self.assertEqual("damon", p.first_name)
 
 
 if __name__ == '__main__':

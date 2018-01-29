@@ -5,22 +5,29 @@
 
 ## Likes
 
-* Dynamic. Fast REPL. No compliation.
+* Dynamic. Fast REPL (no compilation cycle).
+* Flexible. Simple to embed into other programs.
 
 ## Dislikes
 
 * Dynamic. No type checking, type information.
+
 * The core data structures (except tuple) are mutable by default.
     * Swift's `val` and `var` are much more clear, safe.
+
 * Built-in functions vs. objects. Built-ins should be on objects.
     * `del` seems like a complete hack. Put `delete` on all data structure types.
     * `sorted`
     * `zip`
     * `enumerate`
+
 * Heterogeneous lists.
+    * `array()` stores homogeneous lists. Specifying an array type feels awkaard.
 
 * Exceptions are all named with `Error` rather than `Exception`.
+
 * Mutliple base classes
+
 * `self`
 
 * Data encapsulation is impossible in python. It's done by convention. Yuk
