@@ -1,5 +1,8 @@
 """A simple person class"""
 
+import logging
+
+
 class Person:
     """A simple person class"""
 
@@ -37,3 +40,28 @@ class Person:
     def child_first_names(self):
         for child in self.children:
             yield child.first_name
+
+    #
+    # Adds support for "with". Python calls the with construct a "context manager".
+    #
+    # Use context managers when you need to ensure non-local resources are closed properly.
+    #
+    # Examples of non-local resources include:
+    #
+    # * Files
+    # * Context handles / environment pointers
+    # * Database connections
+    # * Sockets
+    #
+    #
+    # Example:
+    #
+    # with Person("damon", "allison") as p:
+    #     pass
+    #
+    def __enter__(self):
+        logging.warning("__enter__ person context")
+        return self
+
+    def __exit__(self, *args):
+        logging.warning("__exit__ person context")
