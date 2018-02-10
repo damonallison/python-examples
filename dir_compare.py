@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # dir_compare.py
 #
@@ -30,11 +30,10 @@ log.debug("STARTING")
 log.debug("Python version : " + sys.version)
 log.debug("Current file : " + CURRENT_FILE)
 
-# functions here
-
 def md5_for_file_name(file_name):
     """
         MD5 a file using a sane block_size multiplier : (64 * 128 == 8192 bytes).
+
         MD5 has 128 byte digest block, so use a multiplier of 128.
     """
     md5 = hashlib.md5()
@@ -44,6 +43,9 @@ def md5_for_file_name(file_name):
     return md5.hexdigest()
 
 def hashes_for_dir(root_dir):
+    """
+        
+    """
     results = {}
     counter = 0
     for folder, sub_folders, files in os.walk(root_dir):
