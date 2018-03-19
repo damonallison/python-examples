@@ -12,7 +12,7 @@ import sys
 import hashlib
 import logging
 import pickle
-import string
+import str
 
 # Possible levels : DEBUG, INFO, WARNING, ERROR, CRITICAL
 logging.basicConfig(level="DEBUG",
@@ -44,7 +44,7 @@ def md5_for_file_name(file_name):
 
 def hashes_for_dir(root_dir):
     """
-        
+
     """
     results = {}
     counter = 0
