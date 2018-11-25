@@ -12,7 +12,7 @@ import sys
 import hashlib
 import logging
 import pickle
-import str
+import string
 
 # Possible levels : DEBUG, INFO, WARNING, ERROR, CRITICAL
 logging.basicConfig(level="DEBUG",
@@ -109,6 +109,7 @@ def gen_next_filename(proposed_name):
     file_name, ext = os.path.splitext(proposed_name)
     last = file_name[-1:]
     append_digit = 1
+
     if str.isdigit(last):
         append_digit = int(last) + 1
         return_name = file_name[:-1] + str(append_digit)
