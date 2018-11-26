@@ -37,7 +37,7 @@ class TestExceptions(unittest.TestCase):
             self.assertTrue(type(err) is ZeroDivisionError)
 
     def test_exception_object_hierarchy(self) -> None:
-        """The except clause is compatible with an exception if it is the same class or a base class.abs
+        """The except clause is compatible with an exception if it is the same class or a base class.
 
         Catch the most derived exceptions first, followed by the most generic.
 

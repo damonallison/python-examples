@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 
-# Welcome to python!
-#
-# Damon Allison
-# 01/11/2018
-#
-
 import sys
 
 from algorithms.fibonacci import fib
 
 def print_environment():
     """Prints relevant information about the current runtime environment"""
+
     print("argv == " + str(sys.argv))
     #
     # The module search path is the list of:
@@ -19,6 +14,8 @@ def print_environment():
     # * $PYTHONPATH environment variable. Takes same format as $PATH (/usr/local:/usr/bin).
     # * Installation dependent default
     print("path == " + str(sys.path))
+
+
 #
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
