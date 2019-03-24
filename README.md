@@ -2,7 +2,6 @@
 
 ## Likes
 
-* Dynamic. Fast REPL (no compilation cycle).
 * Flexible. Simple to embed into other programs.
 
 ## Dislikes

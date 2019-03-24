@@ -9,6 +9,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "Python: Current File (Integrated Terminal)",
             "type": "python",
@@ -17,6 +18,11 @@
             "console": "integratedTerminal",
 
             // Automatically stop the debugger on the first line.
+            //
+            // Important: There is a bug in the debugger. stopOnEntry doesn't work.
+            // Instead, set a breakpoint on the first line and do *not*
+            // add `stopOnEntry` to the configuration.
+            //
             // "stopOnEntry": true
         },
         {

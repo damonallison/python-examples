@@ -1,7 +1,33 @@
 # TODO
 
+## Python Community
+
 * What makes Python so popular for data science?
   * Interpreted? REPL?
+
+## Language
+
+* Module / Package system (imports / exports / scoping)
+
+* Example of list comprehension?
+    `[_convert_name(name) for name in names]`
+
+* `__import__(module)` - is `import` a statement and function?
+
+## Libraries
+
+* `unittest`
+  * Graphical test runner? Run from VS Code?
+  
+* `sys`
+* `os.path`
+
+## Environment
+
+* What is `__init__.py` and `__main__.py`?
+* `def __init__` - constructor?
+
+* What environment variables can be setup to ron globally? (`.pythonrc`?)
 
 ## Distributions
 
