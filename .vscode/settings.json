@@ -1,3 +1,8 @@
 {
+    /** 
+     * settings.json 
+     * 
+     * VS Code workspace settings
+     */
     "python.pythonPath": "python3"
 }

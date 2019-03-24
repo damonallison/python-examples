@@ -15,13 +15,14 @@ def print_environment():
     # * Installation dependent default
     print("path == " + str(sys.path))
 
-
 #
+
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
 #
 if __name__ == "__main__":
 
+    print("damon", "allison", "", sep="--", end='test\n', flush=True)
     print("hello from " + __name__)
     print_environment()
 
