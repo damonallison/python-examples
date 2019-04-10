@@ -1,5 +1,3 @@
-"""Tests exception handling"""
-
 import unittest
 
 from .custom_derived_error import CustomDerivedError
@@ -7,7 +5,7 @@ from .custom_error import CustomError
 
 
 class TestExceptions(unittest.TestCase):
-    """Tests for Python I/O."""
+    """Tests exception handling"""
 
     testFileName = "test.txt"
 
