@@ -27,7 +27,7 @@
 * What is `__init__.py` and `__main__.py`?
 * `def __init__` - constructor?
 
-* What environment variables can be setup to ron globally? (`.pythonrc`?)
+* What environment variables can be setup to run globally? (`.pythonrc`?)
 
 ## Distributions
 

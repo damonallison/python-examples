@@ -16,7 +16,6 @@ def print_environment():
     print("path == " + str(sys.path))
 
 #
-
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
 #

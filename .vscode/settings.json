@@ -4,5 +4,15 @@
      * 
      * VS Code workspace settings
      */
-    "python.pythonPath": "python3"
+    "python.pythonPath": "python3",
+    "python.unitTest.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.unitTest.unittestEnabled": true,
+    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false
 }

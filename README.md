@@ -1,65 +1,40 @@
 # Python
 
-## Likes
+This repo contains python examples as `unittest` test cases. All tests are in
+the `tests` top level directory.
 
-* Flexible. Simple to embed into other programs.
+## Running Tests
 
-## Dislikes
+Tests can be executed from the command line or from VS Code.
+### Command Line
 
-* Dynamic. No type checking, type information.
+```sh
+# Run all unit tests starting in the `tests` directory.
+$ python3 -m unittest discover -s tests
+```
 
-* The core data structures (except tuple) are mutable by default.
-    * Swift's `val` and `var` are much more clear, safe.
+## Visual Studio Code
 
-* Built-in functions vs. objects. Built-ins should be on objects.
-    * `del` seems like a complete hack. Put `delete` on all data structure types.
-    * `sorted`
-    * `zip`
-    * `enumerate`
+The `.vscode/settings.json` file should contain the following config for unit
+testing to work.
 
-* Heterogeneous lists.
-    * `array()` stores homogeneous lists. Specifying an array type feels awkaard.
-
-* Exceptions are all named with `Error` rather than `Exception`.
-
-* Mutliple base classes
-
-* `self`
-
-* Data encapsulation is impossible in python. It's done by convention. Yuk.
-
-> In fact, nothing in Python makes it possible to enforce data hiding — it is
-> all based upon convention.
-
-> “Private” instance variables that cannot be accessed except from inside an
-> object don’t exist in Python. However, there is a convention that is followed
-> by most Python code: a name prefixed with an underscore (e.g. _spam) should be
-> treated as a non-public part of the API (whether it is a function, a method or
-> a data member). It should be considered an implementation detail and subject
-> to change without notice.`
-
-## Comments
-
-* Primary Collection Types : List, Tuple (immutable), Set, Dictionary
-    * Any hashable object can be a dictionary key. (How does it enforce?)
-
-## Namespaces
-
-* Built-ins (`abs()`)
-* Module global
-* Function
-
-### Scopes (Lexical)
-
-* Innermost scope (block or function)
-* Enclosing scope (outer function or class)
-* Module global scope
-* Built-ins
-
-* `nonlocal` binds a variable higher in the enclosing scope to the current scope.
-* `global` binds a variable in the global scope to the current scope.
-
-
-## Classes
-
-* Visibility rules / modification.
+```json
+{
+    /** 
+     * settings.json 
+     * 
+     * VS Code workspace settings
+     */
+    "python.pythonPath": "python3",
+    "python.unitTest.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.unitTest.unittestEnabled": true,
+    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false
+}
+```
