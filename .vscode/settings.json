@@ -7,8 +7,6 @@
     "python.pythonPath": "python3",
     "python.unitTest.unittestArgs": [
         "-v",
-        "-s",
-        "./tests",
         "-p",
         "test_*.py"
     ],

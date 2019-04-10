@@ -10,7 +10,7 @@ Tests can be executed from the command line or from VS Code.
 
 ```sh
 # Run all unit tests starting in the `tests` directory.
-$ python3 -m unittest discover -s tests
+$ python3 -m unittest
 ```
 
 ## Visual Studio Code
@@ -28,8 +28,6 @@ testing to work.
     "python.pythonPath": "python3",
     "python.unitTest.unittestArgs": [
         "-v",
-        "-s",
-        "./tests",
         "-p",
         "test_*.py"
     ],

@@ -36,9 +36,9 @@ import unittest
 # It must be referenced with it's full name.
 #
 # For Example:
-# err = exceptions.custom_error.CustomError(state="oops")
+# err = tests.exceptions.custom_error.CustomError(state="oops")
 #
-import exceptions.custom_error
+import tests.exceptions.custom_error
 
 #
 # Import the submodule without it's package prefix.
@@ -47,7 +47,7 @@ import exceptions.custom_error
 # For example:
 # err = CustomDerivedError(state="oops")
 #
-from exceptions.custom_derived_error import CustomDerivedError
+from ..exceptions.custom_derived_error import CustomDerivedError
 
 
 #
@@ -85,8 +85,8 @@ class TestModules(unittest.TestCase):
         #
         self.assertTrue(
             isinstance(
-                exceptions.custom_error.CustomError(state="oops"),
-                exceptions.custom_error.CustomError),
+                tests.exceptions.custom_error.CustomError(state="oops"),
+                tests.exceptions.custom_error.CustomError),
             msg="Unable to find the CustomError module"
         )
 
