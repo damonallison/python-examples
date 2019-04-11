@@ -5,7 +5,14 @@ from .custom_error import CustomError
 
 
 class TestExceptions(unittest.TestCase):
-    """Tests exception handling"""
+    """Tests exception handling
+    
+    There are two types of errors:
+
+    SyntaxError : the code couldn't be parsed. 
+    Exception   : runtime error
+
+    """
 
     testFileName = "test.txt"
 

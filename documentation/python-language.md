@@ -3,10 +3,11 @@
 ## Likes
 
 * Flexible. Simple to embed into other programs.
+* Small, easy to learn. Guido hit his goal if being "executable pseudocode".
 
 ## Dislikes
 
-* Dynamic typing. 
+* Dynamic typing.
 
 * The core data structures (except tuple) are mutable by default.
     * Swift's `val` and `var` are much more clear, safe.

@@ -5,7 +5,9 @@ import unittest
 #
 value = 100
 
+
 class FunctionTests(unittest.TestCase):
+    """Examples showing python scoping"""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -27,16 +29,28 @@ class FunctionTests(unittest.TestCase):
     value = 10
 
     def test_scopes(self) -> None:
-        """Python has 3 scopes. This test shows how scoping works."""
+        """Python has 3 scopes.
+
+        local scope
+        class scope
+        global scope
+
+        This test shows how scoping works."""
+
         def local_scope():
-            """ Here, value is created locally. Class and module level `value` objects are not touched."""
-            value = 10
+            """Value is created locally.
+
+            Class and module level `value`+ objects are not touched.
+            """
+            value = 100
+            self.assertEqual(100, value)
+
         def nonlocal_scope():
-            """Here, value is bound to the class level (enclosing scope) `value` instance."""
+            """self.value is bound to the class level (enclosing scope)."""
             self.value = self.value + 1
 
         def global_scope():
-            """Here, value is bound to the module level (global) `value` instance."""
+            """Value is bound to the module level (global) `value` instance."""
             global value
             value = value + 1
 
@@ -58,8 +72,6 @@ class FunctionTests(unittest.TestCase):
         global_scope()
         self.assertTrue(11, self.value)
         self.assertTrue(101, value)
-
-
 
     def fun_defaults(self, name: str, num: int=5) -> [str]:
         """Function arguments can have default values."""
@@ -89,28 +101,37 @@ class FunctionTests(unittest.TestCase):
         """Tests functions with default parameters."""
 
         self.assertEqual(["damon", "damon"], self.fun_defaults("damon", num=2))
-        self.assertEqual(["damon", "damon", "damon", "damon", "damon"], self.fun_defaults("damon"))
+        self.assertEqual(["damon", "damon", "damon", "damon", "damon"],
+                         self.fun_defaults("damon"))
 
     def test_args(self) -> None:
-        """Tests functions with variable arguments and variable keyword arguments."""
+        """Tests functions with variable arguments and
+        variable keyword arguments.
+        """
 
-        (args, kwargs) = self.fun_keyword_args(1, 2, 3, first="damon", last="allison")
+        (args, kwargs) = self.fun_keyword_args(1,
+                                               2,
+                                               3,
+                                               first="damon",
+                                               last="allison")
 
         self.assertEqual([1, 2, 3], args)
 
         self.assertEqual(
             kwargs,
-            {"first" : "damon", "last" : "allison"})
+            {"first": "damon", "last": "allison"})
 
         self.assertEqual(
             kwargs,
-            {"last" : "allison", "first" : "damon"},
+            {"last": "allison", "first": "damon"},
             msg="Dictionary ordering doesn't matter for equality checks")
 
     def test_unpacking_tuple(self) -> None:
-        """Lists and dictionaries can be unpacked and sent into a function as parameters."""
+        """Lists and dictionaries can be unpacked
+        and sent into a function as parameters.
+        """
         args = [1, 2, 3]
-        kws = {"first" : "damon", "last" : "allison"}
+        kws = {"first": "damon", "last": "allison"}
 
         # Unpacks args using * and ** and send to `fun_keyword_args`
         (a, kw) = self.fun_keyword_args(*args, **kws)
@@ -118,14 +139,13 @@ class FunctionTests(unittest.TestCase):
         self.assertEqual(kws, kw)
 
     def test_lambdas(self) -> None:
-        """Python lambdas are restricted to a single statement. They are syntactic sugar for a function definition."""
+        """Python lambdas are restricted to a single statement.
+        They are syntactic sugar for a function definition.
+        """
 
         def inner_func(val: str) -> str:
             """Example of an inner function"""
-            return "echo " + val
+            return f"echo {val}"
 
         self.assertEqual("echo damon", inner_func("damon"))
-        self.assertEqual("echo damon", (lambda x: "echo " + str(x))("damon"))
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertEqual("echo damon", (lambda x: f"echo {str(x)}")("damon"))
