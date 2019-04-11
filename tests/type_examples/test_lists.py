@@ -1,58 +1,88 @@
 import unittest
 
+
 class ListTests(unittest.TestCase):
-    """Tests for built in Python data structures : tuple, list, set, dictionary."""
+    """Tests for built in Python data structures.
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        pass
+    list
+    tuple
+    set
+    dictionary
+    """
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        pass
+    def test_mutability(self):
+        """Lists are mutable "reference" types"""
 
-    def setUp(self) -> None:
-        pass
+        a = [1, 2]
+        b = a
+        a[0] = 3
 
-    def tearDown(self) -> None:
-        pass
+        self.assertEqual(a, b)
+        self.assertEqual(3, b[0])  # a and b point to same object in memory.
 
-    def test_copy(self) -> None:
-        """Lists are mutable. To copy, use [:].
+    def test_copy(self):
+        """Lists are ordered, mutable.
 
-        Always use [:] for iteration.
+        Lists are not strongly typed. Lists can contain elements
+        of multiple types.
+
+        To copy, use [:]. Always use [:] for iteration.
         """
 
-        lst = ["damon", "kari"]
+        lst = ["damon", "kari", 10, ["another", "list"]]
         copy = lst[:]
-        self.assertFalse(lst is copy, msg="The objects are not referentially equivalent.")
-        self.assertEqual(lst, copy, msg="The lists are logically equivalent")
 
-    def test_append(self):
+        self.assertFalse(lst is copy,
+                         msg="The objects are not referentially equal.")
+        self.assertEqual(lst, copy,
+                         msg="The lists are logically equivalent")
+
+    def test_list_sorting(self):
+        """Example showing max(), min(), sorted()
+
+        max() retrieves the max element (as defined by >)
+        min() retrieves the min element (as defined by <)
+        sorted() will sort according to <
+        """
+
+        a = [10, 20, 1, 2, 3]
+
+        self.assertEqual(20, max(a))
+        self.assertEqual(1, min(a))
+        self.assertEqual([1, 2, 3, 10, 20], sorted(a))
+        self.assertEqual([20, 10, 3, 2, 1], sorted(a, reverse=True))
+
+    def test_list_append(self):
         """Use .append(elt) and .extend(iterable) to append to a list."""
 
         # Append will add a single value.
         lst = ["damon"]
         lst.append(42)
 
-        # + will concatentate the two lists (calling .extend(iterable) behind the scenes?)
+        # + will concatentate the two lists (use extend() instead for clarity)
         lst = lst + ["cole", 11]
         expected = ["damon", 42, "cole", 11]
+
         self.assertEqual(expected, lst)
-        self.assertEqual(4, len(expected))
 
         # .extend(iterable) will append all items from iterable.
         # This is preferred over using `+` since it's clear what
         # you expect.
-        expected = expected + ["grace", 13]
+        expected.extend(["grace", 13])
         lst.extend(["grace", 13])
         self.assertEqual(expected, lst)
+
+    def test_list_joining(self):
+        """Joining allows you to combine lists of strings"""
+
+        names = ["damon", "ryan", "allison"]
+        self.assertEqual(" ".join(names), "damon ryan allison")
 
     def test_slicing_sequences(self):
         """Strings are sequences and can be indexed."""
 
         s = "Damon"
-        self.assertEqual(len(s), 5, msg="Use len() to determine sequence length")
+        self.assertEqual(len(s), 5)
         self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")
 
     def test_iteration(self):
@@ -61,7 +91,8 @@ class ListTests(unittest.TestCase):
         lst = ["damon", "kari", "grace", "lily", "cole"]
         expected = []
 
-        for name in lst[:]: # iterate a copy of the list
+        # Remember to always iterate over a *copy* of the list
+        for name in lst[:]:
             expected.append(name)
         self.assertEqual(expected, lst)
 
@@ -115,68 +146,8 @@ class ListTests(unittest.TestCase):
         evens = [x for x in range(1, 11) if x % 2 == 0]
         self.assertEqual([2, 4, 6, 8, 10], evens)
 
-        squares = [(x, x **2) for x in [0, 1, 2, 3]]
+        squares = [(x, x ** 2) for x in [0, 1, 2, 3]]
 
         for x in range(len(squares)):
             self.assertEqual(squares[x][0], x)
             self.assertEqual(squares[x][1], x**2)
-
-    def test_tuples(self):
-        """Tuples are immutable sequences.
-
-        In general, lists typically contain homogeneous elements.
-        Tuples contain heterogeneous elements.
-
-        Single element tuples must be defined with a trailing comma.
-        t = 1,
-        """
-
-        t = (1, 2, 3)
-        self.assertEqual((1, 2, 3), t)
-
-        # You need the comment after the element for a single element tuple.
-        t1 = 1,
-        self.assertEqual((1,), t1)
-
-        # Access tuple elements using list notation. t[pos]
-        for x in range(0, len(t)):
-            self.assertEqual(x, t[x] - 1)
-
-    def test_sets(self):
-        """Sets are created using set() or {e1, e2, ...}."""
-
-        colors = {"orange", "yellow", "green"}
-
-        self.assertTrue("orange" in colors)
-
-        # Set comprehension is also supported
-        filtered = {x for x in colors if len(x) > 5}
-
-        self.assertEqual({"yellow", "orange"}, filtered)
-
-    def test_dictionaries(self):
-        """Dictionaries are key:value pairs.
-
-        Dictionary keys can be any immutable type.
-        Strings, numbers, or tuples can all be keys.
-        """
-
-        d = {"first" : "damon", "last" : "allison"}
-        self.assertTrue("first" in d, msg="Test for membership.")
-
-        del d["first"]
-        self.assertFalse("first" in d)
-
-        # Iterate dictionaries using key, value
-        keys = set() #
-        vals = set()
-        for k, v in d.items():
-            keys.add(k)
-            vals.add(v)
-
-        self.assertEqual({"last"}, keys)
-        self.assertEqual({"allison"}, vals)
-
-
-if __name__ == '__main__':
-    unittest.main()
