@@ -123,7 +123,6 @@ class ListTests(unittest.TestCase):
                 primes.append(n)
         self.assertEqual([2, 3, 5], primes)
 
-
         # zip() allows you to loop multiple sequences simultaneously.
         # zip() will stop when any list is exhausted.
         questions = ["who", "what", "when", "where", "why"]
@@ -138,16 +137,32 @@ class ListTests(unittest.TestCase):
         self.assertEqual(answers, a2)
 
     def test_list_comprehensions(self):
-        """List comprehensions are a concise way to create lists."""
+        """List comprehensions are a concise way to create lists.
+
+        lst = [<operation> for <elt> in <iterable> [if <condition>]]
+
+        <operation> : executed for each element in the iterable.
+        <elt> : the current element being executed
+        <iterable> : the iterable to run the list comprehension on
+        <condition> : the condition to apply. If condition returns false,
+                      the element is skipped.
+        """
 
         squares = [x**2 for x in range(1, 4)]
-        self.assertEqual([1, 4, 9], squares)
+        self.assertListEqual([1, 4, 9], squares)
 
         evens = [x for x in range(1, 11) if x % 2 == 0]
-        self.assertEqual([2, 4, 6, 8, 10], evens)
+        self.assertListEqual([2, 4, 6, 8, 10], evens)
 
         squares = [(x, x ** 2) for x in [0, 1, 2, 3]]
+        self.assertListEqual([(0, 0), (1, 1), (2, 4), (3, 9)],
+                             squares)
+        # Note that the condition can only include an if statement.
+        # If you want to use an else, you'll need to make the condition part of
+        # the operation.
 
-        for x in range(len(squares)):
-            self.assertEqual(squares[x][0], x)
-            self.assertEqual(squares[x][1], x**2)
+        # Here, we'll only compute squares for even numbers and default
+        # odds to 0.
+        squares_with_default = [x**2 if x % 2 == 0 else 0 for x in range(8)]
+        self.assertListEqual([0, 0, 4, 0, 16, 0, 36, 0],
+                             squares_with_default)

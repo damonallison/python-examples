@@ -4,7 +4,7 @@ import unittest
 class TestTuples(unittest.TestCase):
     """Tuples are immutable, ordered sequence of elements."""
 
-    def test_tuples(self):
+    def test_tuple_create(self):
         """Tuples are immutable, ordered sequences."""
 
         t = (1, 2)
@@ -16,8 +16,6 @@ class TestTuples(unittest.TestCase):
         t2 = t[1], 3, 4
 
         self.assertTupleEqual((2, 3, 4), t2)
-
-
 
     def test_tuple_assignment(self):
         """Tuples can be used to assign multiple variables at once."""
@@ -46,3 +44,21 @@ class TestTuples(unittest.TestCase):
         # Access tuple elements using list notation. t[pos]
         for x in range(0, len(t)):
             self.assertEqual(x, t[x] - 1)
+
+    def test_tuple_list_conversion(self):
+        """Tuples and lists are easily castable to eachother."""
+        tup = 1, 2
+        lst = [3, 4]
+
+        self.assertEqual(type(tup), tuple)
+        self.assertEqual(type(lst), list)
+
+        # Convert a list to a tuple
+        tup2 = tuple(lst)
+        self.assertEqual(type(tup2), tuple)
+        self.assertTupleEqual((3, 4), tup2)
+
+        # Convert a tuple to a list
+        lst2 = list(tup)
+        self.assertEqual(type(lst2), list)
+        self.assertListEqual([1, 2], lst2)

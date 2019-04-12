@@ -51,3 +51,5 @@ class TestDictionaries(unittest.TestCase):
         self.assertEqual({"first", "last"}, keys)
         self.assertEqual({"allison", "damon"}, vals)
 
+if __name__ == "__main__":
+    unittest.main()
