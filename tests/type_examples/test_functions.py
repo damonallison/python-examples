@@ -149,3 +149,5 @@ class FunctionTests(unittest.TestCase):
 
         self.assertEqual("echo damon", inner_func("damon"))
         self.assertEqual("echo damon", (lambda x: f"echo {str(x)}")("damon"))
+
+        self.assertEqual(200, (lambda x, y: x * y)(10, 20))
