@@ -1,4 +1,3 @@
-"""Tests for Python I/O"""
 import unittest
 import os.path
 
@@ -8,19 +7,11 @@ class TestIO(unittest.TestCase):
 
     testFileName = "test.txt"
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        pass
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        pass
-
-    def setUp(self) -> None:
+    def setUp(self):
         if os.path.exists(self.testFileName):
             os.remove(self.testFileName)
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         # Ensure any resources created by this test suite are deleted.
         if os.path.exists(self.testFileName):
             os.remove(self.testFileName)

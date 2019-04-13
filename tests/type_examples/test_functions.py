@@ -8,21 +8,6 @@ value = 100
 
 class FunctionTests(unittest.TestCase):
     """Examples showing python scoping"""
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        pass
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        pass
-
-    def setUp(self) -> None:
-        pass
-
-    def tearDown(self) -> None:
-        pass
-
     #
     # Class level (enclosing scope) variable
     #
@@ -151,3 +136,19 @@ class FunctionTests(unittest.TestCase):
         self.assertEqual("echo damon", (lambda x: f"echo {str(x)}")("damon"))
 
         self.assertEqual(200, (lambda x, y: x * y)(10, 20))
+
+    def gen_to(self, val):
+        """Generators are preferable to lists in certain scenarios.
+
+        They are lazy, do not take up memory, could be infinite.
+
+        They can only be iterated over once.
+        """
+        for x in range(val):
+            yield x
+
+    def test_generator(self):
+        lst = []
+        for x in self.gen_to(2):
+            lst.append(x)
+        self.assertListEqual([0, 1], lst)

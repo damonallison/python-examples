@@ -5,30 +5,15 @@ from .custom_error import CustomError
 
 
 class TestExceptions(unittest.TestCase):
-    """Tests exception handling
-    
+    """Tests exception handling.
+
     There are two types of errors:
 
-    SyntaxError : the code couldn't be parsed. 
+    SyntaxError : the code couldn't be parsed.
     Exception   : runtime error
-
     """
 
     testFileName = "test.txt"
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        pass
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        pass
-
-    def setUp(self) -> None:
-        pass
-
-    def tearDown(self) -> None:
-        pass
 
     def test_exception_handling(self) -> None:
         """Handling exceptions is simple. Wrap code into a try / except block.
@@ -41,7 +26,15 @@ class TestExceptions(unittest.TestCase):
         except (ZeroDivisionError, TypeError, NameError) as err:
             self.assertTrue(type(err) is ZeroDivisionError)
 
-    def test_exception_object_hierarchy(self) -> None:
+    def test_base_exception(self):
+        """Exception is the base class for all built in exceptions"""
+        try:
+            1 / 0
+            self.fail("Exception should have been thrown")
+        except Exception as e:
+            print("Exception : {}".format(e))
+
+    def test_exception_object_hierarchy(self):
         """The except clause is compatible with an exception if it is the same class or a base class.
 
         Catch the most derived exceptions first, followed by the most generic.
@@ -60,7 +53,7 @@ class TestExceptions(unittest.TestCase):
         except:
             self.fail("A generic wildcard handler will catch all exception types")
 
-    def test_else_clause(self) -> None:
+    def test_else_clause(self):
         """The `else` clause (optional) will be executed when no exception is raised."""
 
         result = ["start"]

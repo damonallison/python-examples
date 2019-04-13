@@ -1,5 +1,3 @@
-"""An example exception"""
-
 class CustomError(Exception):
     """A test exception"""
 
