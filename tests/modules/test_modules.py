@@ -32,6 +32,19 @@ The module search path:
 import unittest
 
 #
+# Allows us to use an alias rather than having to refer to the entire function
+# name:
+# tests.modules.calculator.add()
+#
+import tests.modules.calculator as c
+
+#
+# Uses a named import. Makes the objects you import available directly in the
+# script. You don't need to prefix the object name when using it.
+# add(2, 2)
+from tests.modules.calculator import add
+
+#
 # This loads the module `exceptions.custom_error`.
 # It must be referenced with it's full name.
 #
@@ -75,6 +88,13 @@ class TestModules(unittest.TestCase):
 
     def tearDown(self) -> None:
         pass
+
+    def test_module_alias(self):
+        # add is imported into this modules directly
+        self.assertEqual(4, add(2, 2))
+
+        # it's also available via the 'c' alias
+        self.assertTrue(4, c.add(2, 2))
 
     def test_module_imports(self) -> None:
         """Shows which modules are loaded into the local symbol table."""

@@ -28,7 +28,6 @@ source (conda info --root)/etc/fish/conf.d/conda.fish
 #####################################################################
 ```
 
-
 ## Working with the environment
 
 ```shell
@@ -52,6 +51,5 @@ $ conda remove -n snowflake --all
 
 # Activate an environment
 $ conda activate snowflake
-
 
 ```
