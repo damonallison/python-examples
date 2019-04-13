@@ -152,3 +152,9 @@ class FunctionTests(unittest.TestCase):
         for x in self.gen_to(2):
             lst.append(x)
         self.assertListEqual([0, 1], lst)
+
+        # You can create generator expressions like you would a list
+        # comprehension
+        gen = (x**2 for x in range(3))
+        self.assertTupleEqual((0, 1, 4), tuple(gen))
+
