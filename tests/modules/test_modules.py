@@ -1,51 +1,51 @@
 """Module / package documentation and tests.
 
 
-Modules are simply files. A module name is it's file name.
+Modules are simply files. A module name is it's file name (without the .py
+extension).
 
-Packages are directory of modules (files) with an __init__.py file.
+A package is a directory of modules (files) with an __init__.py file.
 
 __init__.py can be empty or initialize the __all__ variable.
 
-__all__ : a list of module names that should be imported when importing *.
-    * `__all__ = ["Test", "Test2"]`
-    * The following statement will import the Test1 and Test2 modules.
-        `from pkg import *`
+__all__ A list of modules that will be imported when `from <module> import *` is
+used. Assume the following is entered into a `pkg` file:
 
-* Generally, don't use `from pkg import *` unless you are on the command line!
-* It can have unwanted side effects.
+    __all__ = ["test", "test2"]
 
-The module search path:
-    * First, look @ built-in modules.
-    * Next, look in sys.path.
+    # This will import both the "test" and "test2" modules locally
 
-* The standard library is located in the python installation. An example from homebrew:
-    /usr/local/Cellar/python3/3.6.4_2/Frameworks/Python.framework/Versions/3.6/lib/python3.6
+    from pkg import *
+
+Generally, **don't use** `from pkg import *` unless you are on the command line!
+You will blindly import symbols locally, which may overwrite other symbols.
+
+Modules are searched for in the following order:
+
+1. Built-in modules (sys)
+2. sys.path - sys.path is built from
+   1. The directory containing the __main__ script
+   2. $PYTHONPATH
+   3. Installation dependent default
+
+* The standard library is located in the python installation. An example from
+  homebrew:
+  /usr/local/Cellar/python3/3.6.4_2/Frameworks/Python.framework/Versions/3.6/lib/python3.6
 
 * PIP installs to the 'site-packages' folder, which is located at:
-    /usr/local/lib/python3.6/site-packages
+  /usr/local/lib/python3.6/site-packages
 """
 
 #
-# Imports the `unittest` module in it's entirety.
+# Imports the `unittest` module. Since this module is part of the stdlib, it
+# will be found in sys.path
 #
 import unittest
 
 #
-# Allows us to use an alias rather than having to refer to the entire function
-# name:
-# tests.modules.calculator.add()
+# Import a module
 #
-import tests.modules.calculator as c
-
-#
-# Uses a named import. Makes the objects you import available directly in the
-# script. You don't need to prefix the object name when using it.
-# add(2, 2)
-from tests.modules.calculator import add
-
-#
-# This loads the module `exceptions.custom_error`.
+# This imports the module `exceptions.custom_error`.
 # It must be referenced with it's full name.
 #
 # For Example:
@@ -54,72 +54,53 @@ from tests.modules.calculator import add
 import tests.exceptions.custom_error
 
 #
-# Import the submodule without it's package prefix.
-# It can be used without it's package prefix.
+# Import a module with an alias
 #
-# For example:
-# err = CustomDerivedError(state="oops")
+# Using "as" allows us to use an alias rather than having to refer to the
+# entire function name: tests.modules.calculator.add()
 #
+import tests.modules.calculator as c
+
+#
+# Import a module or module member.
+#
+# You can also apply an optional alias.
+#
+# Allows you to use "CustomError" without the entire package.
+#
+from tests.exceptions.custom_error import CustomError  # as CE
+
+#
+# Intra-package (relative) references
+#
+# You can use relative paths to import submodules. These imports use "." to
+# indicate the current and parent packages involved in the relative import.
+#
+from .calculator import add
+from .pkg1.mod1 import Mod1Calculator
+from .pkg2.mod2 import Mod2Calculator
 from ..exceptions.custom_derived_error import CustomDerivedError
 
 
-#
-# If you are in a module, you can use an "intra package import"
-#
-# This will traverse up to this package's parent and traverse down.
-#
-# Each "." brings you up a parent directory. You do not use "../.." to refer to parents.
-#
-# from ..package.child import Object
-#
 class TestModules(unittest.TestCase):
     """Examples showing module imports."""
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        pass
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        pass
-
-    def setUp(self) -> None:
-        pass
-
-    def tearDown(self) -> None:
-        pass
-
-    def test_module_alias(self):
-        # add is imported into this modules directly
-        self.assertEqual(4, add(2, 2))
-
-        # it's also available via the 'c' alias
-        self.assertTrue(4, c.add(2, 2))
-
-    def test_module_imports(self) -> None:
-        """Shows which modules are loaded into the local symbol table."""
-
-        #
-        # Because we didn't use the `from` form when importing this module,
-        # we must fully qualify it's name.
-        #
+    def test_module_imports(self):
         self.assertTrue(
             isinstance(
                 tests.exceptions.custom_error.CustomError(state="oops"),
-                tests.exceptions.custom_error.CustomError),
-            msg="Unable to find the CustomError module"
-        )
+                tests.exceptions.custom_error.CustomError))
 
-        #
-        # Because we imported using the `from` form,
-        # we can use the class name directly.
-        #
+    def test_module_alias(self):
+        """We imported the calculator module with alias c"""
+        self.assertTrue(4, c.add(2, 2))
+
+    def test_intra_package_references(self):
+        self.assertEqual(4, add(2, 2))
+        self.assertEqual(4, Mod1Calculator().add(2, 2))
+        self.assertEqual(4, Mod2Calculator().add(2, 2))
         self.assertTrue(
-            isinstance(
-                CustomDerivedError(state="oops"),
-                CustomDerivedError),
-            msg="Unable to find the CustomDerivedError module"
-        )
+            isinstance(CustomDerivedError(state="oops"), CustomDerivedError))
 
 if __name__ == '__main__':
     unittest.main()

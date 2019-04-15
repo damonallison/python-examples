@@ -7,14 +7,18 @@ class TestIO(unittest.TestCase):
 
     testFileName = "test.txt"
 
-    def setUp(self):
-        if os.path.exists(self.testFileName):
+    def clean(self):
+        # Ensure any resources created by this test suite are deleted.
+        try:
             os.remove(self.testFileName)
+        except FileNotFoundError:
+            pass
+
+    def setUp(self):
+        self.clean()
 
     def tearDown(self):
-        # Ensure any resources created by this test suite are deleted.
-        if os.path.exists(self.testFileName):
-            os.remove(self.testFileName)
+        self.clean()
 
     def test_basic_printing(self) -> None:
         """str() == human readable output. repr() == interpreter readable output"""
@@ -28,7 +32,14 @@ class TestIO(unittest.TestCase):
         #
         # format using positional arguments
         #
-        self.assertEqual("damon allison", "{0} {1}".format(first_name, last_name))
+        self.assertEqual("damon allison",
+                         "{0} {1}".format(first_name, last_name))
+
+        #
+        # format using "format string literals". (f strings) You can put any
+        # expression within {}
+        self.assertEqual("damon allison",
+                         f"{first_name} {last_name}")
 
         #
         # format using keyword arguments

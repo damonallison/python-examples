@@ -27,7 +27,7 @@ class TestDictionaries(unittest.TestCase):
         #
         # Which is why get() is a safer method for retrieving a value.
         try:
-            val = d["middle"]
+            d["middle"]
             self.fail("Shouldn't get here")
         except KeyError:
             pass
@@ -50,6 +50,11 @@ class TestDictionaries(unittest.TestCase):
 
         self.assertEqual({"first", "last"}, keys)
         self.assertEqual({"allison", "damon"}, vals)
+
+    def test_dictionary_comprehensions(self):
+        """Dictionaries can be created from dictionary comprehensions"""
+        d = {x: x**2 for x in range(4)}
+        self.assertDictEqual({0: 0, 1: 1, 2: 4, 3: 9}, d)
 
 if __name__ == "__main__":
     unittest.main()

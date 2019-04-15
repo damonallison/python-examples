@@ -1,5 +1,10 @@
 # Python
 
+Python was developed as a high level language - friendlier than bash and C.
+
+> Python where we can, C++ where we must.
+> [Google Engineering](https://stackoverflow.com/questions/2560310/heavy-usage-of-python-at-google/2561008#2561008)
+
 ## Likes
 
 * Flexible. Simple to embed into other programs.

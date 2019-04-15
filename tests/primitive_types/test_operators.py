@@ -10,7 +10,7 @@ class TestOperators(unittest.TestCase):
         +  addition
         -  subtraction
         *  multiplication
-        /  division
+        /  division (always returns a floating point value)
         %  modulus
         ** exponent
         // floor division - always rounds down to next whole integer
@@ -69,13 +69,11 @@ class TestOperators(unittest.TestCase):
 
         self.assertEqual(bool, type(x))
         self.assertEqual(True, x)
-
         # bool is also equal to 1 and 0.
         self.assertEqual(1, x)
 
         # bool can also be used in logical comparison operators
-        self.assertTrue(x > 0)
-        self.assertTrue(x < 10)
+        self.assertTrue(x == 1)
 
         # bool are used in logical operators
         # and
