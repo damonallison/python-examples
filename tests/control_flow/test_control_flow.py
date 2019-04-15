@@ -51,6 +51,19 @@ class TestControlFlow(unittest.TestCase):
         else:
             self.fail("x is True")
 
+    def test_while_for_else(self):
+        """Loop statements (for and while) can also have an else clause.
+
+        The else block is called when the loop finishes naturally. It will *not*
+        be invoked when the loop is terminated with `break`"""
+
+        called = False
+        for i in range(0,5):
+            pass
+        else:
+            called = True
+        self.assertTrue(called)
+
     def test_iterable(self):
         """Python for loops work with iterables.
 

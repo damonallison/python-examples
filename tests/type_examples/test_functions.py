@@ -58,9 +58,15 @@ class FunctionTests(unittest.TestCase):
         self.assertTrue(11, self.value)
         self.assertTrue(101, value)
 
+    def test_nested_functions(self):
+        """Functions can be nested within functions."""
+        def add(x, y):
+            return x + y
+
+        self.assertEqual(4, add(2, 2))
+
     def fun_defaults(self, name: str, num: int=5) -> [str]:
         """Function arguments can have default values."""
-
         ret = []
         for i in range(0, num):
             ret.append(name)
@@ -102,11 +108,11 @@ class FunctionTests(unittest.TestCase):
 
         self.assertEqual([1, 2, 3], args)
 
-        self.assertEqual(
+        self.assertDictEqual(
             kwargs,
             {"first": "damon", "last": "allison"})
 
-        self.assertEqual(
+        self.assertDictEqual(
             kwargs,
             {"last": "allison", "first": "damon"},
             msg="Dictionary ordering doesn't matter for equality checks")
@@ -119,9 +125,16 @@ class FunctionTests(unittest.TestCase):
         kws = {"first": "damon", "last": "allison"}
 
         # Unpacks args using * and ** and send to `fun_keyword_args`
+        #
+        # Lists and tuples are unpacked with *, while dictionaries are unpacked
+        # with **
         (a, kw) = self.fun_keyword_args(*args, **kws)
         self.assertEqual(args, a)
         self.assertEqual(kws, kw)
+
+        # This will unpack the (0, 2) tuple and send the values as arguments
+        # to range()
+        self.assertEqual([0, 1], list(range(*(0, 2))))
 
     def test_lambdas(self) -> None:
         """Python lambdas are restricted to a single statement.

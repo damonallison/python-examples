@@ -78,6 +78,15 @@ class TestPrimitiveTypes(unittest.TestCase):
 
         self.assertEqual(str, type(x))
 
+        # Raw strings r"str" will *not* interpret \ as a special character
+        self.assertEqual(r"A \test", "A \\test")
+
+        # Multi-line string literal
+        # \ at the end of line will prevent a newline from being added.
+        print("""\
+Usage: test [OPTIONS]
+Another line""")
+
     def test_string_conversion(self):
         """Use str() to get a string representation from any variable"""
 
@@ -99,3 +108,13 @@ class TestPrimitiveTypes(unittest.TestCase):
         self.assertEqual(5, len(s))
         self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")
 
+    def test_string_slicing(self):
+        """Strings are sequences and can be indexed.
+
+        Strings are also immutable, so the following will error
+        str[0] = "D"
+        """
+
+        s = "Damon"
+        self.assertEqual(len(s), 5)
+        self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")

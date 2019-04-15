@@ -3,6 +3,29 @@ import unittest
 
 class TestIteration(unittest.TestCase):
 
+    def test_list_iteration(self):
+        """Python's `for` loop is different than C, C++, C#, Java.
+
+        It only allows you to iterate over an iterable. It doesn't allow you to
+        specify the halting condition or step criteria."""
+
+        a = ["damon", "allison"]
+        result = []
+
+        for elt in a:
+            result.append(elt)
+
+        self.assertListEqual(["damon", "allison"], result)
+
+        # To iterate over the indices of a sequence
+        result = []
+        for i in range(len(a)):
+            result.append(a[i])
+
+        self.assertListEqual(["damon", "allison"], result)
+
+
+
     def test_udacity_intro_to_python_data_structures(self):
         """This test shows an example problem using iteration and list comprehensions."""
 

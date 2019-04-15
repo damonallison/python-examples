@@ -37,6 +37,17 @@ class ListTests(unittest.TestCase):
         self.assertEqual(lst, copy,
                          msg="The lists are logically equivalent")
 
+        # Copies are shallow.
+        lst = [1, 2]
+        lst2 = lst[:]
+        lst2[0] = 3
+        self.assertListEqual([1, 2], lst)
+
+        lst = [[1], 2]
+        lst2 = lst[:]
+        lst2[0][0] = 3
+        self.assertEqual([[3], 2], lst)
+
     def test_list_sorting(self):
         """Example showing max(), min(), sorted()
 
@@ -77,13 +88,6 @@ class ListTests(unittest.TestCase):
 
         names = ["damon", "ryan", "allison"]
         self.assertEqual(" ".join(names), "damon ryan allison")
-
-    def test_slicing_sequences(self):
-        """Strings are sequences and can be indexed."""
-
-        s = "Damon"
-        self.assertEqual(len(s), 5)
-        self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")
 
     def test_iteration(self):
         """`for` iterates over the elements in a sequence."""
@@ -166,3 +170,12 @@ class ListTests(unittest.TestCase):
         squares_with_default = [x**2 if x % 2 == 0 else 0 for x in range(8)]
         self.assertListEqual([0, 0, 4, 0, 16, 0, 36, 0],
                              squares_with_default)
+
+        # You can have multiple for and if statements in the same list
+        # comprehension.
+        concatenated = [(x, y) for x in range(1, 3) for y in range(1, 3) if x != y]
+        self.assertListEqual([(1, 2), (2, 1)], concatenated)
+
+        # Flatten a list using a listcomp
+        vec = [[1, 2, 3], [4, 5, 6]]
+        self.assertListEqual([1, 2, 3, 4, 5, 6], [x for elt in vec for x in elt])
