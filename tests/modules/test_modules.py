@@ -2,23 +2,44 @@
 
 
 Modules are simply files. A module name is it's file name (without the .py
-extension).
+extension). A package is a directory of modules (files) with an __init__.py
+file.
 
-A package is a directory of modules (files) with an __init__.py file.
+Modules: https://docs.python.org/3.7/tutorial/modules.html
 
-__init__.py can be empty or initialize the __all__ variable.
+There are two forms of the import statement. You can import other modules in
+their entirety or individual members of a module.
 
-__all__ A list of modules that will be imported when `from <module> import *` is
-used. Assume the following is entered into a `pkg` file:
+This will import the module itself into your module:
 
-    __all__ = ["test", "test2"]
+```
+import mod [as alias]
+```
 
-    # This will import both the "test" and "test2" modules locally
+This form will import either a module or an individual member from within a
+module. `import` first tests whether a member (name) is defined in the given
+module. If so, it imports that member. If not, it assumes the member is a module
+and attempts to load it.
 
-    from pkg import *
+```
+from pkg.subpkg import name [as n]
+```
+
+There is a special form of import that allows you to import a set of modules
+from a given package. The set of modules that will be imported are defined in
+the package's __init__.py file in a special __all__ variable.
+
+```
+from pkg import *
+```
+
+Assume that pkg.py has __all__defined as:
+
+__all__ = ["test", "test2"]
 
 Generally, **don't use** `from pkg import *` unless you are on the command line!
-You will blindly import symbols locally, which may overwrite other symbols.
+You will blindly import modules locally, which may overwrite other modules.
+
 
 Modules are searched for in the following order:
 
@@ -34,6 +55,7 @@ Modules are searched for in the following order:
 
 * PIP installs to the 'site-packages' folder, which is located at:
   /usr/local/lib/python3.6/site-packages
+
 """
 
 #
