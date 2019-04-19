@@ -15,6 +15,37 @@ class TestExceptions(unittest.TestCase):
 
     testFileName = "test.txt"
 
+    def test_exception_handling_all_clauses(self):
+        """try/catch is a little different than traditional OOP languages like Java or C#.
+
+        Python's `try` statement can have an `else` clause, which is only
+        executed when no exception is raised.
+
+        `finally` is *always* executed before the try block completes,
+        regardless of how it completes. If it completes with a break, continue,
+        or return statement, an error is raised and caught, or an error is
+        raised and *not* caught.
+
+        If an error is raised and *not* caught, it will be re-raised after the
+        finally executes.
+        """
+        result = ["start"]
+        try:
+            result.append("middle")
+        except CustomError:
+            pass
+        except:
+            self.fail("No exception should be raised")
+        else:
+            result.append("end")
+        finally:
+            # Finally will *always* be executed (even if try was exited with `break`)
+            # If the exception was not caught (or it was re-raised),
+            # it will be re-raised after the finally clause.
+            result.append("finally")
+
+        self.assertEqual(["start", "middle", "end", "finally"], result)
+
     def test_exception_handling(self) -> None:
         """Handling exceptions is simple. Wrap code into a try / except block.
 
@@ -52,24 +83,6 @@ class TestExceptions(unittest.TestCase):
             self.fail("CustomDerivedError should have caught the exception." + str(cex))
         except:
             self.fail("A generic wildcard handler will catch all exception types")
-
-    def test_else_clause(self):
-        """The `else` clause (optional) will be executed when no exception is raised."""
-
-        result = ["start"]
-        try:
-            result.append("middle")
-        except:
-            self.fail("No exception should be raised")
-        else:
-            result.append("end")
-        finally:
-            # Finally will *always* be executed (even if try was exited with `break`)
-            # If the exception was not caught (or it was re-raised),
-            # it will be re-raised after the finally clause.
-            result.append("finally")
-
-        self.assertEqual(["start", "middle", "end", "finally"], result)
 
 if __name__ == '__main__':
     unittest.main()
