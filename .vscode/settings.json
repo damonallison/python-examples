@@ -1,16 +1,16 @@
 {
-    /** 
-     * settings.json 
-     * 
+    /**
+     * settings.json
+     *
      * VS Code workspace settings
      */
     "python.pythonPath": "python3",
-    "python.unitTest.unittestArgs": [
+    "python.testing.unittestArgs": [
         "-v",
         "-p",
         "test_*.py"
     ],
-    "python.unitTest.unittestEnabled": true,
-    "python.unitTest.pyTestEnabled": false,
-    "python.unitTest.nosetestsEnabled": false
+    "python.testing.unittestEnabled": true,
+    "python.testing.pyTestEnabled": false,
+    "python.testing.nosetestsEnabled": false
 }
