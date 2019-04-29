@@ -112,7 +112,7 @@ class TestIO(unittest.TestCase):
                          "{first_name} {last_name}".format(**d))
 
     def test_reading_writing_files(self) -> None:
-        """With will automatically close the file
+        """With will automatically close the file.
 
         Generally, always use with() to ensure your file handle is closed
         properly. It's more efficient than writing a try/finally block (the

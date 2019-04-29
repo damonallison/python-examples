@@ -10,7 +10,7 @@ class TestExceptions(unittest.TestCase):
     There are two types of errors:
 
     SyntaxError : the code couldn't be parsed.
-    Exception   : runtime error
+    Exception   : runtime error.
     """
 
     testFileName = "test.txt"
@@ -21,7 +21,7 @@ class TestExceptions(unittest.TestCase):
         Python's `try` statement can have an `else` clause, which is only
         executed when no exception is raised.
 
-        `finally` is *always* executed before the try block completes,
+        `finally` is *always* executed before the try block returns,
         regardless of how it completes. If it completes with a break, continue,
         or return statement, an error is raised and caught, or an error is
         raised and *not* caught.
@@ -49,7 +49,7 @@ class TestExceptions(unittest.TestCase):
     def test_exception_handling(self) -> None:
         """Handling exceptions is simple. Wrap code into a try / except block.
 
-        You can handle multiple types
+        You can catch multiple types.
         """
         try:
             print(str(10 / 0))
@@ -63,7 +63,7 @@ class TestExceptions(unittest.TestCase):
             1 / 0
             self.fail("Exception should have been thrown")
         except Exception as e:
-            print("Exception : {}".format(e))
+            self.assertTrue(isinstance(e, ZeroDivisionError))
 
     def test_exception_object_hierarchy(self):
         """The except clause is compatible with an exception if it is the same class or a base class.

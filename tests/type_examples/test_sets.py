@@ -27,6 +27,7 @@ class TestSets(unittest.TestCase):
         s = set(["a", "a", "b", "c"])
 
         self.assertSetEqual({"b", "c", "a"}, s)
+        self.assertTrue({"b", "c", "a"} == s)
 
     def test_set_operations(self):
         """Example of set operations - union, difference, intersection"""
