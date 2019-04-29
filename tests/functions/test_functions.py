@@ -1,62 +1,7 @@
 import unittest
 
-#
-# Module level (global) scope
-#
-value = 100
-
 
 class FunctionTests(unittest.TestCase):
-    """Examples showing python scoping"""
-    #
-    # Class level (enclosing scope) variable
-    #
-    value = 10
-
-    def test_scopes(self) -> None:
-        """Python has 3 scopes.
-
-        local scope
-        class scope
-        global scope
-
-        This test shows how scoping works."""
-
-        def local_scope():
-            """Value is created locally.
-
-            Class and module level `value`+ objects are not touched.
-            """
-            value = 100
-            self.assertEqual(100, value)
-
-        def nonlocal_scope():
-            """self.value is bound to the class level (enclosing scope)."""
-            self.value = self.value + 1
-
-        def global_scope():
-            """Value is bound to the module level (global) `value` instance."""
-            global value
-            value = value + 1
-
-        # Initial values
-        self.assertTrue(10, self.value)
-        self.assertTrue(100, value)
-
-        # Local scope does not touch class or module level `value`.
-        local_scope()
-        self.assertTrue(10, self.value)
-        self.assertTrue(100, value)
-
-        # Nonlocal updates class level `value`.
-        nonlocal_scope()
-        self.assertTrue(11, self.value)
-        self.assertTrue(100, value)
-
-        # Global updates module level `value`.
-        global_scope()
-        self.assertTrue(11, self.value)
-        self.assertTrue(101, value)
 
     def test_nested_functions(self):
         """Functions can be nested within functions."""
@@ -91,7 +36,9 @@ class FunctionTests(unittest.TestCase):
     def test_defaults(self) -> None:
         """Tests functions with default parameters."""
 
-        self.assertEqual(["damon", "damon"], self.fun_defaults("damon", num=2))
+        self.assertEqual(["damon", "damon"],
+                         self.fun_defaults("damon", num=2))
+
         self.assertEqual(["damon", "damon", "damon", "damon", "damon"],
                          self.fun_defaults("damon"))
 
@@ -170,4 +117,3 @@ class FunctionTests(unittest.TestCase):
         # comprehension
         gen = (x**2 for x in range(3))
         self.assertTupleEqual((0, 1, 4), tuple(gen))
-

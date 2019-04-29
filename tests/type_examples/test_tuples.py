@@ -12,7 +12,8 @@ class TestTuples(unittest.TestCase):
         self.assertEqual(2, len(t))
         self.assertEqual(1, t[0])
 
-        # Parens can be omitted when defining a tuple var
+        # Parens can be omitted when defining a tuple var,
+        # but really shouldn't be.
         t2 = t[1], 3, 4
 
         self.assertTupleEqual((2, 3, 4), t2)
@@ -38,7 +39,7 @@ class TestTuples(unittest.TestCase):
         self.assertEqual((1, 2, 3), t)
 
         # You need the comment after the element for a single element tuple.
-        t1 = 1,
+        t1 = (1,)
         self.assertEqual((1,), t1)
 
         # Access tuple elements using list notation. t[pos]

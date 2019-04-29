@@ -48,8 +48,8 @@ class TestDictionaries(unittest.TestCase):
             keys.add(k)
             vals.add(v)
 
-        self.assertEqual({"first", "last"}, keys)
-        self.assertEqual({"allison", "damon"}, vals)
+        self.assertSetEqual({"first", "last"}, keys)
+        self.assertSetEqual({"allison", "damon"}, vals)
 
     def test_dictionary_comprehensions(self):
         """Dictionaries can be created from dictionary comprehensions"""

@@ -99,15 +99,6 @@ Another line""")
 
         self.assertEqual("Damon Allison", first_name + " " + last_name)
 
-    def test_string_sequence(self):
-        """Strings are sequences and can be indexed."""
-
-        s = "Damon"
-
-        # Use len to get the length of a string (just like array)
-        self.assertEqual(5, len(s))
-        self.assertEqual(s[0:3].lower() + s[-1].lower(), "damn")
-
     def test_string_slicing(self):
         """Strings are sequences and can be indexed.
 

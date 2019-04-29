@@ -8,9 +8,9 @@ class TestControlFlow(unittest.TestCase):
         x = 100
 
         if x > 10 and x < 50:
-            pass
+            self.fail()
         elif x > 100:
-            pass
+            self.fail()
         else:
             self.assertTrue(x == 100)
 
@@ -26,7 +26,7 @@ class TestControlFlow(unittest.TestCase):
             pass
 
         # using logical operators (and, or, not)
-        # use parsne
+        # use parens to disambiguate complex expressions
         self.assertTrue(height == 72 and
                         not weight > 200 and
                         (height > 100 or height < 80))
@@ -42,10 +42,17 @@ class TestControlFlow(unittest.TestCase):
         """
 
         self.assertFalse({})
+        self.assertFalse([])
+        self.assertFalse("")
+        self.assertFalse(set())
         self.assertFalse(0.0)
+        self.assertFalse(0)
 
+        self.assertTrue("test")  # anything non-false will be true
+        self.assertTrue([""])
+
+        # Any value can be used in logical statements.
         x = 100
-
         if x:
             pass
         else:
@@ -58,89 +65,34 @@ class TestControlFlow(unittest.TestCase):
         be invoked when the loop is terminated with `break`"""
 
         called = False
-        for i in range(0,5):
-            pass
+        iter = 0
+        while iter < 10:
+            iter += 1
         else:
             called = True
+
+        self.assertEqual(10, iter)
         self.assertTrue(called)
 
-    def test_iterable(self):
-        """Python for loops work with iterables.
+        called = False
+        lst = []
+        for i in range(5):
+            lst.append(i)
+        else:
+            called = True
+        self.assertEqual([0, 1, 2, 3, 4], lst)
+        self.assertTrue(called)
 
-        Strings, list, tuples, dictionaries, lists, files are all example
-        iterables.
-
-        Objects with an iter method can be used as an iterable.
-        """
-
-        # range() can create a sequence of numbers range(start, stop, step)
+        called = False
         for i in range(10):
-            pass
+            if i == 1:
+                break
+        else:
+            called = True
 
-        # Always use a copy of a list for iteration if you are going to mutate
-        # the list.
-        a = ["damon", "allison"]
-        for idx, val in enumerate(a[:]):
-            a[idx] = val.title()
-
-        self.assertListEqual(["Damon", "Allison"], a)
-
-        # Iterate thru a dictionary with items
-        d = {"first": "damon", "last": "allison"}
-        for key, val in d.items():
-            pass
-
-    def test_enumerate(self):
-        """enumerate() returns tuples of the indicies and values of a list."""
-
-        lst = ["damon", "ryan", "allison"]
-        expected = []
-        for idx, val in enumerate(lst):
-            expected.append((idx, val))
-
-        self.assertListEqual([(0, "damon"), (1, "ryan"), (2, "allison")],
-                             expected)
-
-    def test_zip(self):
-        """zip() returns an iterator that combines multiple iterables
-        into a sequence of tuples.
-
-        Each tuple contains the elements in that position from all the
-        iterables.
-
-        Once one list is exhaused, zip stops.
-
-        The object that zip() returns is a zip() object.
-
-        See:
-        https://docs.python.org/3.3/library/functions.html#zip
-
-        """
-
-        # Here are two iterables that we are going to pass to zip().
-        # Notice how ages only has 2 elements. This will force zip() to stop
-        # after two elements, leaving "joe" out of the resulting zip() result.
-
-        # If you care about the trailing, unmatched values from longer
-        # iterables, use itertools.zip_longest() instead.
-
-        names = ("damon", "jeff", "joe")
-        ages = [20, 32]
-
-        # zip() will return a zip() object, which is an iterator. You need to
-        # cast the iterator into a concrete type (tuple, list, set, dict) to
-        # realize the iterable.
-
-        self.assertTupleEqual((("damon", 20), ("jeff", 32)),
-                              tuple(zip(names, ages)))
-        self.assertListEqual([("damon", 20), ("jeff", 32)],
-                             list(zip(names, ages)))
-
-        # You can use * to "unzip" a list. In this case, we will unzip people
-        # to send zip() the inner tuples.
-        people = (("damon", "jeff"), (20, 32))
-        self.assertTupleEqual((("damon", 20), ("jeff", 32)),
-                              tuple(zip(*people)))
+        # `else` will not be called since the iteration was prematurely
+        # terminated.
+        self.assertFalse(called)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

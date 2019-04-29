@@ -2,9 +2,9 @@
 
 from .person import Person
 
+
 class Manager(Person):
     """A class used to demonstrate inheritance."""
-    pass
 
     def full_name(self) -> str:
         """Overrides Person.full_name."""

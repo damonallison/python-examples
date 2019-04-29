@@ -1,9 +1,4 @@
-#
-# Fibonacci
-#
-
-# Is there a way to hide this variable (class?)
-call_count = 0
+"""Finonacci"""
 
 
 def fib_to(num: int) -> int:

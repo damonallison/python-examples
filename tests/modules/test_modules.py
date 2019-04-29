@@ -104,6 +104,25 @@ from .pkg2.mod2 import Mod2Calculator
 from ..exceptions.custom_derived_error import CustomDerivedError
 
 
+#
+# Note that when importing module level variables,
+# you must import the module and reference the variable the module reference
+# (i.e, pm.name_call_count).
+#
+# Using `from .classes.person import name_call_count` will create a new local
+# `name_call_count` variable setting it's value to the current value of the
+# person module's value - not what you want!
+#
+from .pkg1 import mod1
+
+#
+# Here, a local `static_call_count` variable is created. Because
+# `name_call_count` is a primitive type, a copy of the value is associated with
+# `static_call_count`. Therefore, `static_call_count` does *not* reference the
+# `name_call_count` variable, as you would expect.
+#
+from .pkg1.mod1 import call_count
+
 class TestModules(unittest.TestCase):
     """Examples showing module imports."""
 
@@ -116,6 +135,20 @@ class TestModules(unittest.TestCase):
     def test_module_alias(self):
         """We imported the calculator module with alias c"""
         self.assertTrue(4, c.add(2, 2))
+
+    def test_global_variable_import(self):
+        """Because call_count is imported directly into this module,
+        call_count actually points to a *new* variable in this module's
+        namespace. It is *not* the same as the call_count variable in mod1"""
+
+        self.assertEqual(0, call_count)
+        mod1.call_count = 1
+        self.assertEqual(0, call_count)
+        self.assertEqual(1, mod1.call_count)
+
+        Mod1Calculator().add(2, 2)
+        self.assertEqual(0, call_count)
+        self.assertEqual(2, mod1.call_count)
 
     def test_intra_package_references(self):
         self.assertEqual(4, add(2, 2))
