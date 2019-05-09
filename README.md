@@ -20,9 +20,9 @@ testing to work.
 
 ```json
 {
-    /** 
-     * settings.json 
-     * 
+    /**
+     * settings.json
+     *
      * VS Code workspace settings
      */
     "python.pythonPath": "python3",
