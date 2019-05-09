@@ -37,19 +37,25 @@ $ conda --version
 # Update anaconda
 $ conda update conda
 
+# All conda environment information
+$ conda info
+
+# Show environments
+$ conda info --envs
+
+#
+# Environments
+#
+
 # Create a conda environment with the global python version
 $ conda create --name snowflake
 
 # Create a conda environment (use python=2.7)
 $ conda create --name snowflake python=2.7
 
-# Show environments
-$ conda info --envs
-
-# Remove a conda environment
-$ conda remove -n snowflake --all
-
 # Activate an environment
 $ conda activate snowflake
 
+# Remove a conda environment
+$ conda remove -n snowflake --all
 ```
