@@ -114,6 +114,7 @@ class FunctionTests(unittest.TestCase):
         self.assertListEqual([0, 1], lst)
 
         # You can create generator expressions like you would a list
-        # comprehension
+        # comprehension. Generator expressions tend to be more memory friendly
+        # than equivalent list comprehensions.
         gen = (x**2 for x in range(3))
         self.assertTupleEqual((0, 1, 4), tuple(gen))

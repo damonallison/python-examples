@@ -1,4 +1,22 @@
-"""Example stdlib usage."""
+"""Example stdlib usage.
+
+Important standard library modules:
+
+* sys - command line arguments, environment (stderr, environment variables)
+* os - interact with the operating system.
+* shutil - high level interface for dealing with files
+* glob - make list of filenames using wildcards
+* re - regular expressions
+* urllib.request - HTTP
+* datetime
+* timeit, profile, pstats - performance measurement
+* json
+* threading
+* logging
+* decimal - more precise 'float' - use for financial apps, when you need to
+  control precision and/or rounding.
+
+"""
 
 import unittest
 

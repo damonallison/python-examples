@@ -1,10 +1,16 @@
-"""A simple person class"""
+"""A simple person class."""
 
 import logging
 
 
 class Person:
-    """A simple person class"""
+    """A simple person class
+
+    Objects in python are *very* simple. Each class definition contains two
+    types of attributes: data attributes and functions (methods).
+
+    Python's calling convention
+    """
 
     # A class variable (attribute) shared by all instances.
     #
@@ -14,6 +20,13 @@ class Person:
     iq = 0
 
     def __init__(self, first_name: str, last_name: str = "default"):
+        """A class can have a single __init__ constructor function.
+
+        Unlike other languages, python does not allow you to define multiple
+        constructors. Idiomatic python will use default arguments for
+        "convenience" (not required) attributes.
+        """
+
         self.first_name = first_name
         self.last_name = last_name
         self.index = 0
@@ -26,6 +39,8 @@ class Person:
     # Adding iterator behavior to classes.
     #
     def __iter__(self):
+        """iter() should return an object with a `__next__` method"""
+
         self.index = 0
         return self
 
@@ -41,7 +56,8 @@ class Person:
     # Generators are another way to write iterators.
     #
     # Generators are typically cleaner than iterators since both __iter__ and
-    # __next__ are created implicitly.
+    # __next__ are created implicitly, it also raises `StopIteration` when the
+    # iterator is exhausted.
     #
     def child_first_names(self):
         for child in self.children:

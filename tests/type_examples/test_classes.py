@@ -13,24 +13,17 @@ modified further after creation.
 You cannot hide data in Python. All hiding is based on convention. (Underscore
 prefixes, etc)
 
-* Members are, but default, public. Methods are virtual (can be overridden).
+* Members are "public". Methods are virtual (can be overridden).
 * Methods are declared with a specific `self` first argument representing the
-  object, which is provided implicitly by the call.
+  object, which is provided implicitly during method invocation.
 * Built-in types can be used as base classes.
 * Like C++, most built-in operators with special syntax (arithmetic operators)
   can be redefined for class instances (==, +=)
-
-
-To test:
-
-* Multiple inheritance
-* `global` and `nonlocal`. (Nonlocal can rebind variables found outside the
-  innermost scope). If not declared `nonlocal`, variables found outside the
-  innermost scope are read-only.
 """
 
 import unittest
 
+from .classes.printer import Printer
 from .classes.person import Person
 from .classes.manager import Manager
 
@@ -42,7 +35,8 @@ class ClassesTest(unittest.TestCase):
         """Shows creating objects and calling methods."""
 
         #
-        # Objects can have class level ("static" or "global") state.
+        # Objects can have class level ("static" or "global") state. Of course,
+        # this is traditionally a **bad** idea.
         #
         Person.iq = 50
         self.assertEqual(50, Person.iq)
@@ -75,20 +69,33 @@ class ClassesTest(unittest.TestCase):
         #
         self.assertEqual("cole allison", Person.full_name(p2))
         #
-        # 2. By calling the instance method.
+        # 2. By calling the instance method (pythonic).
         #
         self.assertEqual("cole allison", p2.full_name())
+
+    def test_docstring(self) -> None:
+        """Classes have a __doc__ attribute that will return the docstring"""
+
+        p = Person("damon", "allison")
+
+        self.assertIsNotNone(p.__doc__)
+        # print(p.__doc__)
 
     def test_check_type(self) -> None:
         """Example showing how to check for type instances using isinstance()"""
         m = Manager("damon", "allison")
 
+        self.assertTrue(isinstance(m, Printer))
         self.assertTrue(isinstance(m, Manager))
         self.assertTrue(isinstance(m, Person))
+        self.assertTrue(isinstance(m, object))
 
-        # Example showing that __class__ is used retrieve the class object for a variable.
-        self.assertTrue(issubclass(m.__class__, Person))
+        # Example showing that __class__ is used retrieve the class object for a
+        # variable.
+        self.assertTrue(issubclass(m.__class__, Printer))
         self.assertTrue(issubclass(m.__class__, Manager))
+        self.assertTrue(issubclass(m.__class__, Person))
+        self.assertTrue(issubclass(m.__class__, object))
 
         # Test method overriding
         self.assertEqual("Manager damon allison", m.full_name())
@@ -118,11 +125,16 @@ class ClassesTest(unittest.TestCase):
                         msg="Always use `is None` to check for None")
 
     def test_type_check(self) -> None:
-        """Use isinstance() to check for a type. issubclass(obj,"""
+        """Use isinstance() to check for a type, issubclass() to check for inheritance."""
 
         m = Manager("test", "user")
         self.assertTrue(isinstance(m, Person))
         self.assertTrue(isinstance(m, Manager))
+        self.assertTrue(isinstance(m, Printer))
+
+        self.assertTrue(issubclass(m.__class__, Manager))
+        self.assertTrue(issubclass(m.__class__, Person))
+        self.assertTrue(issubclass(m.__class__, object))
 
     def test_iteration(self) -> None:
 
@@ -132,6 +144,8 @@ class ClassesTest(unittest.TestCase):
                       Person("cole", "allison")]
 
         children = []
+
+        # Person defines __iter__ and __next__, thus it supports iteration.
         for child in p:
             children.append(child)
 
@@ -140,6 +154,7 @@ class ClassesTest(unittest.TestCase):
         self.assertEqual("cole", children[2].first_name)
 
     def test_generator(self) -> None:
+        """Person.child_first_names() is a generator function. Generators return iterators."""
 
         p = Person("damon", "allison")
         p.children = [Person("grace", "allison"),
