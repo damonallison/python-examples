@@ -42,7 +42,7 @@ class ClassesTest(unittest.TestCase):
         """Shows creating objects and calling methods."""
 
         #
-        # Objects can have class level ("static") state.
+        # Objects can have class level ("static" or "global") state.
         #
         Person.iq = 50
         self.assertEqual(50, Person.iq)
@@ -50,6 +50,7 @@ class ClassesTest(unittest.TestCase):
         p = Person("damon", "allison")
         self.assertEqual("damon", p.first_name)
         self.assertEqual("allison", p.last_name)
+        self.assertEqual("damon allison", p.full_name())
 
         # Referencing the class variable thru an instance pointer. This is
         # generally frowned upon. Don't mix class and instance state.
@@ -62,12 +63,12 @@ class ClassesTest(unittest.TestCase):
         self.assertEqual(52, Person.iq)
 
         # You can dynamically modify class instances at runtime (yuk).
+        # Here, we add a "test" data member to p2.
         p2 = Person("cole", "allison")
         p2.test = 100
         self.assertEqual(100, p2.test)
-        self.assertEqual(52, p2.iq)
+        self.assertEqual(52, p2.iq)  # Still have access to static state.
 
-        #
         # Methods can be called in two ways:
         #
         # 1. By calling the class function with an instance.

@@ -26,6 +26,8 @@ class TestExceptions(unittest.TestCase):
         or return statement, an error is raised and caught, or an error is
         raised and *not* caught.
 
+        `else` is executed only when an exception is *not* raised in the try block.
+
         If an error is raised and *not* caught, it will be re-raised after the
         finally executes.
         """
@@ -49,7 +51,7 @@ class TestExceptions(unittest.TestCase):
     def test_exception_handling(self) -> None:
         """Handling exceptions is simple. Wrap code into a try / except block.
 
-        You can catch multiple types.
+        You can catch multiple types by providing a tuple to an except clause.
         """
         try:
             print(str(10 / 0))
@@ -66,7 +68,9 @@ class TestExceptions(unittest.TestCase):
             self.assertTrue(isinstance(e, ZeroDivisionError))
 
     def test_exception_object_hierarchy(self):
-        """The except clause is compatible with an exception if it is the same class or a base class.
+        """The except clause is compatible with an exception when the else clause
+        contains the exception being raised of is a base class of the exception
+        being raised.
 
         Catch the most derived exceptions first, followed by the most generic.
 

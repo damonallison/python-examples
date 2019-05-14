@@ -10,13 +10,13 @@ Modules: https://docs.python.org/3.7/tutorial/modules.html
 There are two forms of the import statement. You can import other modules in
 their entirety or individual members of a module.
 
-This will import the module itself into your module:
+This will import the module in its entirety into your module:
 
 ```
 import mod [as alias]
 ```
 
-This form will import either a module or an individual member from within a
+The following form will import either a module or an individual member from within a
 module. `import` first tests whether a member (name) is defined in the given
 module. If so, it imports that member. If not, it assumes the member is a module
 and attempts to load it.
@@ -25,7 +25,7 @@ and attempts to load it.
 from pkg.subpkg import name [as n]
 ```
 
-There is a special form of import that allows you to import a set of modules
+There is a special form of import (`import *)` that allows you to import a set of modules
 from a given package. The set of modules that will be imported are defined in
 the package's __init__.py file in a special __all__ variable.
 
@@ -55,7 +55,6 @@ Modules are searched for in the following order:
 
 * PIP installs to the 'site-packages' folder, which is located at:
   /usr/local/lib/python3.6/site-packages
-
 """
 
 #
@@ -122,6 +121,7 @@ from .pkg1 import mod1
 # `name_call_count` variable, as you would expect.
 #
 from .pkg1.mod1 import call_count
+
 
 class TestModules(unittest.TestCase):
     """Examples showing module imports."""
