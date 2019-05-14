@@ -48,9 +48,11 @@ class Person:
             yield child.first_name
 
     #
-    # Adds support for "with". Python calls the with construct a "context manager".
+    # Adds support for "with". Python calls the with construct a "context
+    # manager".
     #
-    # Use context managers when you need to ensure non-local resources are closed properly.
+    # Use context managers when you need to ensure non-local resources are
+    # closed properly.
     #
     # Examples of non-local resources include:
     #
