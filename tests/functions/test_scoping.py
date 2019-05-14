@@ -36,8 +36,8 @@ import unittest
 #
 # Module level (global) scope.
 #
-# Even tho you *can* use global scope, just don't. Consider encapsulating state
-# into an object.
+# Even though you *can* use global scope, just don't. Consider encapsulating
+# state into an object.
 #
 value = 100
 module_var = 1
@@ -101,7 +101,7 @@ class ScopingTests(unittest.TestCase):
 
     def test_nonlocal(self) -> None:
         """Nonlocal indicates a particular variable is lives
-        in an enclosing scope ans should be rebound locally."""
+        in an enclosing scope and should be rebound locally."""
         x = 10
 
         class MyClass:
