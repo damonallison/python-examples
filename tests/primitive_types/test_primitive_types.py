@@ -12,6 +12,7 @@ class TestPrimitiveTypes(unittest.TestCase):
         * bool
 
         """
+
     def test_type_conversion(self):
         """Shows type conversion
 
@@ -85,7 +86,9 @@ class TestPrimitiveTypes(unittest.TestCase):
         # \ at the end of line will prevent a newline from being added.
         print("""\
 Usage: test [OPTIONS]
-Another line""")
+    -h        help
+    -H        hostname
+""")
 
     def test_string_conversion(self):
         """Use str() to get a string representation from any variable"""
