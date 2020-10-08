@@ -5,19 +5,19 @@ class FunctionTests(unittest.TestCase):
 
     def test_nested_functions(self):
         """Functions can be nested within functions."""
-        def add(x, y):
+        def add(x: int, y: int):
             return x + y
 
         self.assertEqual(4, add(2, 2))
 
-    def fun_defaults(self, name: str, num: int=5) -> [str]:
+    def fun_defaults(self, name: str, num: int = 5) -> [str]:
         """Function arguments can have default values."""
         ret = []
-        for i in range(0, num):
+        for i in range(num):
             ret.append(name)
         return ret
 
-    def fun_keyword_args(self, *args: [str], **kwargs: {str : str}) -> ([str], {str : str}):
+    def fun_keyword_args(self, *args: [str], **kwargs: {str: str}) -> ([str], {str: str}):
         """Functions can take arbitrary numbers of arguments and keyword arguments.
 
         Normally, *args is the last parameter. Anything after *args must be keyword arguments.
@@ -33,8 +33,33 @@ class FunctionTests(unittest.TestCase):
 
         return (a, kw)
 
+    def test_positional_keyword_params(self) -> None:
+
+        def f(one: str, /, two: str, three: str, *, four: str) -> None:
+            """When defining functions, two special parameters exist - "/" and "*".
+
+            "/" specifies the prior arguments must be passed by position.
+            "*" specifies the following arugments *must* be passed by keyword.
+
+            General guidance
+            ----------------
+            * Use positional only if you want to hide the param names from the caller
+              or want to enforce argument order.
+            * Use keyword only when names have meaning and you want to enforce the
+              caller specify the param name.
+            * For an API, use positional to prevent breaking API changes. Positional only
+              allows the param name to change in the future.
+            """
+            print("positional_params", one, two, three, four)
+
+        f(1, "two", "three", four="four")
+        f("one", "two", three="three", four="four")
+        f("one", two="two", three="three", four="four")
+
     def test_defaults(self) -> None:
         """Tests functions with default parameters."""
+        exp = ["damon", "damon"]
+        self.assertEqual(exp, self.fun_defaults(name="damon", num=2))
 
         self.assertEqual(["damon", "damon"],
                          self.fun_defaults("damon", num=2))

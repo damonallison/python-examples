@@ -1,10 +1,5 @@
 # TODO
 
-## Python Community
-
-* What makes Python so popular for data science?
-  * Interpreted? REPL?
-
 ## Language
 
 * Module / Package system (imports / exports / scoping)
@@ -18,7 +13,7 @@
 
 * `unittest`
   * Graphical test runner? Run from VS Code?
-  
+
 * `sys`
 * `os.path`
 

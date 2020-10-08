@@ -4,9 +4,7 @@ import unittest
 class TestControlFlow(unittest.TestCase):
 
     def test_if_elif(self):
-
         x = 100
-
         if x > 10 and x < 50:
             self.fail()
         elif x > 100:
@@ -93,6 +91,7 @@ class TestControlFlow(unittest.TestCase):
         # `else` will not be called since the iteration was prematurely
         # terminated.
         self.assertFalse(called)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

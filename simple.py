@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 
-"""An example python program that shows how python interacts with it's environment.
-
-When
-
-"""
+"""An example python program that shows how python interacts with it's environment"""
 
 # The sys module holds information about how the script was executed. Including
 # it's command line arguments.
 import sys
 
-# Import a package
 from tests.algorithms.fibonacci import fib
+
 
 def print_environment():
     """Prints relevant information about the current runtime environment"""
@@ -32,13 +28,12 @@ def print_environment():
 
     print(f"platform == {sys.platform}")
 
+
 #
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
 #
 if __name__ == "__main__":
-
-    print("damon", "allison", "", sep="--", end='test\n', flush=True)
     print("hello from " + __name__)
     print_environment()
 
