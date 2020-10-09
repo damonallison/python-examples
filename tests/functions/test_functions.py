@@ -1,3 +1,4 @@
+from typing import Any, List, Dict, Tuple
 import unittest
 
 
@@ -10,31 +11,24 @@ class FunctionTests(unittest.TestCase):
 
         self.assertEqual(4, add(2, 2))
 
-    def fun_defaults(self, name: str, num: int = 5) -> [str]:
-        """Function arguments can have default values."""
-        ret = []
-        for i in range(num):
-            ret.append(name)
-        return ret
+    def test_defaults(self) -> None:
+        """Tests functions with default parameters."""
 
-    def fun_keyword_args(self, *args: [str], **kwargs: {str: str}) -> ([str], {str: str}):
-        """Functions can take arbitrary numbers of arguments and keyword arguments.
+        def fun_defaults(name: str, num: int = 5) -> List[str]:
+            """Function arguments can have default values."""
+            ret = []
+            for i in range(num):
+                ret.append(name)
+            return ret
 
-        Normally, *args is the last parameter. Anything after *args must be keyword arguments.
-        """
+        exp = ["damon", "damon"]
 
-        a = []
-        for arg in args:
-            a.append(arg)
+        self.assertEqual(exp, fun_defaults(name="damon", num=2))
 
-        kw = {}
-        for kwarg in kwargs:
-            kw[kwarg] = kwargs[kwarg]
+        self.assertEqual(["damon", "damon", "damon", "damon",
+                          "damon"], fun_defaults("damon"))
 
-        return (a, kw)
-
-    def test_positional_keyword_params(self) -> None:
-
+    def test_positional_keyword_arguments(self) -> None:
         def f(one: str, /, two: str, three: str, *, four: str) -> None:
             """When defining functions, two special parameters exist - "/" and "*".
 
@@ -56,51 +50,34 @@ class FunctionTests(unittest.TestCase):
         f("one", "two", three="three", four="four")
         f("one", two="two", three="three", four="four")
 
-    def test_defaults(self) -> None:
-        """Tests functions with default parameters."""
-        exp = ["damon", "damon"]
-        self.assertEqual(exp, self.fun_defaults(name="damon", num=2))
+    def test_variable_arguments(self) -> None:
+        def fun_varargs(*args: List[Any], **kwargs: Dict[str, Any]) -> Tuple[List[Any], Dict[str, Any]]:
+            return (args, kwargs)
 
-        self.assertEqual(["damon", "damon"],
-                         self.fun_defaults("damon", num=2))
+        (args, kwargs) = fun_varargs(1,
+                                     2,
+                                     3,
+                                     first="damon",
+                                     last="allison")
 
-        self.assertEqual(["damon", "damon", "damon", "damon", "damon"],
-                         self.fun_defaults("damon"))
-
-    def test_args(self) -> None:
-        """Tests functions with variable arguments and
-        variable keyword arguments.
-        """
-
-        (args, kwargs) = self.fun_keyword_args(1,
-                                               2,
-                                               3,
-                                               first="damon",
-                                               last="allison")
-
-        self.assertEqual([1, 2, 3], args)
+        self.assertEqual((1, 2, 3), args)
 
         self.assertDictEqual(
-            kwargs,
-            {"first": "damon", "last": "allison"})
+            {"first": "damon", "last": "allison"},
+            kwargs)
 
         self.assertDictEqual(
-            kwargs,
             {"last": "allison", "first": "damon"},
+            kwargs,
             msg="Dictionary ordering doesn't matter for equality checks")
 
-    def test_unpacking_tuple(self) -> None:
-        """Lists and dictionaries can be unpacked
-        and sent into a function as parameters.
-        """
-        args = [1, 2, 3]
+        args = (1, 2, 3)
         kws = {"first": "damon", "last": "allison"}
 
-        # Unpacks args using * and ** and send to `fun_keyword_args`
-        #
-        # Lists and tuples are unpacked with *, while dictionaries are unpacked
-        # with **
-        (a, kw) = self.fun_keyword_args(*args, **kws)
+        # * unpacks a list/tuple and sends all elements to a function as positional arguments
+        # ** unpacks a dict, sending all elements to a function as keyword arguments
+        (a, kw) = fun_varargs(*args, **kws)
+
         self.assertEqual(args, a)
         self.assertEqual(kws, kw)
 

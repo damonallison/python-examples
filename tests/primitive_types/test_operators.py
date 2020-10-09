@@ -26,8 +26,8 @@ class TestOperators(unittest.TestCase):
         self.assertAlmostEqual(4.0 / 3.0, 1.33, 2)
 
         # // will always round *down* to the nearest integer
-        self.assertEquals(7 // 2, 3)
-        self.assertEquals(-7 // 2, -4)
+        self.assertEqual(7 // 2, 3)
+        self.assertEqual(-7 // 2, -4)
 
         # Exponentiation
         self.assertEqual(3 ** 3, 27)
@@ -61,7 +61,7 @@ class TestOperators(unittest.TestCase):
         self.assertEqual(val, 10000)
 
         val /= 800
-        self.assertAlmostEquals(val, 12.5, 1)
+        self.assertAlmostEqual(val, 12.5, 1)
 
     def test_comparison_operators(self):
 

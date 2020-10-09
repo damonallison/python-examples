@@ -1,7 +1,7 @@
 """Examples of using custom classes in python.
 
 Class objects support two kinds of operations: attribute references (data and
-method references) and instiantiation.
+method references) and instantiation.
 
 Classes can be created anywhere - within functions, within an `if` statement,
 etc. Classes introduce a new scope and the class object itself is added to it's
