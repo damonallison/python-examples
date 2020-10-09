@@ -5,7 +5,7 @@
 """
 
 import unittest
-import os.path
+import os
 import json
 
 
@@ -72,6 +72,7 @@ class TestIO(unittest.TestCase):
                 return f"{self.first_name} {self.last_name}"
 
         person = Person("damon", "allison")
+
         amt = 100.
         self.assertEqual(type(amt), float)
 
