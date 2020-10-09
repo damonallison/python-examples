@@ -5,7 +5,7 @@ Modules are simply files. A module name is it's file name (without the .py
 extension). A package is a directory of modules (files) with an __init__.py
 file.
 
-Modules: https://docs.python.org/3.7/tutorial/modules.html
+Modules: https://docs.python.org/3/tutorial/modules.html
 
 There are two forms of the import statement. You can import other modules in
 their entirety or individual members of a module.
@@ -48,6 +48,8 @@ Modules are searched for in the following order:
    1. The directory containing the __main__ script
    2. $PYTHONPATH
    3. Installation dependent default
+
+--
 
 * The standard library is located in the python installation. An example from
   homebrew:
@@ -156,6 +158,7 @@ class TestModules(unittest.TestCase):
         self.assertEqual(4, Mod2Calculator().add(2, 2))
         self.assertTrue(
             isinstance(CustomDerivedError(state="oops"), CustomDerivedError))
+
 
 if __name__ == '__main__':
     unittest.main()

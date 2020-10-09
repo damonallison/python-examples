@@ -5,8 +5,6 @@ class TestTuples(unittest.TestCase):
     """Tuples are immutable, ordered sequence of elements."""
 
     def test_tuple_create(self):
-        """Tuples are immutable, ordered sequences."""
-
         t = (1, 2)
 
         self.assertEqual(2, len(t))
