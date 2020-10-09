@@ -6,11 +6,13 @@ the `tests` top level directory.
 ## Running Tests
 
 Tests can be executed from the command line or from VS Code.
+
 ### Command Line
 
 ```sh
-# Run all unit tests starting in the `tests` directory.
-$ python3 -m unittest
+# Run all unit tests
+$ pip3 install pytest
+$ pytest
 ```
 
 ## Visual Studio Code
@@ -31,8 +33,8 @@ testing to work.
         "-p",
         "test_*.py"
     ],
-    "python.unitTest.unittestEnabled": true,
-    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.unittestEnabled": false,
+    "python.unitTest.pyTestEnabled": true,
     "python.unitTest.nosetestsEnabled": false
 }
 ```

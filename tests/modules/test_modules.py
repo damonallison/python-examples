@@ -41,18 +41,17 @@ Generally, **don't use** `from pkg import *` unless you are on the command line!
 You will blindly import modules locally, which may overwrite other modules.
 
 
-Modules are searched for in the following order:
+Module search path:
 
 1. Built-in modules (sys)
 2. sys.path - sys.path is built from
    1. The directory containing the __main__ script
    2. $PYTHONPATH
-   3. Installation dependent default
+   3. Installation dependent defaults
 
 --
 
-* The standard library is located in the python installation. An example from
-  homebrew:
+* The standard library is located in the python installation. An example from homebrew:
   /usr/local/Cellar/python3/3.6.4_2/Frameworks/Python.framework/Versions/3.6/lib/python3.6
 
 * PIP installs to the 'site-packages' folder, which is located at:
@@ -96,7 +95,7 @@ from tests.exceptions.custom_error import CustomError  # as CE
 #
 # Intra-package (relative) references
 #
-# You can use relative paths to import submodules. These imports use "." to
+# You can use relative paths to import submodules. These imports use "." and ".." to
 # indicate the current and parent packages involved in the relative import.
 #
 from .calculator import add
