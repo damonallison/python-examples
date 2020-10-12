@@ -36,8 +36,8 @@ class TestIO(unittest.TestCase):
         Some types (int, float) have the same string representation for both
         "readable" and "non-readable" output. Strings, however, do not.
         """
-        self.assertTrue(str("damon") == "damon")
-        self.assertTrue(repr("damon") == "'damon'")
+        self.assertEqual("damon", str("damon"))
+        self.assertEqual("'damon'", repr("damon"))
 
         # Numbers have the same representation across both str() and repr()
         x = 100.
@@ -109,6 +109,9 @@ class TestIO(unittest.TestCase):
         d = {"first_name": "damon",
              "last_name": "allison"}
 
+        self.assertEqual(
+            "damon allison", f"{d['first_name']} {d['last_name']}")
+
         self.assertEqual("damon allison",
                          "{first_name} {last_name}".format(**d))
 
@@ -118,6 +121,13 @@ class TestIO(unittest.TestCase):
         Generally, always use with() to ensure your file handle is closed
         properly. It's more efficient than writing a try/finally block (the
         other option).
+
+        Mode
+        ----
+        r  = read only (default)
+        w  = write only (an existing file w/ the same name will be erased)
+        a  = append
+        r+ = read / write
         """
 
         # Adding the newlines is extremely lame.
