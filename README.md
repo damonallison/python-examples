@@ -7,6 +7,29 @@ the `tests` top level directory.
 
 Tests can be executed from the command line or from VS Code.
 
+### Create a virtual environment (venv)
+
+```shell
+python3 -m pip install --user virtualenv
+
+# The second argument is the env name
+python3 -m venv myenv
+
+# Activate
+source ./env/bin/activate.fish
+
+# Deactivate
+deactivate
+
+# Freezing dependencies
+pip freeze
+
+
+
+
+
+
+```
 ### Command Line
 
 ```sh

@@ -1,3 +1,10 @@
+
+# git conflict files
+*.orig
+
+# Visual Studio Code
+*.vscode
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -155,9 +162,3 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-
-# git conflict files
-*.orig
-
-# Visual Studio Code
-*.vscode
