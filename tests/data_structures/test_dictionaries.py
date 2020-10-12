@@ -56,5 +56,6 @@ class TestDictionaries(unittest.TestCase):
         d = {x: x**2 for x in range(4)}
         self.assertDictEqual({0: 0, 1: 1, 2: 4, 3: 9}, d)
 
+
 if __name__ == "__main__":
     unittest.main()

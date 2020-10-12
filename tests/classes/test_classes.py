@@ -4,11 +4,11 @@ Class objects support two kinds of operations: attribute references (data and
 method references) and instantiation.
 
 Classes can be created anywhere - within functions, within an `if` statement,
-etc. Classes introduce a new scope and the class object itself is added to it's
-enclosing scope (typically a module).
+etc. Classes introduce a new scope (namespace) and the class object itself is
+added to it's enclosing scope (typically a module).
 
 Classes, like python itself, are dynamic. They are created at runtime and can be
-modified further after creation.
+modified further after creation (yuk).
 
 You cannot hide data in Python. All hiding is based on convention. (Underscore
 prefixes, etc)
@@ -19,17 +19,38 @@ prefixes, etc)
 * Built-in types can be used as base classes.
 * Like C++, most built-in operators with special syntax (arithmetic operators)
   can be redefined for class instances (==, +=)
+
+
+Scopes
+
+* Innermost scope (contains local names)
+* The scopes of enclosing functions, which are searched up the callstack.
+  * Contains non-local (but non-global) names.
+* Current module's global names
+* Builtins
+
+* `global` is used to declare varaibles in the module's namespace.
+* `nonlocal` is used to reference variables in a parent (not module) namespace.
+
+
 """
 
 import unittest
+import builtins
 
-from .classes.printer import Printer
-from .classes.person import Person
-from .classes.manager import Manager
+from .printer import Printer
+from .person import Person
+from .manager import Manager
 
 
 class ClassesTest(unittest.TestCase):
     """Examples of creating and using classes."""
+
+    def test_namespaces(self) -> None:
+        Person.iq2 = 100
+        print("i'm adding a new builtin")
+        builtins.anew = "test"
+        self.assertEqual(100, Person.iq2)
 
     def test_basic_object_usage(self) -> None:
         """Shows creating objects and calling methods."""
@@ -92,8 +113,8 @@ class ClassesTest(unittest.TestCase):
 
         # Example showing that __class__ is used retrieve the class object for a
         # variable.
-        self.assertTrue(issubclass(m.__class__, Printer))
         self.assertTrue(issubclass(m.__class__, Manager))
+        self.assertTrue(issubclass(m.__class__, Printer))
         self.assertTrue(issubclass(m.__class__, Person))
         self.assertTrue(issubclass(m.__class__, object))
 

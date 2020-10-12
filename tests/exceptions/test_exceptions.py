@@ -1,3 +1,4 @@
+import sys
 import unittest
 
 from .custom_derived_error import CustomDerivedError
@@ -12,8 +13,6 @@ class TestExceptions(unittest.TestCase):
     SyntaxError : the code couldn't be parsed.
     Exception   : runtime error.
     """
-
-    testFileName = "test.txt"
 
     def test_exception_handling_all_clauses(self):
         """try/catch is a little different than traditional OOP languages like Java or C#.
@@ -84,9 +83,12 @@ class TestExceptions(unittest.TestCase):
             self.assertTrue(type(cex) is CustomDerivedError)
             self.assertEqual("test", cex.state)
         except CustomError as cex:
-            self.fail("CustomDerivedError should have caught the exception." + str(cex))
+            self.fail(
+                "CustomDerivedError should have caught the exception." + str(cex))
         except:
-            self.fail("A generic wildcard handler will catch all exception types")
+            self.fail(f"Unhandled exception: {sys.exc_info()[0]}")
+            raise
+
 
 if __name__ == '__main__':
     unittest.main()

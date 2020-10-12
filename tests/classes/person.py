@@ -1,6 +1,7 @@
 """A simple person class."""
 
 import logging
+from typing import Any
 
 
 class Person:
@@ -8,15 +9,12 @@ class Person:
 
     Objects in python are *very* simple. Each class definition contains two
     types of attributes: data attributes and functions (methods).
-
-    Python's calling convention
     """
 
     # A class variable (attribute) shared by all instances.
     #
     # This is a sneaky form of global state. Prefer instance variables over
     # class variables.
-    #
     iq = 0
 
     def __init__(self, first_name: str, last_name: str = "default"):
@@ -35,6 +33,11 @@ class Person:
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}"
 
+    def __eq__(self, rhs: Any) -> bool:
+        if not isinstance(rhs, Person):
+            return False
+        return self.first_name == rhs.first_name and self.last_name == rhs.last_name
+
     #
     # Adding iterator behavior to classes.
     #
@@ -52,7 +55,6 @@ class Person:
         self.index = self.index + 1
         return self.children[idx]
 
-    #
     # Generators are another way to write iterators.
     #
     # Generators are typically cleaner than iterators since both __iter__ and
@@ -63,7 +65,6 @@ class Person:
         for child in self.children:
             yield child.first_name
 
-    #
     # Adds support for "with". Python calls the with construct a "context
     # manager".
     #
