@@ -8,7 +8,8 @@ etc. Classes introduce a new scope (namespace) and the class object itself is
 added to it's enclosing scope (typically a module).
 
 Classes, like python itself, are dynamic. They are created at runtime and can be
-modified further after creation (yuk).
+modified further after creation (yuk). For example, attributes and methods can
+be added to classes anytime.
 
 You cannot hide data in Python. All hiding is based on convention. (Underscore
 prefixes, etc)
@@ -21,7 +22,8 @@ prefixes, etc)
   can be redefined for class instances (==, +=)
 
 
-Scopes
+Namespaces
+----------
 
 * Innermost scope (contains local names)
 * The scopes of enclosing functions, which are searched up the callstack.
@@ -31,12 +33,11 @@ Scopes
 
 * `global` is used to declare varaibles in the module's namespace.
 * `nonlocal` is used to reference variables in a parent (not module) namespace.
-
-
 """
 
-import unittest
 import builtins
+import logging
+import unittest
 
 from .printer import Printer
 from .person import Person
@@ -47,10 +48,15 @@ class ClassesTest(unittest.TestCase):
     """Examples of creating and using classes."""
 
     def test_namespaces(self) -> None:
+        # An example of adding a "static" (class level) member - shared by all
+        # instances of the class.
         Person.iq2 = 100
-        print("i'm adding a new builtin")
-        builtins.anew = "test"
         self.assertEqual(100, Person.iq2)
+
+        # You can modify any namespace at any time. Here, we modify the
+        # "builtins" namespace.
+        builtins.anew = "test"
+        self.assertEqual("test", builtins.anew)
 
     def test_basic_object_usage(self) -> None:
         """Shows creating objects and calling methods."""
@@ -117,6 +123,7 @@ class ClassesTest(unittest.TestCase):
         self.assertTrue(issubclass(m.__class__, Printer))
         self.assertTrue(issubclass(m.__class__, Person))
         self.assertTrue(issubclass(m.__class__, object))
+        self.assertTrue(issubclass(type(m), Person))
 
         # Test method overriding
         self.assertEqual("Manager damon allison", m.full_name())
@@ -202,7 +209,7 @@ class ClassesTest(unittest.TestCase):
     def test_context_manager(self) -> None:
         """Python's context managers allow you to support
         python's `with` statement."""
-
+        logging.warning("here we are")
         with Person("damon", "allison") as p:
             self.assertEqual("damon", p.first_name)
 

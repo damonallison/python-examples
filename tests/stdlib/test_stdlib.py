@@ -17,41 +17,25 @@ Important standard library modules:
   control precision and/or rounding.
 
 """
-
-import unittest
-
+# os abstracts away OS platform differences, like path separator characters. Use
+# os.path functions to build and manipulate file paths in an OS agnostic way.
 #
-# Abstracts away OS platform differences, like path separator characters.
-# Use os.path functions to build and manipulate file paths in an OS agnostic way.
-#
+# Using `os` to perform path related activities will make your code more
+# portable across platforms. All pathname manipulation should be done using
+# os.path.
 import os
-import shutil
 import logging
+import shutil
 
 
-class TestStdLib(unittest.TestCase):
-    """Examples showing stdlib usage."""
+def test_needs_tmp_dir() -> None:
+    assert 1
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        # warm up the root logger
-        logging.basicConfig()
-        pass
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        pass
+def test_os() -> None:
+    """os and shutil provide platform agnostic I/O operations."""
 
-    def setUp(self) -> None:
-
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-
-    def tearDown(self) -> None:
-        pass
-
-    def test_os(self) -> None:
-        """os and shutil provide platform agnostic I/O operations."""
-
-        self.assertTrue(len(os.getcwd()) > 1, msg="Retrieve current working directory failed")
-        self.assertTrue(shutil.disk_usage(os.getcwd()).total > 0, "Disk usage for the volume returned 0")
+    logging.info(os.getcwd())
+    logging.info(shutil.disk_usage(os.getcwd()))
+    assert len(os.getcwd()) > 1
+    assert shutil.disk_usage(os.getcwd()).total > 0
