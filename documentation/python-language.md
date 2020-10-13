@@ -8,7 +8,8 @@ Python was developed as a high level language - friendlier than bash and C.
 ## Likes
 
 * Flexible. Simple to embed into other programs.
-* Small, easy to learn. Guido hit his goal if being "executable pseudocode".
+* Small, easy to learn. Guido hit his goal of being "executable pseudocode".
+* Great prototyping language.
 
 ## Dislikes
 
@@ -42,16 +43,6 @@ Python was developed as a high level language - friendlier than bash and C.
 > a data member). It should be considered an implementation detail and subject
 > to change without notice.`
 
-## Comments
-
-* Primary Collection Types : List, Tuple (immutable), Set, Dictionary
-    * Any hashable object can be a dictionary key. (How does it enforce?)
-
-## Namespaces
-
-* Built-ins (`abs()`)
-* Module global
-* Function
 
 ### Scopes (Lexical)
 
@@ -62,8 +53,3 @@ Python was developed as a high level language - friendlier than bash and C.
 
 * `nonlocal` binds a variable higher in the enclosing scope to the current scope.
 * `global` binds a variable in the global scope to the current scope.
-
-
-## Classes
-
-* Visibility rules / modification.
