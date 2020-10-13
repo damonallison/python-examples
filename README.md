@@ -22,12 +22,10 @@ source ./env/bin/activate.fish
 deactivate
 
 # Freezing dependencies
-pip freeze
+pip freeze > requirements.txt
 
-
-
-
-
+# Installing requirements
+pip install -r requirements.txt
 
 ```
 ### Command Line
