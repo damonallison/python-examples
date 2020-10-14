@@ -152,6 +152,13 @@ class ClassesTest(unittest.TestCase):
         self.assertTrue(x is None,
                         msg="Always use `is None` to check for None")
 
+    def test_str(self) -> None:
+        """__repr__ defines a string representation for a class"""
+        p = Person("damon", "allison")
+        m = Manager("damon", "allison")
+        self.assertEqual("Person: damon allison", str(p))
+        self.assertEqual("Manager: damon allison", str(m))
+
     def test_type_check(self) -> None:
         """Use isinstance() to check for a type, issubclass() to check for inheritance."""
 

@@ -1,5 +1,7 @@
 import unittest
 
+from collections import defaultdict
+
 
 class TestDictionaries(unittest.TestCase):
     """Dictionaries (HashMap) allow us to store elements with a key."""
@@ -56,6 +58,14 @@ class TestDictionaries(unittest.TestCase):
         d = {x: x**2 for x in range(4)}
         self.assertDictEqual({0: 0, 1: 1, 2: 4, 3: 9}, d)
 
+    def test_defaultdict(self) -> None:
+        wc = defaultdict(int)  # int produces 0 defaults
+        # uses the default value (0) rather than throwing a `KeyError`
+        wc["word"] += 1
+        self.assertEqual(1, wc["word"])
+
 
 if __name__ == "__main__":
     unittest.main()
+
+    # defaultdict provides a default value for a key not in the dictionary

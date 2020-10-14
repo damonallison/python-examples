@@ -34,13 +34,17 @@ class Person:
         return f"{self.first_name} {self.last_name}"
 
     def __eq__(self, rhs: Any) -> bool:
+        """__eq__ implements value equality"""
         if not isinstance(rhs, Person):
             return False
         return self.first_name == rhs.first_name and self.last_name == rhs.last_name
 
+    def __repr__(self) -> str:
+        return f"Person: {self.first_name} {self.last_name}"
     #
     # Adding iterator behavior to classes.
     #
+
     def __iter__(self):
         """iter() should return an object with a `__next__` method"""
 

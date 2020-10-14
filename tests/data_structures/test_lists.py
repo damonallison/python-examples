@@ -68,11 +68,14 @@ class ListTests(unittest.TestCase):
         self.assertEqual(1, min(a))
         self.assertEqual([1, 2, 3, 10, 20], sorted(a))
         self.assertEqual([20, 10, 3, 2, 1], sorted(a, reverse=True))
+        # Sorted returns a copy
+        self.assertEqual([10, 20, 1, 2, 3], a)
 
-        b = a[:]
+        b = a.copy()
 
         a.sort()  # sort() will sort in place.
         self.assertEqual(a, sorted(b))
+        self.assertEqual([10, 20, 1, 2, 3], b)
 
     def test_list_append(self):
         """Use .append(elt) and .extend(iterable) to append to a list."""
@@ -183,7 +186,7 @@ class ListTests(unittest.TestCase):
                          tuple(zip(*people)))
 
     def test_list_comprehensions(self):
-        """List comprehensions are a concise way to create lists.
+        """List comprehensions are a concise way to transform lists.
 
         lst = [<operation> for <elt> in <iterable> [if <condition>]]
 
@@ -393,13 +396,13 @@ class ListTests(unittest.TestCase):
         # director
         nom_count_dict = {}
 
-        for year, nominated_lst in nominated.items():
+        for nominated_lst in nominated.values():
             for director in nominated_lst:
                 nom_count_dict[director] = nom_count_dict.get(director, 0) + 1
 
         # 1B: Create dictionary with the count of Oscar wins for each director
         win_count_dict = {}
-        for year, winner_lst in winners.items():
+        for winner_lst in winners.values():
             for winner in winner_lst:
                 win_count_dict[winner] = win_count_dict.get(winner, 0) + 1
 
