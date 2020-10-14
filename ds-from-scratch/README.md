@@ -29,3 +29,11 @@ An example of simple data analysis to spot trends and relationships in data.
 ## Chapter 2: A Crash Course in Python
 
 An elementary introduction to python.
+
+## Chapter 3: Visualizing Data
+
+A tour of `matplotlib` with line / bar chart / scatterplot examples.
+
+## Chapter 4: Linear Algebra
+
+Linear algebra is the branch of mathematics that deals with vector spaces. Vectors are lists.
