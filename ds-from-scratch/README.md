@@ -28,3 +28,4 @@ An example of simple data analysis to spot trends and relationships in data.
 
 ## Chapter 2: A Crash Course in Python
 
+An elementary introduction to python.

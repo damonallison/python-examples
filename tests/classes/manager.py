@@ -11,3 +11,6 @@ class Manager(Person, Printer):
         """Overrides Person.full_name."""
 
         return "Manager " + super().full_name()
+
+    def __repr__(self) -> str:
+        return f"Manager: {self.first_name} {self.last_name}"
