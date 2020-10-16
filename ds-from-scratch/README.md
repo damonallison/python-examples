@@ -76,3 +76,49 @@ For example, people from the east coast may have more friends than people on the
 west coast. However, if you break up the data set by gender, you may find that
 people on the west coast actually have more friends. Gender is the confounding
 variable that needs to be accounted for in the analysis.
+
+## Chapter 6: Probability
+
+Probability is a way of quantifying uncertainty.
+
+### Dependence
+
+Two events are *dependent* if knowing the outcome of one event gives us
+information about another event.
+
+Mathematically, we say two events E and F are independent if the probability
+they both happen is the product of the probabilities each one happens:
+
+P(E, F) = P(E) * P(F)
+
+> The probability of events E and F happening equals the probability of E
+> happening by itself times the probability of F happening by itself.
+
+### Conditional probability
+
+P(E | F) = P(E, F) / P(F)
+P(E, F) = P(E | F) * P(F)
+
+> The probability of E occurring given F has occurred equals the probability of
+> both E and F occurring / the probability that F occurs.
+
+### Distribution
+
+Distribution is the probability of a value falling within a range of possible
+values. A cumulative distribution function is the probability that a random
+variable is less than or equal to a certain value.
+
+For example, given uniform distribution of values between 0 and 1, the
+cumulative distribution function is:
+
+```python
+
+def uniform_cdf(x):
+  """Returns the probability that a uniform random variable is <= x"""
+  if x < 0: return 0     # uniform random is never < 0
+  elif x < 1: return x   # P(X <= 0.4) == 0.4
+  else return 1          # uniform random is never > 1
+```
+
+
+
