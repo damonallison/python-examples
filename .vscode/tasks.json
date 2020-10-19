@@ -1,0 +1,24 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "say hello",
+            // shell: execute shell command
+            // process: execute a new process
+            "type": "shell",
+            "command": "echo",
+            "args": [
+                "hello",
+                "world"
+            ],
+            "osx": {
+                "args": [
+                    "hello from",
+                    "osx"
+                ]
+            },
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "simple",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/simple.py",
+            "args": [
+                "10"
+            ],
+            "console": "integratedTerminal",
+            // Controls the visibility of the Debug Console
+            "internalConsoleOptions": "neverOpen",
+            // Example of running pre/post launch tasks
+            // "preLaunchTask": "say hello",
+            // "postDebugTask": "say hello",
+            "presentation": {
+                "hidden": false,
+                "group": "simple",
+                "order": 1
+            }
+        }
+    ]
+}

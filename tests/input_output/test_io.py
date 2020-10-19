@@ -4,9 +4,12 @@
 * File I/O.
 """
 
-import unittest
-import os
+import csv
 import json
+import os
+import tempfile
+from tempfile import NamedTemporaryFile, TemporaryFile
+import unittest
 
 
 class TestIO(unittest.TestCase):
@@ -116,18 +119,17 @@ class TestIO(unittest.TestCase):
                          "{first_name} {last_name}".format(**d))
 
     def test_reading_writing_files(self) -> None:
-        """With will automatically close the file.
+        """`with` automatically closes it's resource (file).
 
         Generally, always use with() to ensure your file handle is closed
-        properly. It's more efficient than writing a try/finally block (the
-        other option).
+        properly. It's more efficient / safe than manually closing / dealing
+        with exceptions.
 
         Mode
         ----
-        r  = read only (default)
-        w  = write only (an existing file w/ the same name will be erased)
-        a  = append
-        r+ = read / write
+        * r  = read only (default)
+        * w  = write only (an existing file w/ the same name will be erased)
+        * a  = append r+ = read / write
         """
 
         # Adding the newlines is extremely lame.
@@ -160,6 +162,16 @@ class TestIO(unittest.TestCase):
 
         self.assertEqual("damon", d2["first_name"])
         self.assertDictEqual(d, d2)
+
+    def test_csv_read_write(self) -> None:
+        tf = tempfile.NamedTemporaryFile(mode="r+")
+        w = csv.writer(tf, delimiter=",")
+        d = {'AAPL': 119.12, "GOOGL": 1546.23}
+        for stock, price in d.items():
+            w.writerow([stock, price])
+        tf.seek(0)
+        for line in tf:
+            print(f"reading line {line}")
 
 
 if __name__ == '__main__':

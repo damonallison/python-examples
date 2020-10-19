@@ -120,5 +120,66 @@ def uniform_cdf(x):
   else return 1          # uniform random is never > 1
 ```
 
+## Chapter 7: Hypothesis and Inference
+
+* Significance: How willing are you to make a type 1 error (false positive) (1%? 5%?)
+* Power: How willing are you to make a type 2 error (false negative)
+
+* Bernoulli Trial: The result is a randome variable that can be approximated using the normal distribution
+
+Example: Coin Flipping
+
+* Null (default) hypothesis: The coin is fair (p = .5)
+* Alternative hypothesis: The coin is *not* fair (p != .5)
+
+
+## Chapter 8: Gradient Descent
+
+Gradient descent attempts to find the minimum value (low point) of a function by
+iteratively moving in the direction of the steepest descent as defined by the
+negative of the gradient.
+
+Loss (Cost) function: tells us "how good" our model is at making predictions for a
+given set of parameters. The cost function has it's own curve and gradients. The
+slope of this curve tell sus how to update our parameters to make the model more
+accurate.
+
+
+## Chpater 9: Getting Data
+
+I/O, CSV, HTML, JSON, HTTP (Github / Twitter APIs)
+
+## Chapter 10: Working with Data
+
+### Exploration
+
+Before building models, *explore* the data.
+
+* Summary statistics, smallest, largest, min, max, mean, median, mode
+* Histogram (grouping data into buckets)
+* Scatter plots
+
+### Cleaning
+
+* Remove invalid values (`null`, `0`, `year == 3000`, etc)
+* Check for outliers
+* Reformat data: put into a form condusive to analysis (example: group data by stock ticker)
+
+### Rescaling
+
+Analyzing data with the wrong scale can produce different results.
+
+When dimensions aren't compatible with each other (e.g., height, weight) we'll
+*rescale* the data so that each dimension has a mean 0 and standard deviation of
+1.0. This effectively gets rid of the units, converting each dimension to
+"standard deviations from the mean".
+
+### Dimensionality Reduction
+
+Remove dimensions to focus on the data that captures the most variation. Some
+dimensions can be redundant. Removing redundant dimensions allows you to focus
+on only those which cause variance.
+
+## Chapter 11: Maching Learning
 
 
