@@ -21,11 +21,11 @@ class TestOperators(unittest.TestCase):
         val = 2 + 2 * 6
         self.assertEqual(14, val)
 
-        # Division returns the exact value, not integer
+        # Division returns the exact value, not integer (Python 3)
         self.assertAlmostEqual(4 / 3, 1.33, 2)
         self.assertAlmostEqual(4.0 / 3.0, 1.33, 2)
 
-        # // will always round *down* to the nearest integer
+        # Integer division will always round *down* to the nearest integer
         self.assertEqual(7 // 2, 3)
         self.assertEqual(-7 // 2, -4)
 
@@ -36,7 +36,6 @@ class TestOperators(unittest.TestCase):
         self.assertAlmostEqual(4.4 % 1, .4, 2)
 
     def test_assignment_operators(self):
-
         # Multiple assignment
         x, y = 10, 20
 
@@ -64,15 +63,13 @@ class TestOperators(unittest.TestCase):
         self.assertAlmostEqual(val, 12.5, 1)
 
     def test_comparison_operators(self):
-
         x = True
-
         self.assertEqual(bool, type(x))
         self.assertEqual(True, x)
         # bool is also equal to 1 and 0.
         self.assertEqual(1, x)
 
-        # bool can also be used in logical comparison operators
+        # bool used in logical comparison operators
         self.assertTrue(x == 1)
 
         # bool are used in logical operators

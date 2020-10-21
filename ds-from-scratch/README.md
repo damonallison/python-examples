@@ -183,3 +183,121 @@ on only those which cause variance.
 ## Chapter 11: Maching Learning
 
 
+What is a model? It's a specification of a mathematical relationship between different variables.
+
+What is ML? Creating models that are *learned from data* to predict outcomes.
+
+* Supervised: model created with a known-good labeled data set (training data)
+* Unsupervised: model created without training data
+* Online: model consistently ajusting in real time
+
+### Overfitting and Underfitting
+
+* Overfitting is creating a model which performs well on training data / poor in real world.
+* Underfitting is producing a model that doesn't perform well on training data (usually not used in production)
+
+Models that are too complex lead to overfitting.
+
+* True positive - true prediction is correct
+* False positive (type 1 error) - predicted true, actually false
+* False negative (type 2 error) - predicted false, actually true
+* True negative - false prediction is correct
+
+Precison - how accurate were our true predictions?
+Recall - of all true values, what percent did the model predict?
+
+There is usually a tradeoff between precision and recall. A model that predicts
+"yes" even if not very confident will have great recall, terrible precision (a
+lot of false positives). A model that predicts "yes" only when very confident (a
+lot of false negatives)
+
+```python
+def precision(true_pos: float, false_pos: float) -> float:
+  """Measures how accurate our model identified positives"""
+  return true_pos / (true_pos + false_pos)
+
+def recall(true_pos: false, false_neg: float) -> float:
+  """Measures what fraction of positives identified"""
+  return true_pos / (true_pos + false_neg)
+```
+
+### Bias and Variance
+
+* Bias - the degree to which a model doesn't fit the training data. A model that
+  doesn't predict well has high bias.
+
+* Variance - the degree to which a model's results vary across training data
+  sets. A model that predicts similarily across training sets has low variance.
+
+* High bias and low variance typically indicates the model is underfitting.
+* Low bias and high variance typically indicates the model is overfitting.
+
+* What should you do if your model has high bias? Try adding more features.
+
+* Holding model complexity constant, the more data you have the harder it is to overfit.
+* More data will *not* help with bias. If your model doesn't use enough features
+  to capture regularities in the data, throwing more data at it won't help.
+
+### Feature Extraction and Selection
+
+* Features are model inputs. They fall into a few categories: bool, float, enum
+
+* The type of features (bool, float, enum) constrain which model types you can use.
+
+How do you choose features? Experience and domain expertise. Know your data.
+
+
+
+### Chapter 12: kNN
+
+Prediction based on neighboring elements. It makes no mathematical assumptions,
+it simply looks at the relationship between two elements.
+
+Where most models use the entire data set to help predict a result, kNN simply
+needs the `k` closest data elements.
+
+The "Curse of Dimensionality" means that as you increase dimensions, kNN will
+not be as accurate. Points in high dimensional spaces tend not to be close to
+one another at all. Points may be very close in some dimensions, wildly
+different in others, making their overall distance "average".
+
+In general, keep the number of dimensions small and meaningful.
+
+`scikit-learn` has many kNN models.
+
+### Chapter 13: Naive Bayes
+
+Multiplies the probabilities of each distinct event. This algorithm is "naive"
+because it assumes that each element occurring is independent of each other. For
+example, a spam filter would use Naive Bayes to classify messages as spam using
+known keywords like "cheap", "viagra", ...
+
+* Spam = P(viagra) * P(cheap) * P(...)
+
+### Chapter 14: Linear Regression
+
+Finding the line of best fit. The goal is to make the "sum of squared error" as
+low as possible. Gradient descent (consistently predicting and adjusting to find
+the best estimate) can be used to create better results.
+
+### Chapter 15: Multiple Regression
+
+Using multiple variables in linear regression. The model gives us coefficients
+for each variable - values representing how each variable impacts the result.
+
+For example:
+
+minutes spent online = 30.63 + 0.972 friends - 1.68 work hours + 0.911 phd
+
+Means that on average, each extra friend corresponds to one more minute spent
+online. Each hour spent working results in -1.68 minutes spent online, and
+having a phd results in .911 more minutes online.
+
+The variables are considered independent. If one variable impacts another (i.e.,
+work hours impacts people with more friends more than with less friends), this
+model won't tell us that.
+
+You must pick features that are independent of each other.
+
+
+

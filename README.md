@@ -36,6 +36,15 @@ $ pip3 install pytest
 $ pytest
 ```
 
+## Python Packages
+
+* `virtualenv`
+  * virtual environment support
+* `pip_upgrade_outdated`
+  * Upgrades all outdated packages
+
+
+
 ## Visual Studio Code
 
 The `.vscode/settings.json` file should contain the following config for unit
