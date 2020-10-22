@@ -276,9 +276,19 @@ known keywords like "cheap", "viagra", ...
 
 ### Chapter 14: Linear Regression
 
-Finding the line of best fit. The goal is to make the "sum of squared error" as
-low as possible. Gradient descent (consistently predicting and adjusting to find
-the best estimate) can be used to create better results.
+Regression is the process of finding the relationship between a dependent
+variable (the result) and one or more independent variables (the 'predictors',
+or 'features').
+
+For example: Who is more likely to subscribe to a website given the state they
+live in, their age, marital status, and number of kids.
+
+* Subscription is the dependent variable.
+* State, age, marital status, and kids are independent variables.
+
+Linear regression is finding the line of best fit. The goal is to make the "sum
+of squared error" as low as possible. Gradient descent (consistently predicting
+and adjusting to find the best estimate) can be used to create better results.
 
 ### Chapter 15: Multiple Regression
 
@@ -291,7 +301,8 @@ minutes spent online = 30.63 + 0.972 friends - 1.68 work hours + 0.911 phd
 
 Means that on average, each extra friend corresponds to one more minute spent
 online. Each hour spent working results in -1.68 minutes spent online, and
-having a phd results in .911 more minutes online.
+having a phd results in .911 more minutes online. The larger the coefficients
+are for a term, the more impact it has on the result.
 
 The variables are considered independent. If one variable impacts another (i.e.,
 work hours impacts people with more friends more than with less friends), this
@@ -299,5 +310,123 @@ model won't tell us that.
 
 You must pick features that are independent of each other.
 
+### Chapter 16: Logistic Regression
 
+Logistic regression is used to model certain classes of event - like "win/lose",
+"pass/fail", or "dog/cat/lion/tiger".
+
+Attempts to fit the data to a logarithmic function rather than a linear function.
+
+#### Support Vector Machines (SVM)
+
+Used for classification, an SVM is the line which best separates the data. The
+line which *maximizes* the distance betweeen the two classifications of data.
+New points are classified depending on which side of the line they fall.
+
+### Chapter 17: Decision Trees
+
+The goal is to build an optimal decision tree which predicts an outcome for a
+set of inputs.
+
+Note: it's easy to build a tree which overfits to the training data and doesn't
+generalize well.
+
+When building a tree, you want to pick steps you are confident in. An ideal step
+would accurately predict the outcome for an input. i.e., if height > 6.4, they
+are always a basketball player.
+
+Each point is measured by entropy (uncertainty). High uncertainty = high
+entropy. Generally, you want to partition data into buckets with large numbers
+of values. Partitioning data based on SSN for example gives us no information.
+
+ID3 Algorithm for building a decision tree:
+
+* If all the data has the same label, create a leaf node that predicts that
+  label, then stop.
+
+* If the list of attributes is empty (no more questions to ask), create a leaf
+  node that predicts the most common label then stop.
+
+* Partition the data by each attribute. Create a decision node using the
+  partition with the least entropy.
+
+* Recurse on each partitioned subset.
+
+#### Random Forests
+
+Decision trees are closely tied to their training data and have the tendency to
+overfit. A "random forest" consists of running muliple decision trees and take
+the most common result.
+
+Multiple trees can be built using multiple training sets.
+
+To introduce randomness, rather than always choosing the "best" (lowest
+entrophy), we choose a random attribute to split on.
+
+Random Forests are examples of "ensemble learning", which combines several weak
+models to produce a strong model (strenth in numbers).
+
+### Chapter 18: Neural Networks
+
+Neural networks are similar to brain networks. Each neuron takes an input and
+either fires or doesn't fire.
+
+Neurons are chained together:
+
+input -> hidden neurons (many layers) -> output
+
+#### Backpropogation
+
+How do you decide which neurons to build and how many layers a network should
+have? By training.
+
+Similar to gradient descent, backpropogation finds the "best fit" neural network.
+
+Backpropogation calculates the error result for a given set of inputs and
+"propogates" the errors backward thru the hidden layers to adjust their weights.
+
+
+### Chapter 19: Clustering
+
+Clustering is an example of unsupervised learning. Unsupervised learning does
+*not* use labeled training data when model building. Models are built just from
+the data itself.
+
+Clustering assumes that like elements will generally cluster together.
+
+k-means is a simple custering methods which the number of clusters is chosen in
+advance. Once k is chosen, the goal is to cluster the inputs into k clusters
+which minimizes the total sum of squares distances from each point to the mean
+of it's assigned cluster.
+
+Algorithm:
+
+1. Start with a set of k clusters at ramdom points.
+2. Assign each data item to the point which it's closest.
+3. Determine if any assignment has changed since the last iteration. If no, you are done.
+4. Compute new cluster points based on previous results.
+5. Repeat step 2.
+
+How do you choose `k`?
+
+Run the algorithm for k=1 -> k=n. Determine at what point the sum of squared
+error begins to level out. You'll reach a `k` where the delta in squared error
+starts to level out.
+
+Bottom up clustering: starting with a cluster for each element, merge close
+clusters until you have a single cluster. By keeping track of the merge order,
+we will have a list of clusters for k=1 to k=n.
+
+### Chapter 20: Natural Language Processing
+
+NLP analyzes text and language (grammars).
+
+n-grams : n words that appear together. A bi-gram (2) is a pair of words
+together. A tri-gram is a set of three words together. Stringing together a set
+of n-grams together can produce coherent documents. The larger n, the more
+realisitc the documents become.
+
+A grammar is a set of language rules.
+
+Topic modeling: identifying the topic of a document given it's contents.
 
