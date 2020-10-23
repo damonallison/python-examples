@@ -430,3 +430,70 @@ A grammar is a set of language rules.
 
 Topic modeling: identifying the topic of a document given it's contents.
 
+### Chapter 21: Network Analysis
+
+Networks are graphs. Series of nodes and edges.
+
+Edges can be undirected (bidirectional - like facebook friends) or directed (one
+way - like html links).
+
+#### Centrality
+
+[Centrality](https://en.wikipedia.org/wiki/Centrality)
+
+Degree Centrality: nodes who are highly connected.
+
+Betweeness Centraility: nodes frequently on the shortest path.
+
+How to find betweenness centrality? Write a function that finds the shortest
+path from one node to all other nodes. Then find out how many of those shortest
+paths pass thru the node.
+
+Closeness Centrality: How close is a node to other nodes?
+
+Eigenvector Centrality: The measure of a node's influence on the network
+(PageRank). High eigenvector centrality means a node has a lot of connections to
+other highly connected nodes.
+
+Directed Graphs / PageRank
+
+The number of links to a page isn't by itself very important. Links from "more
+important" pages (highly linked to) are more important than links from less
+important pages (less linked to).
+
+### Chapter 22: Recommender Systems
+
+What makes a great recommendation?
+
+What's popular.
+
+User-Based Collaborative Filtering: Find other nodes whose profile look like the
+current node, making recommendations based off that node.
+
+Item-Based Collaborative Filtering: Recommend based on the characteristics of
+the node, not other nodes. For example, rather than looking for "other nodes
+like the current node", base the recommmendation off of one of the node's
+attributes. Think "user's who have bought an iPhone also buy...". The
+recommendation is based on the iPhone, not the profile of the user who bought
+it.
+
+### Chapter 23: Databases and SQL
+
+GROUP BY: Every column *NOT* in the group by needs to be an aggregate function.
+HAVING: The filtering is applied to the aggregates.
+
+### Chapter 24: MapReduce
+
+* Break work into independent chunks (map).
+* Execute each chunk in parallel.
+* Reduce the chunks to produce a result (reduce).
+
+MapReduce allows you to move processing closer to the data.
+
+### Chapter 25: Go Forth and Data Science
+
+* ipython: a better shell (with notebooks)
+* numpy: scientific data structures
+* pandas: `DataFrame` / data set manipulation
+* scikit-learn: ML implementations
+* d3.js (data driven documents): web visualization
