@@ -123,7 +123,11 @@ class ClassesTest(unittest.TestCase):
         self.assertTrue(issubclass(m.__class__, Printer))
         self.assertTrue(issubclass(m.__class__, Person))
         self.assertTrue(issubclass(m.__class__, object))
+
+        # Checking a variables's type (which is pythonic?)
         self.assertTrue(issubclass(type(m), Person))
+        self.assertEqual(type(m), Manager)
+        self.assertTrue(type(m) == Manager)
 
         # Test method overriding
         self.assertEqual("Manager damon allison", m.full_name())
