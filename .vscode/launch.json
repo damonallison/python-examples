@@ -8,7 +8,7 @@
             "name": "simple",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/simple.py",
+            "program": "${workspaceFolder}/environment.py",
             "args": [
                 "10"
             ],
