@@ -1,16 +1,19 @@
-# Python
+# Python Examples
 
-This repo contains python examples as `unittest` test cases. All tests are in
-the `tests` top level directory.
+Simple python examples as unit tests.
 
 ## Running Tests
 
-Tests can be executed from the command line or from VS Code.
+```shell
+pip install -U pytest
+pytest
+
+```
 
 ### Create a virtual environment (venv)
 
 ```shell
-python3 -m pip install --user virtualenv
+pip install virtualenv
 
 # The second argument is the env name
 python3 -m venv myenv
@@ -28,22 +31,6 @@ pip freeze > requirements.txt
 pip install -r requirements.txt
 
 ```
-### Command Line
-
-```sh
-# Run all unit tests
-$ pip3 install pytest
-$ pytest
-```
-
-## Python Packages
-
-* `virtualenv`
-  * virtual environment support
-* `pip_upgrade_outdated`
-  * Upgrades all outdated packages
-
-
 
 ## Visual Studio Code
 

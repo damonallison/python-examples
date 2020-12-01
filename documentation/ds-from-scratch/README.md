@@ -36,7 +36,7 @@ A tour of `matplotlib` with line / bar chart / scatterplot examples.
 
 ## Chapter 4: Linear Algebra
 
-Linear algebra is the branch of mathematics that deals with vector spaces. Vectors are lists.j
+Linear algebra is the branch of mathematics that deals with vector spaces. Vectors are lists.
 
 ## Chapter 5: Statistics
 
@@ -125,7 +125,7 @@ def uniform_cdf(x):
 * Significance: How willing are you to make a type 1 error (false positive) (1%? 5%?)
 * Power: How willing are you to make a type 2 error (false negative)
 
-* Bernoulli Trial: The result is a randome variable that can be approximated using the normal distribution
+* Bernoulli Trial: The result is a random variable that can be approximated using the normal distribution
 
 Example: Coin Flipping
 
@@ -141,7 +141,7 @@ negative of the gradient.
 
 Loss (Cost) function: tells us "how good" our model is at making predictions for a
 given set of parameters. The cost function has it's own curve and gradients. The
-slope of this curve tell sus how to update our parameters to make the model more
+slope of this curve tells us how to update our parameters to make the model more
 accurate.
 
 
