@@ -9,31 +9,23 @@
 
 * `__import__(module)` - is `import` a statement and function?
 
-## Libraries
-
-* `unittest`
-  * Graphical test runner? Run from VS Code?
-
-* `sys`
-* `os.path`
+* Language - object orientation, encapsulation.
 
 ## Environment
+
+* Lexical scoping rules.
 
 * What is `__init__.py` and `__main__.py`?
 * `def __init__` - constructor?
 
 * What environment variables can be setup to run globally? (`.pythonrc`?)
 
-## Distributions
-
-* Get Anaconda running.
-  * Why was Anaconda created? Is the python ecosystem that difficult to configure properly?
-
-## Modules
-
 * Where are python standard modules on disk?
 * Where does PIP (PIP3) install new modules?
 * What is PyPi?
+
+* Virtual environments : anaconda vs. virtualenv / pip
+  * Why was Anaconda created? Is the python ecosystem that difficult to configure properly?
 
 ## Visual Studio Code
 

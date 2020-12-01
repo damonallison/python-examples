@@ -185,6 +185,7 @@ if __name__ == "__main__":
             proposed_name = os.path.join(
                 verify_dir, next_filename(verify_dir, existing_file_name))
             log.debug("proposed_name:" + proposed_name)
+            os.path.exists()
             if os.path.exists(proposed_name):
                 os.remove(proposed_name)
             log.debug("copying '" + v[0] + "' to '" + proposed_name + "'")

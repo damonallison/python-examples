@@ -24,9 +24,9 @@ def print_environment():
     # * Current directory
     # * $PYTHONPATH environment variable. Takes same format as $PATH (/usr/local:/usr/bin).
     # * Installation dependent default
-    print("path == " + str(sys.path))
-
+    print(f"path == {str(sys.path)}")
     print(f"platform == {sys.platform}")
+    sys.argv
 
 
 #
