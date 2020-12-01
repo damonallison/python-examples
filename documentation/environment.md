@@ -8,8 +8,8 @@ virtual environments. `pyenv` simplifies installing and managing multiple python
 versions, and `virtualenv` allows for creating multiple environments, each which
 uses a different python version.
 
-All development is done within a `virtualenv` to prevent polluting the global
-environment.
+All my python development is done within a `virtualenv` to prevent polluting the
+global environment.
 
 ## Installation
 

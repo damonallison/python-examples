@@ -5,15 +5,16 @@ class ListTests(unittest.TestCase):
     """Python's list() is an ordered, mutable data structure
        which can elements of different types."""
 
-    def test_mutability(self):
+    def test_mutability(self) -> None:
         """Lists are mutable "reference" types"""
 
         a = [1, 2]
         b = a
         a[0] = 3
 
-        self.assertEqual(a, b)
-        self.assertEqual(3, b[0])
+        assert a == b
+        assert 3 == b[0]
+
 
     def test_copy(self):
         """Lists are ordered, mutable.
