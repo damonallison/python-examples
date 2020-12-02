@@ -32,17 +32,17 @@ def test_positional_keyword_arguments() -> None:
     def f(one: str, /, two: str, three: str, *, four: str) -> str:
         """When defining functions, two special parameters exist - "/" and "*".
 
-            "/" specifies the prior arguments must be passed by position.
-            "*" specifies the following arugments *must* be passed by keyword.
+            "/" specifies the prior arguments must be passed by position. "*"
+            specifies the following arugments *must* be passed by keyword.
 
             General guidance
             ----------------
-            * Use positional only if you want to hide the param names from the caller
-                or want to enforce argument order.
-            * Use keyword only when names have meaning and you want to enforce the
-                caller specify the param name.
-            * For an API, use positional to prevent breaking API changes. Positional only
-                allows the param name to change in the future.
+            * Use positional only if you want to hide the param names from the
+              caller or want to enforce argument order.
+            * Use keyword only when names have meaning and you want to enforce
+              the caller specify the param name.
+            * For an API, use positional to prevent breaking API changes.
+              Positional only allows the param name to change in the future.
             """
         return " ".join([one, two, three, four])
 
@@ -54,6 +54,14 @@ def test_positional_keyword_arguments() -> None:
 
 def test_variable_arguments() -> None:
     def fun_varargs(*args: Tuple[Any], **kwargs: Dict[str, Any]) -> Tuple[Tuple[Any], Dict[str, Any]]:
+        """Argument handling.
+
+        If a parameter with the form *name is present, it will be set to a tuple
+        with any "extra" positional parameters.
+
+        If a parameter with the form **name is present, it will be set to a dict
+        with any "extra" keyword parameters.
+        """
         return (args, kwargs)
 
     (args, kwargs) = fun_varargs(1,
