@@ -17,7 +17,7 @@ Scopes are textual regions of a Python program where a namespace is directly
 accessible. There are at least 3 scopes whose namespaces are directly
 accessible.
 
-* Inner most scope, search first, which contains the local names.
+* Inner most scope of a function (local).
 * The scopes of any enclosed functions (nonlocal).
 * The Module's global names (global).
 * Built-ins
