@@ -17,7 +17,7 @@ call_count = 0
 
 
 class Mod1Calculator:
-    def add(self, x, y):
+    def add(self, x: int, y: int) -> int:
         global call_count
         call_count += 1
         return x + y
