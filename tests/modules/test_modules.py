@@ -74,7 +74,7 @@ import tests.exceptions.custom_error
 # Using "as" allows us to use an alias rather than having to refer to the
 # entire function name: tests.modules.calculator.add()
 #
-import tests.modules.calculator as c
+import tests.modules.calculator as calc
 
 #
 # Import a module or module member.
@@ -125,7 +125,7 @@ def test_module_imports() -> None:
 
 def test_module_alias() -> None:
     """We imported the calculator module with alias c"""
-    assert 4 == c.add(2, 2)
+    assert 4 == calc.add(2, 2)
 
 
 def test_global_variable_import() -> None:
