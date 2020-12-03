@@ -57,13 +57,6 @@ Module search path:
 * PIP installs to the 'site-packages' folder, which is located at:
   /usr/local/lib/python3.6/site-packages
 """
-
-#
-# Imports the `unittest` module. Since this module is part of the stdlib, it
-# will be found in sys.path
-#
-import unittest
-
 #
 # Import a module
 #
@@ -116,48 +109,47 @@ from ..exceptions.custom_derived_error import CustomDerivedError
 from .pkg1 import mod1
 
 #
-# Here, a local `static_call_count` variable is created. Because
-# `name_call_count` is a primitive type, a copy of the value is associated with
-# `static_call_count`. Therefore, `static_call_count` does *not* reference the
-# `name_call_count` variable, as you would expect.
+# Here, a local `call_count` variable is created. Because `call_count` is a
+# primitive type, a copy of the value is added to this module's namespace.
+# Therefore, `call_count` does *not* reference `.pkg1.mod1.call_count` as you
+# would expect.
 #
 from .pkg1.mod1 import call_count
 
 
-class TestModules(unittest.TestCase):
-    """Examples showing module imports."""
-
-    def test_module_imports(self):
-        self.assertTrue(
-            isinstance(
-                tests.exceptions.custom_error.CustomError(state="oops"),
-                tests.exceptions.custom_error.CustomError))
-
-    def test_module_alias(self):
-        """We imported the calculator module with alias c"""
-        self.assertTrue(4, c.add(2, 2))
-
-    def test_global_variable_import(self):
-        """Because call_count is imported directly into this module,
-        call_count actually points to a *new* variable in this module's
-        namespace. It is *not* the same as the call_count variable in mod1"""
-
-        self.assertEqual(0, call_count)
-        mod1.call_count = 1
-        self.assertEqual(0, call_count)
-        self.assertEqual(1, mod1.call_count)
-
-        Mod1Calculator().add(2, 2)
-        self.assertEqual(0, call_count)
-        self.assertEqual(2, mod1.call_count)
-
-    def test_intra_package_references(self):
-        self.assertEqual(4, add(2, 2))
-        self.assertEqual(4, Mod1Calculator().add(2, 2))
-        self.assertEqual(4, Mod2Calculator().add(2, 2))
-        self.assertTrue(
-            isinstance(CustomDerivedError(state="oops"), CustomDerivedError))
+def test_module_imports() -> None:
+    assert isinstance(
+        tests.exceptions.custom_error.CustomError(state="oops"),
+        tests.exceptions.custom_error.CustomError)
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_module_alias() -> None:
+    """We imported the calculator module with alias c"""
+    assert 4 == c.add(2, 2)
+
+
+def test_global_variable_import() -> None:
+    """Because call_count is imported directly into this module,
+    call_count actually points to a *new* variable in this module's
+    namespace. It is *not* the same as the call_count variable in mod1"""
+
+    assert call_count == 0
+    mod1.call_count = 1
+
+    assert call_count == 0
+    assert mod1.call_count == 1
+
+    Mod1Calculator().add(2, 2)
+
+    assert call_count == 0
+    assert mod1.call_count == 2
+
+
+def test_intra_package_references() -> None:
+
+    # add was added directly to our module's namespace
+    assert add(2, 2) == 4
+
+    assert Mod1Calculator().add(2, 2) == 4
+    assert Mod2Calculator().add(2, 2) == 4
+    assert isinstance(CustomDerivedError(state="oops"), CustomDerivedError)
