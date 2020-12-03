@@ -1,10 +1,10 @@
 """A manager class used to demonstrate inheritance in Python"""
 
 from .person import Person
-from .printer import Printer
+from .logger import Logger
 
 
-class Manager(Person, Printer):
+class Manager(Person, Logger):
     """A class used to demonstrate (multiple) inheritance."""
 
     def full_name(self) -> str:

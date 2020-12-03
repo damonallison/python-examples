@@ -33,197 +33,124 @@ Namespaces
 
 * `global` is used to declare varaibles in the module's namespace.
 * `nonlocal` is used to reference variables in a parent (not module) namespace.
+
+Classes add another
 """
 
 import builtins
 import logging
 import unittest
 
-from .printer import Printer
+from .logger import Logger
 from .person import Person
 from .manager import Manager
 
 
-class ClassesTest(unittest.TestCase):
-    """Examples of creating and using classes."""
+def test_namespaces() -> None:
+    # An example of adding a "static" (class level) member - shared by all
+    # instances of the class.
+    Person.iq2 = 100
+    assert 100 == Person.iq2
 
-    def test_namespaces(self) -> None:
-        # An example of adding a "static" (class level) member - shared by all
-        # instances of the class.
-        Person.iq2 = 100
-        self.assertEqual(100, Person.iq2)
+    p = Person("damon", "allison")
+    assert 100 == p.iq2
+    assert "damon allison" == p.full_name()
 
-        # You can modify any namespace at any time. Here, we modify the
-        # "builtins" namespace.
-        builtins.anew = "test"
-        self.assertEqual("test", builtins.anew)
+    Person.iq2 = 101
+    assert 101 == p.iq2
 
-    def test_basic_object_usage(self) -> None:
-        """Shows creating objects and calling methods."""
-
-        #
-        # Objects can have class level ("static" or "global") state. Of course,
-        # this is traditionally a **bad** idea.
-        #
-        Person.iq = 50
-        self.assertEqual(50, Person.iq)
-
-        p = Person("damon", "allison")
-        self.assertEqual("damon", p.first_name)
-        self.assertEqual("allison", p.last_name)
-        self.assertEqual("damon allison", p.full_name())
-
-        # Referencing the class variable thru an instance pointer. This is
-        # generally frowned upon. Don't mix class and instance state.
-        # You'd want to use "Person.iq" here.
-        self.assertEqual(50, p.iq)
-
-        # Change the default class variable. All instances are impacted.
-        Person.iq = 52
-        self.assertEqual(52, p.iq)
-        self.assertEqual(52, Person.iq)
-
-        # You can dynamically modify class instances at runtime (yuk).
-        # Here, we add a "test" data member to p2.
-        p2 = Person("cole", "allison")
-        p2.test = 100
-        self.assertEqual(100, p2.test)
-        self.assertEqual(52, p2.iq)  # Still have access to static state.
-
-        # Methods can be called in two ways:
-        #
-        # 1. By calling the class function with an instance.
-        #
-        self.assertEqual("cole allison", Person.full_name(p2))
-        #
-        # 2. By calling the instance method (pythonic).
-        #
-        self.assertEqual("cole allison", p2.full_name())
-
-    def test_docstring(self) -> None:
-        """Classes have a __doc__ attribute that will return the docstring"""
-
-        p = Person("damon", "allison")
-
-        self.assertIsNotNone(p.__doc__)
-        # print(p.__doc__)
-
-    def test_check_type(self) -> None:
-        """Example showing how to check for type instances using isinstance()"""
-        m = Manager("damon", "allison")
-
-        self.assertTrue(isinstance(m, Printer))
-        self.assertTrue(isinstance(m, Manager))
-        self.assertTrue(isinstance(m, Person))
-        self.assertTrue(isinstance(m, object))
-
-        # Example showing that __class__ is used retrieve the class object for a
-        # variable.
-        self.assertTrue(issubclass(m.__class__, Manager))
-        self.assertTrue(issubclass(m.__class__, Printer))
-        self.assertTrue(issubclass(m.__class__, Person))
-        self.assertTrue(issubclass(m.__class__, object))
-
-        # Checking a variables's type (which is pythonic?)
-        self.assertTrue(issubclass(type(m), Person))
-        self.assertEqual(type(m), Manager)
-        self.assertTrue(type(m) == Manager)
-
-        # Test method overriding
-        self.assertEqual("Manager damon allison", m.full_name())
-
-    def test_equality(self) -> None:
-        """Object equality
-
-        Python has two similar comparison operators: `==` and `is`.
-
-        `==` is for object equality (calls __eq__)
-        `is` is for object identity (two objects are the *same* object)
-        """
-
-        class A:
-            def __eq__(self, rhs):
-                return False
-
-        x = A()
-        self.assertTrue(x is x)
-        self.assertFalse(x == x)
-
-        # == will use the class's implementation of `__eq__` if it exists.
-        # Therefore, to always determine if a variable is truly `None`, use `is
-        # None`.
-        x = None
-        self.assertTrue(x is None,
-                        msg="Always use `is None` to check for None")
-
-    def test_str(self) -> None:
-        """__repr__ defines a string representation for a class"""
-        p = Person("damon", "allison")
-        m = Manager("damon", "allison")
-        self.assertEqual("Person: damon allison", str(p))
-        self.assertEqual("Manager: damon allison", str(m))
-
-    def test_type_check(self) -> None:
-        """Use isinstance() to check for a type, issubclass() to check for inheritance."""
-
-        m = Manager("test", "user")
-        self.assertTrue(isinstance(m, Person))
-        self.assertTrue(isinstance(m, Manager))
-        self.assertTrue(isinstance(m, Printer))
-
-        self.assertTrue(issubclass(m.__class__, Manager))
-        self.assertTrue(issubclass(m.__class__, Person))
-        self.assertTrue(issubclass(m.__class__, object))
-
-    def test_iteration(self) -> None:
-
-        p = Person("damon", "allison")
-        p.children = [Person("grace", "allison"),
-                      Person("lily", "allison"),
-                      Person("cole", "allison")]
-
-        children = []
-
-        # Person defines __iter__ and __next__, thus it supports iteration.
-        for child in p:
-            children.append(child)
-
-        self.assertEqual("grace", children[0].first_name)
-        self.assertEqual("lily", children[1].first_name)
-        self.assertEqual("cole", children[2].first_name)
-
-    def test_generator(self) -> None:
-        """Person.child_first_names() is a generator function. Generators return iterators."""
-
-        p = Person("damon", "allison")
-        p.children = [Person("grace", "allison"),
-                      Person("lily", "allison"),
-                      Person("cole", "allison")]
-
-        names = []
-        for name in p.child_first_names():
-            names.append(name)
-
-        self.assertEqual("grace", names[0])
-        self.assertEqual("lily", names[1])
-        self.assertEqual("cole", names[2])
-
-        #
-        # Generator expressions are similar to list comprehensions
-        # but with parentheses rather than brackets.
-        #
-        names = list(child.first_name for child in p.children)
-        self.assertEqual("grace", names[0])
-        self.assertEqual("lily", names[1])
-        self.assertEqual("cole", names[2])
-
-    def test_context_manager(self) -> None:
-        """Python's context managers allow you to support
-        python's `with` statement."""
-        logging.warning("here we are")
-        with Person("damon", "allison") as p:
-            self.assertEqual("damon", p.first_name)
+    # You can modify any namespace at any time. Here, we modify the
+    # "builtins" namespace. Facepalm.
+    builtins.anew = "test"
+    assert "test" == builtins.anew
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_check_type() -> None:
+    """Example showing how to check for type instances using type(), isinstance() and issubclass()"""
+    m = Manager("damon", "allison")
+
+    assert type(m) == Manager
+
+    assert isinstance(m, Logger)
+    assert isinstance(m, Manager)
+    assert isinstance(m, Person)
+    assert isinstance(m, object)
+
+    assert issubclass(type(m), Manager)
+    assert issubclass(type(m), Logger)
+    assert issubclass(type(m), Person)
+    assert issubclass(type(m), object)
+
+
+def test_equality() -> None:
+    """Object equality
+
+    Python has two similar comparison operators: `==` and `is`.
+
+    `==` is for object equality (calls __eq__)
+    `is` is for object identity (two objects are the *same* object)
+    """
+
+    class A:
+        def __eq__(self, rhs):
+            return False
+
+    x = A()
+    assert x is x, "reference equality"
+    # == will use the class's implementation of `__eq__` if it exists.
+    assert x != x, "value equality"
+
+    x = None
+    assert x is None, "always use `is None` to check for None"
+
+
+def test_formatting() -> None:
+    """__repr__ defines a string representation for a class"""
+    p = Person("damon", "allison")
+    m = Manager("damon", "allison")
+
+    assert "Person: damon allison" == str(p)
+    assert "Manager: damon allison" == str(m)
+
+
+def test_sequence_iteration() -> None:
+
+    p = Person("damon", "allison")
+    p.children = [
+        Person("grace", "allison"),
+        Person("lily", "allison"),
+        Person("cole", "allison"),
+    ]
+
+    children = []
+
+    # Person defines __iter__ and __next__, thus it supports iteration.
+    for child in p:
+        children.append(child)
+
+    assert "grace" == children[0].first_name
+    assert "cole" == children[2].first_name
+
+
+def test_generator() -> None:
+    """Person.child_first_names() is a generator function. Generators return iterators."""
+
+    p = Person("damon", "allison")
+    p.children = [Person("grace", "allison"),
+                  Person("lily", "allison"),
+                  Person("cole", "allison")]
+
+    names = []
+
+    # child_first_names is a generator. list() will exhaust the generator
+    names = list(p.child_first_names())
+    assert 3 == len(names)
+    assert "grace" == names[0]
+    assert "cole" == names[2]
+
+
+def test_context_manager() -> None:
+    """Python's context managers allow you to support
+    python's `with` statement."""
+    with Person("damon", "allison") as p:
+        assert "damon", p.first_name
