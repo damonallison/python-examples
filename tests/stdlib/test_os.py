@@ -9,7 +9,6 @@ import os
 import shutil
 
 
-
 def test_os() -> None:
     """os and shutil provide platform agnostic I/O operations."""
 
