@@ -46,7 +46,13 @@ class Person:
     #
 
     def __iter__(self):
-        """iter() should return an object with a `__next__` method"""
+        """iter() should return an object with a `__next__` method.
+
+        Note this is a *really* bad implementation since the same iteration
+        object (self) is used for all iterators. If you were to implement
+        iterators for real, return a custom iterator object which holds the
+        iteration state.
+        """
 
         self.index = 0
         return self

@@ -146,7 +146,6 @@ def test_global_variable_import() -> None:
 
 
 def test_intra_package_references() -> None:
-
     # add was added directly to our module's namespace
     assert add(2, 2) == 4
 

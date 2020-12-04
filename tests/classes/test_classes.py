@@ -1,4 +1,4 @@
-"""Examples of using custom classes in python.
+"""Examples of classes in python.
 
 Class objects support two kinds of operations: attribute references (data and
 method references) and instantiation.
@@ -38,8 +38,7 @@ Classes add another
 """
 
 import builtins
-import logging
-import unittest
+from . import person
 
 from .logger import Logger
 from .person import Person
@@ -53,6 +52,7 @@ def test_namespaces() -> None:
     assert 100 == Person.iq2
 
     p = Person("damon", "allison")
+
     assert 100 == p.iq2
     assert "damon allison" == p.full_name()
 
@@ -122,18 +122,25 @@ def test_sequence_iteration() -> None:
         Person("cole", "allison"),
     ]
 
-    children = []
+    # Manually obtaining / iterating an iterator using iter() and next()
+    it = iter(p)
+    assert next(p).first_name == "grace"
 
     # Person defines __iter__ and __next__, thus it supports iteration.
-    for child in p:
-        children.append(child)
-
+    children = list(p)
+    assert len(children) == 3
     assert "grace" == children[0].first_name
+    assert "lily" == children[1].first_name
     assert "cole" == children[2].first_name
 
 
 def test_generator() -> None:
-    """Person.child_first_names() is a generator function. Generators return iterators."""
+    """Person.child_first_names() is a generator function.
+
+    Generators return iterators. In practice, generators are cleaner than
+    iterators since you don't need to implement __iter__, __next__ and keep
+    iterator state.
+    """
 
     p = Person("damon", "allison")
     p.children = [Person("grace", "allison"),
