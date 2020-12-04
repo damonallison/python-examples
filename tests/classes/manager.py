@@ -13,4 +13,4 @@ class Manager(Person, Logger):
         return "Manager " + super().full_name()
 
     def __repr__(self) -> str:
-        return f"Manager: {self.first_name} {self.last_name}"
+        return f"Manager('{self.first_name}', '{self.last_name}')"

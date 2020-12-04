@@ -87,8 +87,8 @@ def test_equality() -> None:
 
     Python has two similar comparison operators: `==` and `is`.
 
-    `==` is for object equality (calls __eq__)
-    `is` is for object identity (two objects are the *same* object)
+    * `==` is for object equality (calls __eq__)
+    * `is` is for object identity (two objects are the *same* object)
     """
 
     class A:
@@ -101,19 +101,19 @@ def test_equality() -> None:
     assert x != x, "value equality"
 
     x = None
-    assert x is None, "always use `is None` to check for None"
+    assert x is None, "always use `is None` to check for None (pythonic)"
 
 
 def test_formatting() -> None:
     """__repr__ defines a string representation for a class"""
-    p = Person("damon", "allison")
-    m = Manager("damon", "allison")
 
-    assert "Person: damon allison" == str(p)
-    assert "Manager: damon allison" == str(m)
+    assert "Person('damon', 'allison')" == str(Person("damon", "allison"))
+    assert "Manager('damon', 'allison')" == str(Manager("damon", "allison"))
 
 
-def test_sequence_iteration() -> None:
+def test_container() -> None:
+    """Person is a container (of "child" Person objects). It allows you to
+    perform container operations like indexing and slicing."""
 
     p = Person("damon", "allison")
     p.children = [
@@ -122,16 +122,28 @@ def test_sequence_iteration() -> None:
         Person("cole", "allison"),
     ]
 
-    # Manually obtaining / iterating an iterator using iter() and next()
-    it = iter(p)
-    assert next(p).first_name == "grace"
+    # note we are taking the length of the *person*, not the children collection
+    assert 3 == len(p)
 
-    # Person defines __iter__ and __next__, thus it supports iteration.
-    children = list(p)
-    assert len(children) == 3
-    assert "grace" == children[0].first_name
-    assert "lily" == children[1].first_name
-    assert "cole" == children[2].first_name
+    # containers also supports slicing.
+    cc = p[0:2]
+    assert 2 == len(cc)
+    assert "grace" == cc[0].first_name
+    assert "lily" == cc[1].first_name
+
+    # here we are obtaining an iterator for p and exhausting the iterator to
+    # create cc.
+    cc = list(p)
+
+    assert 3 == len(cc)
+    assert "grace" == cc[0].first_name
+    assert "cole" == cc[2].first_name
+
+    cc = []
+    for c in p:
+        cc.append(c)
+
+    assert 3 == len(cc)
 
 
 def test_generator() -> None:
