@@ -3,8 +3,8 @@
 Setting up a clean python environment isn't as simple as it should be. There are
 multiple environment managers (`pyenv`, `virtualenv`, `conda`, others).
 
-I use `pyenv` is used to manage python versions and `pyenv-virtualenv` to create
-virtual environments. `pyenv` simplifies installing and managing multiple python
+I use `pyenv` to manage python versions and `pyenv-virtualenv` to create virtual
+environments. `pyenv` simplifies installing and managing multiple python
 versions, and `virtualenv` allows for creating multiple environments, each which
 uses a different python version.
 

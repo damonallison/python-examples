@@ -11,7 +11,11 @@
 
 * Language - object orientation, encapsulation.
 
+* Green threads / async await
+
 ## Environment
+
+* Virtual environments (`pyenv`)
 
 * Lexical scoping rules.
 
