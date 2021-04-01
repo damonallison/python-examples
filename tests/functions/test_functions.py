@@ -1,5 +1,4 @@
 from typing import Any, List, Dict, Tuple
-import unittest
 
 
 def test_nested_functions() -> None:
