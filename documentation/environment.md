@@ -15,10 +15,10 @@ global environment.
 
 ```shell
 
-# Install pyenv /
+# Install pyenv
 brew install pyenv pyenv-virtualenv
 
-# Install the pyenv plugin for fish
+# Install the pyenv plugin for fish command line completion
 omf update
 omf install pyenv
 ```
