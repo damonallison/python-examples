@@ -1,5 +1,12 @@
 # TODO
 
+## Environment
+
+* pyenv
+* omf / pyenv extension
+* pip / package management
+
+
 ## Language
 
 * Module / Package system (imports / exports / scoping)

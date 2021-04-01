@@ -16,11 +16,10 @@ def test_mutability() -> None:
 def test_copy() -> None:
     """Lists are ordered, mutable.
 
-    Lists are not strongly typed. Lists can contain elements
-    of multiple types.
+    Lists can contain elements of multiple types.
 
-    To copy, use [:]. Always use [:] for iteration when you are
-    modifying the list.
+    To copy, use [:]. Always use [:] for iteration when you are modifying the
+    list.
     """
 
     lst = ["damon", "kari", 10, ["another", "list"]]

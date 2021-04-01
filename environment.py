@@ -37,6 +37,11 @@ if __name__ == "__main__":
     print("hello from " + __name__)
     print_environment()
 
+    # try:
+    #     n
+    # except NameError as ne:
+    #     print(f"NameError: {ne}")
+
     if len(sys.argv) > 1:
         try:
             i = int(sys.argv[1])

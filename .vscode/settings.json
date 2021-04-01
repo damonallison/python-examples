@@ -91,5 +91,7 @@
         "**/crashlytics.properties": true,
         "**/crashlytics-build.properties": true,
         "**/fabric.properties": true
-    }
+    },
+    "python.pythonPath": "/Users/damon/.pyenv/shims/python",
+    "python.formatting.provider": "black"
 }

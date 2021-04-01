@@ -2,7 +2,6 @@
 
 import re
 
-
 def test_string_creation() -> None:
     """Python has multiple ways of creating strings. tl;dr: use f strings"""
 
