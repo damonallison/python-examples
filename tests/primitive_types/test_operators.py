@@ -1,79 +1,57 @@
-import unittest
+import pytest
 
+def test_arithmetic_operators():
+    """Python arithmetic operators
 
-class TestOperators(unittest.TestCase):
-    """Python operator examples"""
+    +  addition
+    -  subtraction
+    *  multiplication
+    /  division (always returns a floating point value)
+    %  modulus
+    ** exponent
+    // floor division - always rounds down to next whole integer
+                        (negative too)
+    """
 
-    def test_arithmetic_operators(self):
-        """Python arithmetic operators
+    # Python handles prescedence within expressions
+    assert 2 + 2 * 6 == 14
 
-        +  addition
-        -  subtraction
-        *  multiplication
-        /  division (always returns a floating point value)
-        %  modulus
-        ** exponent
-        // floor division - always rounds down to next whole integer
-                            (negative too)
-        """
+    # Division returns the exact value, not integer (Python 3)
 
-        # Python handles prescedence within expressions
-        val = 2 + 2 * 6
-        self.assertEqual(14, val)
+    assert 4 / 3 == pytest.approx(1.33, 0.1)
+    assert 4.0 / 3.0 == pytest.approx(1.33, 0.1)
 
-        # Division returns the exact value, not integer (Python 3)
-        self.assertAlmostEqual(4 / 3, 1.33, 2)
-        self.assertAlmostEqual(4.0 / 3.0, 1.33, 2)
+    # Integer division will always round *down* to the nearest integer
+    assert 7 // 2 == 3
+    assert -7 // 2 == -4
 
-        # Integer division will always round *down* to the nearest integer
-        self.assertEqual(7 // 2, 3)
-        self.assertEqual(-7 // 2, -4)
+    # Exponentiation
+    assert 3 ** 3 == 27
 
-        # Exponentiation
-        self.assertEqual(3 ** 3, 27)
+    # Modulo
+    assert 4.4 % 1 == pytest.approx(.4)
 
-        # Modulo
-        self.assertAlmostEqual(4.4 % 1, .4, 2)
+def test_assignment_operators():
+    # Multiple assignment
+    x, y = 10, 20
+    assert x == 10 and y == 20
 
-    def test_assignment_operators(self):
-        # Multiple assignment
-        x, y = 10, 20
+    # All arithmetic operators have a corresponding assignment equivalent.
+    #
+    # += -= *= /=
 
-        self.assertEqual(10, x)
-        self.assertEqual(20, y)
+    val = 10
+    val += 10
+    assert val == 20
 
-        # All arithmetic operators have a corresponding assignment equivalent.
-        #
-        # += -= *= /=
+    val -= 10
+    assert val == 10
 
-        val = 10
-        val += 10
-        self.assertEqual(val, 20)
+    val *= 10
+    assert val == 100
 
-        val -= 10
-        self.assertEqual(val, 10)
+    val **= 2
+    assert val == 10000
 
-        val *= 10
-        self.assertEqual(val, 100)
-
-        val **= 2
-        self.assertEqual(val, 10000)
-
-        val /= 800
-        self.assertAlmostEqual(val, 12.5, 1)
-
-    def test_comparison_operators(self):
-        x = True
-        self.assertEqual(bool, type(x))
-        self.assertEqual(True, x)
-        # bool is also equal to 1 and 0.
-        self.assertEqual(1, x)
-
-        # bool used in logical comparison operators
-        self.assertTrue(x == 1)
-
-        # bool are used in logical operators
-        # and
-        # or
-        # not (inverses a boolean condition)
-        self.assertTrue(x == 1 and x and x < 10)
+    val /= 800
+    assert val == pytest.approx(12.5)
