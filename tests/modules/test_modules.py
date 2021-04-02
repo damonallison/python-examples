@@ -7,6 +7,9 @@ file.
 
 Modules: https://docs.python.org/3/tutorial/modules.html
 
+Each module has a global symbol table. Importing a module adds that module to
+the current module's global symbol table.
+
 There are two forms of the import statement. You can import other modules in
 their entirety or individual members of a module.
 
@@ -16,18 +19,18 @@ This will import the module in its entirety into your module:
 import mod [as alias]
 ```
 
-The following form will import either a module or an individual member from within a
-module. `import` first tests whether a member (name) is defined in the given
-module. If so, it imports that member. If not, it assumes the member is a module
-and attempts to load it.
+The following form will import either a module or an individual member from
+within a module. `import` first tests whether a member (name) is defined in the
+given module. If so, it imports that member. If not, it assumes the member is a
+module and attempts to load it.
 
 ```
 from pkg.subpkg import name [as n]
 ```
 
-There is a special form of import (`import *)` that allows you to import a set of modules
-from a given package. The set of modules that will be imported are defined in
-the package's __init__.py file in a special __all__ variable.
+There is a special form of import (`import *)` that allows you to import a set
+of modules from a given package. The set of modules that will be imported are
+defined in the package's __init__.py file in a special __all__ variable.
 
 ```
 from pkg import *
@@ -51,7 +54,8 @@ Module search path:
 
 --
 
-* The standard library is located in the python installation. An example from homebrew:
+* The standard library is located in the python installation. An example from
+  homebrew:
   /usr/local/Cellar/python3/3.6.4_2/Frameworks/Python.framework/Versions/3.6/lib/python3.6
 
 * PIP installs to the 'site-packages' folder, which is located at:
@@ -120,7 +124,8 @@ from .pkg1.mod1 import call_count
 def test_module_imports() -> None:
     assert isinstance(
         tests.exceptions.custom_error.CustomError(state="oops"),
-        tests.exceptions.custom_error.CustomError)
+        tests.exceptions.custom_error.CustomError,
+    )
 
 
 def test_module_alias() -> None:

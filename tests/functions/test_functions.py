@@ -7,6 +7,7 @@ def test_nested_functions() -> None:
         return x + y
 
     assert 4 == add(2, 2)
+    assert 4 == add(2, y=2)
 
 
 def test_defaults() -> None:
@@ -47,8 +48,7 @@ def test_positional_keyword_arguments() -> None:
 
     assert "one two three four" == f("one", "two", "three", four="four")
     assert "one two three four" == f("one", "two", three="three", four="four")
-    assert "one two three four" == f(
-        "one", two="two", three="three", four="four")
+    assert "one two three four" == f("one", two="two", three="three", four="four")
 
 
 def test_variable_arguments() -> None:
@@ -88,9 +88,7 @@ def test_variable_arguments() -> None:
 
 
 def test_lambdas() -> None:
-    """Python lambdas are restricted to a single statement.
-    They are syntactic sugar for a function definition.
-    """
+    """Lambdas are syntactic sugar for a single lien function."""
 
     def inner_func(val: str) -> str:
         """Example of an inner function"""
@@ -120,3 +118,4 @@ def test_generator() -> None:
     # than equivalent list comprehensions.
     gen = (x**2 for x in range(3))
     assert (0, 1, 4) == tuple(gen)
+    assert (0, 1, 4) == tuple(x**2 for x in range(3))

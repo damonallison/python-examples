@@ -1,4 +1,3 @@
-
 #
 # A "global" variable.
 #
@@ -6,12 +5,12 @@
 # variables.
 #
 # Anyone wanting to access the variable must import a reference to the *module*.
-# Importing the symbol (from mod1 import name_call_count) will create a *new*
-# variable with the initial value of `name_call_count`. They will be different,
+# Importing the symbol (from mod1 import call_count) will create a *new*
+# variable with the initial value of `call_count`. They will be different,
 # independent variables!
 #
 # import mod1
-# mod1.name_call_count += 1
+# mod1.call_count += 1
 #
 call_count = 0
 

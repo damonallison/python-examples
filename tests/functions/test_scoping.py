@@ -43,6 +43,20 @@ value = 100
 module_var = 1
 
 
+class ScopeTest:
+    value = 10
+
+    def get_value(scope: str) -> str:
+        if scope.lower().find("global") >= 0:
+            return globals()["value"]
+        return value
+
+
+def test_scope() -> None:
+    pass
+
+# TODO: finish me...
+
 class ScopingTests(unittest.TestCase):
     """Examples showing python scoping"""
     #
