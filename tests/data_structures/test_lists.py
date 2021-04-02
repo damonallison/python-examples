@@ -1,6 +1,4 @@
 """Python's list() is an ordered, mutable data structure which can elements of different types."""
-import unittest
-
 
 def test_mutability() -> None:
     """Lists are mutable "reference" types"""
@@ -44,6 +42,7 @@ def test_copy() -> None:
     #
     # Here, we are copying reference types. lst2 will contain a pointer to
     # the same lst[0] element.
+    #
     lst = [[1], 2]
     copy = lst.copy()
     copy[0][0] = 3

@@ -54,7 +54,7 @@ def test_dictionary_iteration() -> None:
 def test_dictionary_comprehensions() -> None:
     """Dictionaries can be created from dictionary comprehensions"""
     d = {x: x**2 for x in range(4)}
-    assert {0: 0, 1: 1, 2: 4, 3: 9} == d
+    assert {0: 0, 1: 1, 3: 9, 2: 4} == d
 
 
 def test_defaultdict() -> None:

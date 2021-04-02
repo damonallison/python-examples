@@ -38,7 +38,6 @@ Classes add another
 """
 
 import builtins
-from . import person
 
 from .logger import Logger
 from .person import Person
@@ -155,9 +154,11 @@ def test_generator() -> None:
     """
 
     p = Person("damon", "allison")
-    p.children = [Person("grace", "allison"),
-                  Person("lily", "allison"),
-                  Person("cole", "allison")]
+    p.children = [
+        Person("grace", "allison"),
+        Person("lily", "allison"),
+        Person("cole", "allison"),
+    ]
 
     names = []
 

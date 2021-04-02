@@ -95,8 +95,10 @@ def test_exception_chaining() -> None:
 
     Whenever you are catching and re-raising an exception, chain it.
     """
+
     def f():
         raise IOError
+
     try:
         try:
             f()

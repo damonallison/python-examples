@@ -33,6 +33,8 @@ def test_set_operations() -> None:
     s1 = {"red", "green", "blue"}
     s2 = {"red", "blue", "white"}
 
+    assert "red" in s1 and "red" in s2
+
     # union - the set of unique elements across both sets
     assert {"red", "green", "white", "blue"} == s1.union(s2)
 
