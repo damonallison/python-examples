@@ -9,16 +9,15 @@
 
 ## Language
 
+* Decorators
 * Module / Package system (imports / exports / scoping)
-
+  * `__import__(module)` - is `import` a statement and function?
 * Example of list comprehension?
     `[_convert_name(name) for name in names]`
-
-* `__import__(module)` - is `import` a statement and function?
-
 * Language - object orientation, encapsulation.
-
 * Green threads / async await
+* Typing best practices
+* Annotations
 
 ## Environment
 
@@ -42,3 +41,7 @@
 
 * Logpoints. Like breakpoints, but it logs a message to the console and does not stop the program.
 
+## Libraries
+
+* pytest
+*
