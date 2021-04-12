@@ -71,14 +71,19 @@ class TestExceptions:
         except Exception as e:
             assert isinstance(e, ZeroDivisionError)
 
-    def test_exception_object_hierarchy(self) -> None:
+    def test_exception_class_hierarchy(self) -> None:
         """The except clause will match the actual exception type as well as any
-        base class.
+        base class thereof.
 
         Catch the most derived exceptions first, followed by the most generic.
 
         The last except clause may omit the exception name(s) to serve as a
         wildcard. **Be careful** with this approach, you may mask real errors.
+        The "wildcard" exception handler can be used to chain and reraise an
+        exception.
+
+        Exception chaining happens automatically when an exception is raised
+        from inside an `except` or `finally` block.
         """
 
         try:
