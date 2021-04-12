@@ -1,35 +1,29 @@
-import unittest
-
-
-class TestControlFlow(unittest.TestCase):
-
-    def test_if_elif(self):
+class TestControlFlow:
+    def test_if_elif(self) -> None:
         x = 100
         if x > 10 and x < 50:
-            self.fail()
+            assert False
         elif x > 100:
-            self.fail()
+            assert False
         else:
-            self.assertTrue(x == 100)
+            assert x == 100
 
-    def test_complex_if(self):
-
-        height = 72
+    def test_complex_if(self) -> None:
+        height = 75
         weight = 150
 
+        print(f"weight / height ** 2 == {weight / height ** 2}")
         # You can execute a complex expression
-        if 18.5 < weight / height**2 < 25:
+        if 1 < weight / height > 1.5:
             pass
         else:
-            pass
+            assert False
 
         # using logical operators (and, or, not)
         # use parens to disambiguate complex expressions
-        self.assertTrue(height == 72 and
-                        not weight > 200 and
-                        (height > 100 or height < 80))
+        assert height == 75 and not weight > 200 and (height > 100 or height < 80)
 
-    def test_is_truthy(self):
+    def test_is_truthy(self) -> None:
         """Here are most of the built-in objects that are considered False in Python:
 
         * constants defined to be false: None and False
@@ -38,28 +32,28 @@ class TestControlFlow(unittest.TestCase):
 
         Anything else is treated as True - it doesn't have to be a boolean value.
         """
-
-        self.assertFalse({})
-        self.assertFalse([])
-        self.assertFalse("")
-        self.assertFalse(set())
-        self.assertFalse(0.0)
-        self.assertFalse(0)
-
-        self.assertTrue("test")  # anything non-false will be true
-        self.assertTrue([""])
+        if set():
+            assert False
+        if {}:
+            assert False
+        if []:
+            assert False
+        if "":
+            assert False
+        if 0:
+            assert False
+        if 0.0:
+            assert False
 
         # Any value can be used in logical statements.
         x = 100
-        if x:
-            pass
-        else:
-            self.fail("x is True")
+        if not x:
+            assert False
 
-    def test_while_for_else(self):
+    def test_while_for_else(self) -> None:
         """Loop statements (for and while) can also have an else clause.
 
-        The else block is called when the loop finishes naturally. It will *not*
+        The else clause is called when the loop finishes naturally. It will *not*
         be invoked when the loop is terminated with `break`"""
 
         called = False
@@ -69,17 +63,7 @@ class TestControlFlow(unittest.TestCase):
         else:
             called = True
 
-        self.assertEqual(10, iter)
-        self.assertTrue(called)
-
-        called = False
-        lst = []
-        for i in range(5):
-            lst.append(i)
-        else:
-            called = True
-        self.assertEqual([0, 1, 2, 3, 4], lst)
-        self.assertTrue(called)
+        assert called and iter == 10
 
         called = False
         for i in range(10):
@@ -90,8 +74,4 @@ class TestControlFlow(unittest.TestCase):
 
         # `else` will not be called since the iteration was prematurely
         # terminated.
-        self.assertFalse(called)
-
-
-if __name__ == '__main__':
-    unittest.main(verbosity=2)
+        assert i == 1 and not called
