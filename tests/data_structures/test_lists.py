@@ -16,8 +16,8 @@ def test_copy() -> None:
 
     Lists can contain elements of multiple types.
 
-    To copy, use [:]. Always use [:] for iteration when you are modifying the
-    list.
+    To copy, use [:] or copy(). Always copy when iterating when you are
+    modifying the list.
     """
 
     lst = ["damon", "kari", 10, ["another", "list"]]
@@ -66,14 +66,14 @@ def test_sorting() -> None:
     assert [20, 10, 3, 2, 1] == sorted(a, reverse=True)
 
     # Sorted returns a copy
-    assert [10, 20, 1, 2, 3], a
+    assert a == [10, 20, 1, 2, 3]
 
     b = a.copy()
 
     a.sort()  # sort() will sort in place.
 
-    assert a == sorted(b)
-    assert [10, 20, 1, 2, 3] == b
+    assert a == [1, 2, 3, 10, 20]
+    assert b == [10, 20, 1, 2, 3]
 
 
 def test_list_append() -> None:
@@ -83,19 +83,17 @@ def test_list_append() -> None:
     lst = ["damon"]
     lst.append(42)
 
-    assert ["damon", 42] == lst
+    assert lst == ["damon", 42]
 
     # + will concatentate the two lists (use extend() instead for clarity)
     lst = lst + ["cole", 11]
-    expected = ["damon", 42, "cole", 11]
-    assert expected == lst
+    assert lst == ["damon", 42, "cole", 11]
 
     # .extend(iterable) will append all items from iterable.
     # This is preferred over using `+` since it's clear what
     # you expect.
-    expected.extend(["grace", 13])
     lst.extend(["grace", 13])
-    assert lst == expected
+    assert lst == ["damon", 42, "cole", 11, "grace", 13]
 
 
 def test_iteration() -> None:

@@ -92,5 +92,5 @@
         "**/crashlytics-build.properties": true,
         "**/fabric.properties": true
     },
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
 }
