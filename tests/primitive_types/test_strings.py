@@ -1,0 +1,89 @@
+import re
+from string import Template
+
+
+class TestStrings:
+    def test_string_creation(self) -> None:
+        """Python has multiple ways of creating strings. tl;dr: use f strings"""
+
+        # Single and double quoted strings are identical - one form does not have
+        # special features the other doesn't.
+        x = "This isn't a test"
+        y = 'This "is" a test'
+        assert type(x) == str and type(y) == str
+
+        # Escape the string delimiter character with a \ in both cases.
+        assert "This isn't a test" == x
+        assert 'This "is" a test' == y
+
+        # Multi-line string literal
+        # \ at the end of line will prevent a newline from being added.
+        z = """\
+    Usage: test [OPTIONS]
+        -h        help
+        -H        hostname
+    """
+
+        # Raw strings do not escape special special characters
+        assert r"damon\nallison" == "damon\\nallison"
+
+        # f strings (formatted string literals) provide string interpolation.
+        #
+        # f strings are available in python 3.6 and later
+        name = "damon"
+        assert f"my name is {name}" == "my name is damon"
+
+    def test_string_formatting_concatenation(self) -> None:
+        # strings can be concatenated with +
+        f_name = "damon"
+        l_name = "allison"
+        assert f_name + l_name == "damonallison"
+
+        # strings are indexable. note - python does *not* have a character type.
+        # characters are 1 length strings
+        assert "d" == f_name[0]
+        assert "on" == f_name[-2:]
+
+        # str is immutable
+        fn = f_name.replace("a", "ae")
+        assert fn == "daemon"
+        assert f_name == "damon"
+
+    def test_string_formatting_python3(self) -> None:
+        """Python 3 introduced string.format()"""
+
+        assert "Hello {}".format("damon") == "Hello damon"
+
+        num = 100
+        assert (
+            "Hello {name}, {num:d}".format(name="damon", num=num) == "Hello damon, 100"
+        )
+
+    def test_string_formatting_f_strings(self):
+        """Python 3.6+ added formatted string literals, or 'f-strings'.
+
+        f-strings allow you to embed arbitrary expressions into strings and are
+        the preferred method for string formatting.
+        """
+        name = "damon"
+        num = 100
+        assert f"hello {name}, {num:#d}" == "hello damon, 100"
+        assert f"hello {name}, {num:0>10d}" == "hello damon, 0000000100"
+        assert f"hello {name}, {num:.2f}" == "hello damon, 100.00"
+
+    def test_templates(self):
+        """Templates allow simple name / value substitution.
+
+        Templates are less flexible than str.format() or f-strings. All
+        formatting must be done outside the template."""
+
+        t = Template("Hello $name, $num")
+        assert t.substitute(name="damon", num=100) == "Hello damon, 100"
+
+    def test_join(self) -> None:
+        names = ["damon", "ryan", "allison"]
+        assert "damon ryan allison" == " ".join(names)
+
+    def test_regex(self) -> None:
+        assert re.search(r"damon", "damon allison", re.IGNORECASE) is not None
+        assert re.search(r"^[dD]amon$", "damon") is not None

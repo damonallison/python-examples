@@ -100,7 +100,6 @@ from .pkg1.mod1 import Mod1Calculator
 from .pkg2.mod2 import Mod2Calculator
 from ..exceptions.custom_derived_error import CustomDerivedError
 
-
 #
 # Note that when importing module level variables,
 # you must import the module and reference the variable the module reference
@@ -121,39 +120,38 @@ from .pkg1 import mod1
 from .pkg1.mod1 import call_count
 
 
-def test_module_imports() -> None:
-    assert isinstance(
-        tests.exceptions.custom_error.CustomError(state="oops"),
-        tests.exceptions.custom_error.CustomError,
-    )
+class TestModules:
+    def test_module_imports(self) -> None:
+        assert isinstance(
+            tests.exceptions.custom_error.CustomError(state="oops"),
+            tests.exceptions.custom_error.CustomError,
+        )
+        assert isinstance(CustomError(state="oops"), CustomError)
 
+    def test_module_alias(self) -> None:
+        """We imported the calculator module with alias c"""
+        assert 4 == calc.add(2, 2)
 
-def test_module_alias() -> None:
-    """We imported the calculator module with alias c"""
-    assert 4 == calc.add(2, 2)
+    def test_global_variable_import(self) -> None:
+        """Because call_count is imported directly into this module,
+        call_count actually points to a *new* variable in this module's
+        namespace. It is *not* the same as the call_count variable in mod1"""
 
+        assert call_count == 0
+        mod1.call_count = 1
 
-def test_global_variable_import() -> None:
-    """Because call_count is imported directly into this module,
-    call_count actually points to a *new* variable in this module's
-    namespace. It is *not* the same as the call_count variable in mod1"""
+        assert call_count == 0
+        assert mod1.call_count == 1
 
-    assert call_count == 0
-    mod1.call_count = 1
+        Mod1Calculator().add(2, 2)
 
-    assert call_count == 0
-    assert mod1.call_count == 1
+        assert call_count == 0
+        assert mod1.call_count == 2
 
-    Mod1Calculator().add(2, 2)
+    def test_function_import(self) -> None:
+        # add was added directly to our module's namespace
+        assert add(2, 2) == 4
 
-    assert call_count == 0
-    assert mod1.call_count == 2
-
-
-def test_intra_package_references() -> None:
-    # add was added directly to our module's namespace
-    assert add(2, 2) == 4
-
-    assert Mod1Calculator().add(2, 2) == 4
-    assert Mod2Calculator().add(2, 2) == 4
-    assert isinstance(CustomDerivedError(state="oops"), CustomDerivedError)
+        assert Mod1Calculator().add(2, 2) == 4
+        assert Mod2Calculator().add(2, 2) == 4
+        assert isinstance(CustomDerivedError(state="oops"), CustomDerivedError)

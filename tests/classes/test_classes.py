@@ -44,133 +44,146 @@ from .person import Person
 from .manager import Manager
 
 
-def test_namespaces() -> None:
-    # An example of adding a "static" (class level) member - shared by all
-    # instances of the class.
-    Person.iq2 = 100
-    assert 100 == Person.iq2
+class TestClasses:
+    def test_class_namespaces(self) -> None:
+        # An example class variable. Class variables are shared by all
+        # instances.
+        Person.iq = 100
+        assert Person.iq == 100
 
-    p = Person("damon", "allison")
+        p = Person("damon", "allison")
+        assert p.full_name() == "damon allison"
 
-    assert 100 == p.iq2
-    assert "damon allison" == p.full_name()
+        assert p.iq == 100
+        assert Person("kari", "allison").iq == 100
 
-    Person.iq2 = 101
-    assert 101 == p.iq2
+        Person.iq = 101
+        assert Person.iq == 101 and p.iq == 101
 
-    # You can modify any namespace at any time. Here, we modify the
-    # "builtins" namespace. Facepalm.
-    builtins.anew = "test"
-    assert "test" == builtins.anew
+        def echo(s: str) -> str:
+            return s
 
+        # You can modify any namespace at any time. Here, we modify the
+        # "builtins" namespace. Facepalm.
+        assert "echo" not in dir(builtins)
+        builtins.echo = echo
+        assert "echo" in dir(builtins)
+        assert builtins.echo("hello world") == "hello world"
+        del builtins.echo
+        assert "echo" not in dir(builtins)
 
-def test_check_type() -> None:
-    """Example showing how to check for type instances using type(), isinstance() and issubclass()"""
-    m = Manager("damon", "allison")
+    def test_inheritance(self) -> None:
+        """Example showing how to check for type instances using type(), isinstance() and issubclass()"""
+        m = Manager("damon", "allison")
 
-    assert type(m) == Manager
+        # The manager is a logger.
+        m.log("hello world")
+        m.log("hello again")
+        assert m.history() == ["hello again", "hello world"]
 
-    assert isinstance(m, Logger)
-    assert isinstance(m, Manager)
-    assert isinstance(m, Person)
-    assert isinstance(m, object)
+        # Note that while Python has name mangling, the mangled names can still
+        # be directly accessed.
+        m._Logger__original_log("a test")
+        assert "a test" in m.history()
 
-    assert issubclass(type(m), Manager)
-    assert issubclass(type(m), Logger)
-    assert issubclass(type(m), Person)
-    assert issubclass(type(m), object)
+        assert type(m) == Manager
 
+        assert isinstance(m, Logger)
+        assert isinstance(m, Manager)
+        assert isinstance(m, Person)
+        assert isinstance(m, object)
 
-def test_equality() -> None:
-    """Object equality
+        assert issubclass(type(m), Manager)
+        assert issubclass(type(m), Logger)
+        assert issubclass(type(m), Person)
+        assert issubclass(type(m), object)
 
-    Python has two similar comparison operators: `==` and `is`.
+    def test_equality(self) -> None:
+        """Object equality
 
-    * `==` is for object equality (calls __eq__)
-    * `is` is for object identity (two objects are the *same* object)
-    """
+        Python has two similar comparison operators: `==` and `is`.
 
-    class A:
-        def __eq__(self, rhs):
-            return False
+        * `==` is for object equality (calls __eq__)
+        * `is` is for object identity (two objects are the *same* object)
+        """
 
-    x = A()
-    assert x is x, "reference equality"
-    # == will use the class's implementation of `__eq__` if it exists.
-    assert x != x, "value equality"
+        class A:
+            def __eq__(self, rhs):
+                return False
 
-    x = None
-    assert x is None, "always use `is None` to check for None (pythonic)"
+        x = A()
+        assert x is x, "reference equality"
+        # == will use the class's implementation of `__eq__` if it exists.
+        assert x != x, "value equality"
 
+        x = None
+        assert x is None, "always use `is None` to check for None (pythonic)"
 
-def test_formatting() -> None:
-    """__repr__ defines a string representation for a class"""
+    def test_formatting(self) -> None:
+        """__repr__ defines a string representation for a class"""
 
-    assert "Person('damon', 'allison')" == str(Person("damon", "allison"))
-    assert "Manager('damon', 'allison')" == str(Manager("damon", "allison"))
+        assert "Person('damon', 'allison')" == str(Person("damon", "allison"))
+        assert "Manager('damon', 'allison')" == str(Manager("damon", "allison"))
 
+    def test_container(self) -> None:
+        """Person is a container (of "child" Person objects). It allows you to
+        perform container operations like indexing and slicing."""
 
-def test_container() -> None:
-    """Person is a container (of "child" Person objects). It allows you to
-    perform container operations like indexing and slicing."""
+        p = Person("damon", "allison")
+        p.children = [
+            Person("grace", "allison"),
+            Person("lily", "allison"),
+            Person("cole", "allison"),
+        ]
 
-    p = Person("damon", "allison")
-    p.children = [
-        Person("grace", "allison"),
-        Person("lily", "allison"),
-        Person("cole", "allison"),
-    ]
+        # note we are taking the length of the *person*, not the children collection
+        assert 3 == len(p)
 
-    # note we are taking the length of the *person*, not the children collection
-    assert 3 == len(p)
+        # containers also supports slicing.
+        cc = p[0:2]
+        assert 2 == len(cc)
+        assert "grace" == cc[0].first_name
+        assert "lily" == cc[1].first_name
 
-    # containers also supports slicing.
-    cc = p[0:2]
-    assert 2 == len(cc)
-    assert "grace" == cc[0].first_name
-    assert "lily" == cc[1].first_name
+        # here we are obtaining an iterator for p and exhausting the iterator to
+        # create cc.
+        cc = list(p)
 
-    # here we are obtaining an iterator for p and exhausting the iterator to
-    # create cc.
-    cc = list(p)
+        assert 3 == len(cc)
+        assert "grace" == cc[0].first_name
+        assert "cole" == cc[2].first_name
 
-    assert 3 == len(cc)
-    assert "grace" == cc[0].first_name
-    assert "cole" == cc[2].first_name
+        cc = []
+        for c in p:
+            cc.append(c)
 
-    cc = []
-    for c in p:
-        cc.append(c)
+        assert 3 == len(cc)
 
-    assert 3 == len(cc)
+    def test_generator(test) -> None:
+        """Person.child_first_names() is a generator function.
 
+        Generators return iterators. In practice, generators are cleaner than
+        iterators since you don't need to implement __iter__, __next__ and keep
+        iterator state.
+        """
 
-def test_generator() -> None:
-    """Person.child_first_names() is a generator function.
+        p = Person("damon", "allison")
+        p.children = [
+            Person("grace", "allison"),
+            Person("lily", "allison"),
+            Person("cole", "allison"),
+        ]
 
-    Generators return iterators. In practice, generators are cleaner than
-    iterators since you don't need to implement __iter__, __next__ and keep
-    iterator state.
-    """
+        names = []
 
-    p = Person("damon", "allison")
-    p.children = [
-        Person("grace", "allison"),
-        Person("lily", "allison"),
-        Person("cole", "allison"),
-    ]
+        # child_first_names is a generator. list() will exhaust the generator
+        names = list(p.child_first_names())
+        assert 3 == len(names)
+        assert "grace" == names[0]
+        assert "cole" == names[2]
 
-    names = []
-
-    # child_first_names is a generator. list() will exhaust the generator
-    names = list(p.child_first_names())
-    assert 3 == len(names)
-    assert "grace" == names[0]
-    assert "cole" == names[2]
-
-
-def test_context_manager() -> None:
-    """Python's context managers allow you to support
-    python's `with` statement."""
-    with Person("damon", "allison") as p:
-        assert "damon", p.first_name
+    def test_context_manager(self) -> None:
+        """Python's context managers allow you to support
+        python's `with` statement."""
+        with Person("damon", "allison") as p:
+            assert "damon", p.first_name
