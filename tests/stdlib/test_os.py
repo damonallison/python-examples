@@ -6,11 +6,16 @@
 # portable across platforms. All pathname manipulation should be done using
 # os.path.
 import os
+
 import shutil
 
 
-def test_os() -> None:
-    """os and shutil provide platform agnostic I/O operations."""
+class TestOS:
+    def test_os(self) -> None:
+        """os and shutil provide platform agnostic I/O operations."""
 
-    assert len(os.getcwd()) > 1
-    assert shutil.disk_usage(os.getcwd()).total > 0
+        assert len(os.getcwd()) > 1
+
+    def test_shutil(self) -> None:
+        """shutil provides simple file and directory management functions"""
+        assert shutil.disk_usage(os.getcwd()).total > 0

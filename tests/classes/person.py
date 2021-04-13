@@ -47,7 +47,6 @@ class Person:
 
         self.first_name = first_name
         self.last_name = last_name
-        self.index = 0
         self.children = []
 
     def full_name(self) -> str:

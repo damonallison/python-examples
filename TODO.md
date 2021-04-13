@@ -2,7 +2,7 @@
 
 ## Language
 
-* Name mangling
+* Immutable classes
 * Decorators
 * Module / Package system (imports / exports / scoping)
   * `__import__(module)` - is `import` a statement and function?
