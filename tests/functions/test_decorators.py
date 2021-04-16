@@ -17,15 +17,15 @@ Decorators can be applied at the function or class level.
 Builtin decorators include:
 
 @classmethod - accepts a cls parameter and can use / modify class state. The
-intrepreter injects the class parameter automatically. Class methods could be
-used for creating a factory.
+intrepreter injects the class parameter automatically similar to how `self` is
+injected into method calls. Class methods can be used for creating a factory.
 
 @staticmethod - flags the function as a static method. Python allows you to call
-a static method from a class instance. Python will *not* add `self` to the
-method invocation.
+a static method from a class instance. Python will *not* add `self` or `cls` to
+the method invocation.
 
-Function decorators receive functions as their arguments. Class decorators
-receive classes as their argument.
+Decorators can also be applied to classes. Class decorators receive classes as
+their argument and wrap the way __init__ works.
 
 """
 
