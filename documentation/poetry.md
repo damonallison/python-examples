@@ -25,11 +25,8 @@ set -U XDG_DATA_HOME $HOME/.local/share
 
 ## Usage
 
-Before entering a poetry shell, set `pyenv` to a virtualenv with the version of
-python you want to use with poetry. `poetry shell` will use that Python version
-in it's virtualenv.
-
-
+Before using poetry in a project, create or set the `pyenv` virtualenv you want
+to use with the project.
 
 ```shell
 
@@ -40,16 +37,18 @@ poetry new [project-name]
 cd project-dir
 poetry init
 
-# Start a new poetry shell. This will create a new virtualenv in
-# ~/.config/pypoetry/virtualenvs
-
-poetry shell
-
 # Add a dependency to pyproject.toml
+#
+# You can add packages and version constraints to pyproject.toml manually (recommended)
+#
+# The following is equal to (>= 1.4.0 <2.0.0)
+# pendulum = ^1.4
 poetry add [dep-name]
 
 # Install dependencies (will create poetry.lock)
-poetry install
+# --no-root will prevent installing the project as a package.
+poetry install --no-root
+
 
 # Updates all out of date package (respecting semver as defined in pyproject.toml) and updates poetry.lock
 poetry update
