@@ -65,3 +65,11 @@ curl --silent https://raw.githubusercontent.com/shipt/pyshipt/master/requirement
 
 ## Libraries
 
+```shell
+
+# Builds ./dist with sdist and wheel builds
+poetry build
+
+# Publishes to PyPi or a private repository
+poetry publish [-r my-repository]poet
+```
