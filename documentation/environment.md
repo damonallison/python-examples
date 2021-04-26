@@ -3,13 +3,14 @@
 Setting up a clean python environment isn't as simple as it should be. There are
 multiple environment managers (`pyenv`, `virtualenv`, `conda`, others).
 
-I use `pyenv` to manage python versions and `pyenv-virtualenv` to create virtual
+I use [pyenv](https://github.com/pyenv/pyenv) to manage python versions and
+[pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) to create virtual
 environments. `pyenv` simplifies installing and managing multiple python
 versions, and `virtualenv` allows for creating multiple environments, each which
 uses a different python version.
 
-All my python development is done within a `virtualenv` to prevent polluting the
-global environment.
+All python development should be done within a `virtualenv` to prevent polluting
+the global environment.
 
 ## Installation
 
@@ -62,5 +63,9 @@ pyenv virtualenv test
 # Activate / deactivate a virtual environment
 pyenv activate test
 pyenv deactivate
+
+# Delete a virtualenv (both commands are identical)
+pyenv virtualenv-delete `env`
+pyenv uninstall `env`
 
 ````

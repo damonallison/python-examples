@@ -2,7 +2,7 @@
 
 [Poetry](https://python-poetry.org/docs/)
 
-Virtual environment and dependency manager.
+Packaging and dependency manager.
 
 ## Environment
 
@@ -35,6 +35,10 @@ in it's virtualenv.
 
 # create a new poetry project
 poetry new [project-name]
+
+# initialize an existing project
+cd project-dir
+poetry init
 
 # Start a new poetry shell. This will create a new virtualenv in
 # ~/.config/pypoetry/virtualenvs
