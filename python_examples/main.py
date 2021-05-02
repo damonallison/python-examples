@@ -1,3 +1,3 @@
-from .fastapi.main import app as fastapi_app
+from fastapi.main import app as fastapi_app
 
 app = fastapi_app

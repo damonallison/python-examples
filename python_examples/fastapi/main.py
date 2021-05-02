@@ -34,7 +34,7 @@ def get_root() -> EchoResult:
 @app.get("/echo/{echo}", response_model=EchoResult)
 def get_echo(echo: str) -> EchoResult:
     if echo == "test":
-        return responses.Response(status_code=status.HTTP_301_MOVED_PERMANENTLY, headers={"test_header": "test"})
+        return responses.Response(status_code=status.HTTP_301_MOVED_PERMANENTLY, headers={"X-Test-Header": "test"})
     return EchoResult(echo=echo)
 
 @app.get("/estimate/{id}", response_model=EstimateResponse)
