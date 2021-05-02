@@ -4,7 +4,12 @@ from string import Template
 
 class TestStrings:
     def test_string_creation(self) -> None:
-        """Python has multiple ways of creating strings. tl;dr: use f strings"""
+        """Python has multiple ways of creating strings.
+
+        tl;dr: use f strings if you are using Python 3.6 or later
+
+        FYI: Python strings are immutable.
+        """
 
         # Single and double quoted strings are identical - one form does not have
         # special features the other doesn't.
@@ -42,14 +47,14 @@ class TestStrings:
         # strings are indexable. note - python does *not* have a character type.
         # characters are 1 length strings
         assert "d" == f_name[0]
-        assert "on" == f_name[-2:]
+        assert "on" == f_name[-2:] and f_name.endswith("on")
 
         # str is immutable
         fn = f_name.replace("a", "ae")
         assert fn == "daemon"
         assert f_name == "damon"
 
-    def test_string_formatting_python3(self) -> None:
+    def test_string_format(self) -> None:
         """Python 3 introduced string.format()"""
 
         assert "Hello {}".format("damon") == "Hello damon"
@@ -85,5 +90,8 @@ class TestStrings:
         assert "damon ryan allison" == " ".join(names)
 
     def test_regex(self) -> None:
+        # To determine if a string contains a substring, use "in" and "not in"
+        assert "test" in "this is a test" and "damon" not in "cole allison"
+
         assert re.search(r"damon", "damon allison", re.IGNORECASE) is not None
         assert re.search(r"^[dD]amon$", "damon") is not None

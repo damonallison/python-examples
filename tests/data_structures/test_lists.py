@@ -1,4 +1,7 @@
+import copy
+
 """Python's list() is an ordered, mutable data structure which can elements of different types."""
+
 
 def test_mutability() -> None:
     """Lists are mutable "reference" types"""
@@ -17,14 +20,14 @@ def test_copy() -> None:
     Lists can contain elements of multiple types.
 
     To copy, use [:] or copy(). Always copy when iterating when you are
-    modifying the list.
+    modifying the list. [:] is idomatic python.
     """
 
     lst = ["damon", "kari", 10, ["another", "list"]]
-    copy = lst.copy()
+    cp = lst.copy()
 
-    assert lst is not copy, "the objects should not be referentially equal"
-    assert lst == copy, "the objects should be logically (==) equal"
+    assert lst is not cp, "the objects should not be referentially equal"
+    assert lst == cp, "the objects should be logically (==) equal"
 
     #
     # Copies are shallow.
@@ -33,21 +36,27 @@ def test_copy() -> None:
     # each element.
     #
     lst = [1, 2]
-    copy = lst.copy()
+    cp = lst[:]
 
-    copy[0] = 3
+    cp[0] = 3
     assert lst == [1, 2]
-    assert copy == [3, 2]
+    assert cp == [3, 2]
 
     #
     # Here, we are copying reference types. lst2 will contain a pointer to
     # the same lst[0] element.
     #
     lst = [[1], 2]
-    copy = lst.copy()
-    copy[0][0] = 3
+    cp = lst.copy()
+    cp[0][0] = 3
 
     assert lst == [[3], 2]
+
+    # deepcopy() will
+    lst = [[1], 2]
+    cp = copy.deepcopy(lst)
+    cp[0][0] = 3
+    assert lst == [[1], 2]
 
 
 def test_sorting() -> None:
@@ -192,7 +201,7 @@ def test_list_comprehensions() -> None:
                     the element is skipped.
     """
 
-    squares = [x**2 for x in range(1, 4)]
+    squares = [x ** 2 for x in range(1, 4)]
     assert [1, 4, 9] == squares
 
     evens = [x for x in range(1, 11) if x % 2 == 0]
@@ -207,13 +216,12 @@ def test_list_comprehensions() -> None:
 
     # Here, we'll only compute squares for even numbers and default
     # odds to 0.
-    even_squares = [x**2 if x % 2 == 0 else 0 for x in range(8)]
+    even_squares = [x ** 2 if x % 2 == 0 else 0 for x in range(8)]
     assert [0, 0, 4, 0, 16, 0, 36, 0] == even_squares
 
     # You can have multiple for and if statements in the same list
     # comprehension.
-    concatenated = [(x, y) for x in range(1, 3)
-                    for y in range(1, 3) if x != y]
+    concatenated = [(x, y) for x in range(1, 3) for y in range(1, 3) if x != y]
     assert [(1, 2), (2, 1)] == concatenated
 
     # Flatten a list using a listcomp

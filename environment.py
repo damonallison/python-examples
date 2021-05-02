@@ -6,8 +6,6 @@
 # it's command line arguments.
 import sys
 
-from tests.algorithms.fibonacci import fib
-
 
 def print_environment():
     """Prints relevant information about the current runtime environment"""
@@ -18,7 +16,7 @@ def print_environment():
     # If executed as a script (python simple.py), sys.argv[0] == "simple.py"
     # If executed as a module, (python -m simple), sys.argv[0] is the full path
     # to the script. (i.e., sys.argv[0] == "/Users/dra/projects/python-examples/simple.py"
-    print(f"argv len = {len(sys.argv)}: {sys.argv}")
+    print(f"argv len={len(sys.argv)} = {sys.argv}")
 
     # The module search path is the list of:
     # * Current directory
@@ -26,27 +24,11 @@ def print_environment():
     # * Installation dependent default
     print(f"path == {str(sys.path)}")
     print(f"platform == {sys.platform}")
-    sys.argv
 
 
-#
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
 #
 if __name__ == "__main__":
     print("hello from " + __name__)
     print_environment()
-
-    # try:
-    #     n
-    # except NameError as ne:
-    #     print(f"NameError: {ne}")
-
-    if len(sys.argv) > 1:
-        try:
-            i = int(sys.argv[1])
-            to = i + 100
-            print("fib(" + str(to) + ") == " + str(fib.fib_to(to)))
-            print("fibrec(" + str(i) + ") == " + str(fib.fibrec(i)))
-        except ValueError:
-            print("Unable to calculate fib(" + sys.argv[1] + ")")

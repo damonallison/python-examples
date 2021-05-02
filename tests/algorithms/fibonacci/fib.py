@@ -1,9 +1,11 @@
+from typing import List
+
 """Finonacci"""
 
 
 def fib_to(num: int) -> int:
     """Returns fibonacci numbers up to num"""
-    result = []
+    result: List[int] = []
     a, b = 0, 1
     while b < num:
         result.append(b)
