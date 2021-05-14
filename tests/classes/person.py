@@ -2,7 +2,7 @@
 
 import logging
 
-from typing import Any, Sequence
+from typing import Any, ClassVar, List, Sequence
 
 
 class GenericIterator:
@@ -31,11 +31,17 @@ class Person:
     types of attributes: data attributes and functions (methods).
     """
 
+    #
     # A class variable (attribute) shared by all instances.
     #
     # This is a sneaky form of global state. Prefer instance variables over
     # class variables.
-    iq = 0
+    #
+    iq: ClassVar[int] = 0
+
+    first_name: str
+    last_name: str
+    children: List["Person"]
 
     def __init__(self, first_name: str, last_name: str = "default"):
         """A class can have a single __init__ constructor function.
