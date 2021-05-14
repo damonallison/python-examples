@@ -3,6 +3,7 @@ from typing import Any, List, Dict, Tuple
 
 def test_nested_functions() -> None:
     """Functions can be nested within functions."""
+
     def add(x: int, y: int):
         return x + y
 
@@ -24,26 +25,25 @@ def test_defaults() -> None:
 
     assert ["damon", "damon"] == fun_defaults(name="damon", num=2)
 
-    assert ["damon", "damon", "damon", "damon",
-            "damon"] == fun_defaults(name="damon")
+    assert ["damon", "damon", "damon", "damon", "damon"] == fun_defaults(name="damon")
 
 
 def test_positional_keyword_arguments() -> None:
     def f(one: str, /, two: str, three: str, *, four: str) -> str:
         """When defining functions, two special parameters exist - "/" and "*".
 
-            "/" specifies the prior arguments must be passed by position. "*"
-            specifies the following arugments *must* be passed by keyword.
+        "/" specifies the prior arguments must be passed by position.
+        "*" specifies the following arugments *must* be passed by keyword.
 
-            General guidance
-            ----------------
-            * Use positional only if you want to hide the param names from the
-              caller or want to enforce argument order.
-            * Use keyword only when names have meaning and you want to enforce
-              the caller specify the param name.
-            * For an API, use positional to prevent breaking API changes.
-              Positional only allows the param name to change in the future.
-            """
+        General guidance
+        ----------------
+        * Use positional only if you want to hide the param names from the
+          caller or want to enforce argument order.
+        * Use keyword only when names have meaning and you want to enforce
+          the caller specify the param name.
+        * For an API, use positional to prevent breaking API changes.
+          Positional only allows the param name to change in the future.
+        """
         return " ".join([one, two, three, four])
 
     assert "one two three four" == f("one", "two", "three", four="four")
@@ -52,7 +52,9 @@ def test_positional_keyword_arguments() -> None:
 
 
 def test_variable_arguments() -> None:
-    def fun_varargs(*args: Tuple[Any], **kwargs: Dict[str, Any]) -> Tuple[Tuple[Any], Dict[str, Any]]:
+    def fun_varargs(
+        *args: Tuple[Any], **kwargs: Dict[str, Any]
+    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
         """Argument handling.
 
         If a parameter with the form *name is present, it will be set to a tuple
@@ -63,11 +65,7 @@ def test_variable_arguments() -> None:
         """
         return (args, kwargs)
 
-    (args, kwargs) = fun_varargs(1,
-                                 2,
-                                 3,
-                                 first="damon",
-                                 last="allison")
+    (args, kwargs) = fun_varargs(1, 2, 3, first="damon", last="allison")
 
     assert (1, 2, 3) == args
     assert {"first": "damon", "last": "allison"} == kwargs
@@ -116,6 +114,6 @@ def test_generator() -> None:
     # You can create generator expressions like you would a list
     # comprehension. Generator expressions tend to be more memory friendly
     # than equivalent list comprehensions.
-    gen = (x**2 for x in range(3))
+    gen = (x ** 2 for x in range(3))
     assert (0, 1, 4) == tuple(gen)
-    assert (0, 1, 4) == tuple(x**2 for x in range(3))
+    assert (0, 1, 4) == tuple(x ** 2 for x in range(3))
