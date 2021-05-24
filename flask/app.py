@@ -1,8 +1,6 @@
 """A simple flask app.
 
-#
-# To run the app on a local dev server (port 5000 by default)
-#
+To run the app on a local dev server (port 5000 by default)
 
 # FLASK_APP is the name of the module (flask app) to import and run. Defaults to app.py
 # FLASK_ENV=development will enable hot-reload, also enable the debugger.
@@ -14,10 +12,6 @@ $ env FLASK_APP=app.py python -m flask run
 # To run the app exposed to the world (all public IPs)
 #
 $ flask run --host=0.0.0.0
-
-
-
-
 """
 from flask import Flask, url_for
 from flask import request
