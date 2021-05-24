@@ -93,4 +93,5 @@
         "**/fabric.properties": true
     },
     "python.formatting.provider": "black",
+    "python.pythonPath": "/Users/damon/.pyenv/versions/3.9.5/envs/python-examples/bin/python",
 }
