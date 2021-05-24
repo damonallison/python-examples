@@ -1,7 +1,5 @@
 """A simple person class."""
-
 import logging
-
 from typing import Any, ClassVar, List, Sequence
 
 
