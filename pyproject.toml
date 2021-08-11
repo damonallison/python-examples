@@ -6,6 +6,27 @@ authors = ["Damon Allison <damon@damonallison.com>"]
 license = "MIT"
 readme = "README.md"
 
+# Dependencies are specified with version constraints following:
+# https://python-poetry.org/docs/dependency-specification/
+#
+# Caret: Does not modify the left most non-zero digit
+#   ^1.2.3 == >=1.2.3 <2.0
+#   ^0.0.3 == >=0.0.3 <0.0.4
+#
+# Tilde:
+#   If you specify a major.minor.patch or major.minor, only patch level changes are allowed.
+#   If you specify a major, then minor and patch are allowed.
+#
+#   ~1.2.3   >=1.2.3 <1.3.0
+#   ~1.2     >=1.2.3 <1.3.0
+#   ~1       >=1.0.0 <2.0.0
+#
+# Wildcard:
+#   Allow for the latest version where the wildcard exists.
+#
+#   *     >=0.0.0
+#   1.*   >=1.0.0 <2.0.0
+#   1.2.* >= 1.2.0 <1.3.0
 [tool.poetry.dependencies]
 python = "^3.9"
 fastapi = "^0.63.0"
