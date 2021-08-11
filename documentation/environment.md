@@ -67,5 +67,4 @@ pyenv deactivate
 # Delete a virtualenv (both commands are identical)
 pyenv virtualenv-delete `env`
 pyenv uninstall `env`
-
 ````
