@@ -12,23 +12,24 @@ import sys
 import hashlib
 import logging
 import pickle
-import string
 from typing import Dict
 
 # Possible levels : DEBUG, INFO, WARNING, ERROR, CRITICAL
-logging.basicConfig(level="DEBUG",
-                    format="%(asctime)s <%(threadName)s> (%(filename)s.%(funcName)s.%(lineno)d)::%(levelname)s:%(message)s")
+logging.basicConfig(
+    level="DEBUG",
+    format="%(asctime)s <%(threadName)s> (%(filename)s.%(funcName)s.%(lineno)d)::%(levelname)s:%(message)s",
+)
 
 
 def md5_for_file_name(file_name):
     """
-        MD5 a file using a sane block_size multiplier : (64 * 128 == 8192 bytes).
+    MD5 a file using a sane block_size multiplier : (64 * 128 == 8192 bytes).
 
-        MD5 has 128 byte digest block, so use a multiplier of 128.
+    MD5 has 128 byte digest block, so use a multiplier of 128.
     """
     md5 = hashlib.md5()
-    with open(file_name, 'rb') as f:
-        for chunk in iter(lambda: f.read(128 * md5.block_size), b''):
+    with open(file_name, "rb") as f:
+        for chunk in iter(lambda: f.read(128 * md5.block_size), b""):
             md5.update(chunk)
     return md5.hexdigest()
 
@@ -36,7 +37,7 @@ def md5_for_file_name(file_name):
 def hashes_for_dir(root_dir) -> Dict[str, str]:
     results = {}
     counter = 0
-    for folder, sub_folders, files in os.walk(root_dir):
+    for folder, _, files in os.walk(root_dir):
         for file in files:
             file_path = os.path.join(folder, file)
             try:
@@ -47,8 +48,7 @@ def hashes_for_dir(root_dir) -> Dict[str, str]:
                     results[md5] = [file_path]
                 counter += 1
                 if counter % 250 == 0:
-                    log.debug("hashed " + str(counter) +
-                              " files in " + root_dir)
+                    log.debug("hashed " + str(counter) + " files in " + root_dir)
             except IOError:
                 log.error("ERROR: Could not read file at : " + file_path)
     return results
@@ -132,6 +132,12 @@ if __name__ == "__main__":
     os.chdir("/tmp")
     log.debug("Current working directory :: " + os.getcwd())
 
+    log.debug(f"sys.argv: {sys.argv}")
+
+    if len(sys.argv) < 3:
+        log.debug("usage: python dir_compare.py /dir1 /dir2")
+        sys.exit(1)
+
     existing_dir = "/Volumes/homebase/backup/music"
     current_dir = "/Volumes/homebase/backup/music-copy"
 
@@ -183,7 +189,8 @@ if __name__ == "__main__":
             log.debug("file not in current:" + k + str(v))
             existing_file_name = os.path.split(v[0])[1]
             proposed_name = os.path.join(
-                verify_dir, next_filename(verify_dir, existing_file_name))
+                verify_dir, next_filename(verify_dir, existing_file_name)
+            )
             log.debug("proposed_name:" + proposed_name)
             os.path.exists()
             if os.path.exists(proposed_name):
