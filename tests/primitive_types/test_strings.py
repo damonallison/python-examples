@@ -13,13 +13,15 @@ class TestStrings:
 
         # Single and double quoted strings are identical - one form does not have
         # special features the other doesn't.
-        x = "This isn't a test"
+        x = 'This "is" a test'
         y = 'This "is" a test'
-        assert type(x) == str and type(y) == str
+        assert isinstance(x, str) and isinstance(y, str)
 
-        # Escape the string delimiter character with a \ in both cases.
-        assert "This isn't a test" == x
-        assert 'This "is" a test' == y
+        # == uses value equality (same value)
+        assert x == "This " + '"is" a test'
+
+        # is uses identity equality (same instance)
+        assert x is not "This " + '"is" a test'
 
         # Multi-line string literal
         # \ at the end of line will prevent a newline from being added.
