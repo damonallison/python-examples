@@ -1,10 +1,13 @@
+import logging
+
 from typing import List
 
 """Finonacci"""
 
 
-def fib_to(num: int) -> int:
+def fib_to(num: int) -> List[int]:
     """Returns fibonacci numbers up to num"""
+    logging.debug(f"fib_to({num})")
     result: List[int] = []
     a, b = 0, 1
     while b < num:
