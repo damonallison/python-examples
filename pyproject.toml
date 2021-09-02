@@ -31,6 +31,7 @@ readme = "README.md"
 python = "^3.9"
 fastapi = "^0.63.0"
 uvicorn = "^0.13.4"
+Flask = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
