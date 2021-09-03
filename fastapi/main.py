@@ -9,15 +9,27 @@ FastAPI is a wrapper on top of Starlette which provides:
   * /redoc - redoc documentation
   * /openapi.json - the open api generated schema
 
-  by default).
-*
+FastAPI is based around Pydantic and strongly favors using type hints. The
+combination of pydantic and strong typing include:
+
+* Requirements definition / documentation
+  * Request path parmeters, headers, bodies, etc.
+* Data conversion
+  * Converts path parameters and request bodies into stronly typed objects.
+* Validation
+  * Provides data validation and generates specific error messages.
+
+It goes without saying, but *always* use type hints and strongly type your code.
 
 
 """
+
+import logging
 import uuid
-import json
 import fastapi
-from fastapi import responses, Body
+import time
+
+from fastapi import requests, responses, Body
 
 from typing import List, Optional
 from datetime import datetime
@@ -25,8 +37,36 @@ from datetime import datetime
 from models import estimate
 from models import echo
 
+logger: logging.Logger
 
 app = fastapi.FastAPI()
+
+# Application events - startup / shutdown
+@app.on_event("startup")
+async def startup_logging():
+    global logger
+    logging.basicConfig()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    logger.info("app.startup: started logging")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    logger.info("app.shutdown: shutting down")
+
+
+# Middleware
+@app.middleware("http")
+async def time_request(request: requests.Request, call_next):
+    """An example middleware."""
+    start = time.time()
+    response = await call_next(request)
+    duration = time.time() - start
+    response.headers["X-Process-Time"] = str(duration)
+    logger.info(f"X-Process-Time {duration} {request.url}")
+    return response
+
 
 # Note that path operations are evaluated in the order they are declared.
 #
@@ -40,7 +80,12 @@ app = fastapi.FastAPI()
 # Adding `response_model` adds the response object when
 # generating documentation. If `response_model` is not specified, the
 # documentation will show `null` when rendering the operation's response.
-@app.get("/", response_model=echo.EchoResult)
+@app.get(
+    "/",
+    name="Root",
+    description="Returns a simple 'hello world' data structure",
+    response_model=echo.EchoResult,
+)
 async def get_root() -> echo.EchoResult:
     j = {"echo": "hello world", "updated_at": datetime.utcnow()}
     return echo.EchoResult(**j)
@@ -56,9 +101,11 @@ async def get_root() -> echo.EchoResult:
 # parameter is *not* `Optional`, FastAPI will validate it exists.
 @app.get(
     "/echo/{e:str}",
+    name="Echo",
+    description="Echos back the incoming route parameter as well as an optional 'q' querystring parameter.",
     response_model=echo.EchoResult,
 )
-def get_echo(e: str, q: Optional[str]) -> echo.EchoResult:
+def get_echo(e: str, q: Optional[str] = None) -> echo.EchoResult:
     if e == "test":
         return responses.Response(
             status_code=fastapi.status.HTTP_301_MOVED_PERMANENTLY,
@@ -85,8 +132,9 @@ def get_estimates(id: uuid.UUID) -> estimate.EstimateResponse:
 #
 # See:
 # https://fastapi.tiangolo.com/tutorial/body-multiple-params/#singular-values-in-body
-
-
+#
+# Example:
+# curl -X POST -d '{"times": 10}' --silent http://localhost:8000/estimate
 @app.post(
     "/estimate",
     response_model=estimate.EstimateResponse,

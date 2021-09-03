@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "fpc2",
+            "name": "fastapi",
             "type": "python",
             "request": "launch",
             "module": "uvicorn",

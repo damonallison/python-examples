@@ -23,7 +23,7 @@ class Estimate(BaseModel):
 
 class EstimateRequest(BaseModel):
     times: int = Field(
-        1,
+        default=1,
         title="Estimate count",
         description="The number of estimates to generate.",
         ge=0,
