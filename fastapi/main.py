@@ -29,7 +29,7 @@ import uuid
 import fastapi
 import time
 
-from fastapi import requests, responses, Body
+from fastapi import requests, responses, Body, Path, Query
 
 from typing import List, Optional
 from datetime import datetime
@@ -99,13 +99,31 @@ async def get_root() -> echo.EchoResult:
 # Other function parameters that are *not* part of the path are assumed to be
 # query parameters. Here, `q` is an optional query parameter. If the function
 # parameter is *not* `Optional`, FastAPI will validate it exists.
+#
+# The types `Path` and `Query` can be used to further validate path and query
+# parameter values. The first parameter to Path and Query specify the default
+# value. To specify the parameter is required with no default, use
+# `...`.
+#
+# Here, `e` is required, q is optional with a default value of None.
+#
+# Query and Path also allow you to add metadata to the parameter which will be
+# rendered with the documentation. Note that redoc uses both title and
+# description, and /docs will only use description.
 @app.get(
     "/echo/{e:str}",
     name="Echo",
     description="Echos back the incoming route parameter as well as an optional 'q' querystring parameter.",
     response_model=echo.EchoResult,
 )
-def get_echo(e: str, q: Optional[str] = None) -> echo.EchoResult:
+def get_echo(
+    e: str = Path(..., description="The value to echo back", min_length=2),
+    q: Optional[str] = Query(
+        None,
+        title="An optional querystring parameter",
+        description="When present, echo will also echo this string back.",
+    ),
+) -> echo.EchoResult:
     if e == "test":
         return responses.Response(
             status_code=fastapi.status.HTTP_301_MOVED_PERMANENTLY,
@@ -121,8 +139,7 @@ def get_echo(e: str, q: Optional[str] = None) -> echo.EchoResult:
     "/estimate/{id}",
     response_model=estimate.EstimateResponse,
 )
-def get_estimates(id: uuid.UUID) -> estimate.EstimateResponse:
-    ests: List[estimate.EstimateResponse] = []
+def get_estimate(id: uuid.UUID) -> estimate.EstimateResponse:
     return estimate.EstimateResponse(estimates=[estimate.Estimate(id=id, value=100.0)])
 
 

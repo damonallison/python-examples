@@ -27,7 +27,7 @@ class EstimateRequest(BaseModel):
         title="Estimate count",
         description="The number of estimates to generate.",
         ge=0,
-        # You can also add an "estimate" parameer to the Field object to show
+        # You can also add an "estimate" parameter to the Field object to show
         # this default value when the field is rendered in the documentation.
         example="42",
     )
