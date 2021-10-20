@@ -9,6 +9,10 @@ FastAPI is a wrapper on top of Starlette which provides:
   * /redoc - redoc documentation
   * /openapi.json - the open api generated schema
 
+
+Pydantic
+--------
+
 FastAPI is based around Pydantic and strongly favors using type hints. The
 combination of pydantic and strong typing include:
 
@@ -21,6 +25,21 @@ combination of pydantic and strong typing include:
 
 It goes without saying, but *always* use type hints and strongly type your code.
 
+Concurrency
+-----------
+
+You can mix `async def` and `def` methods. The general guidance is:
+
+* If you need to call `await` with a 3rd party libarry, use `async def`
+* If 3rd party libraries do *not* support await, use `def`
+* If you *don't* communicate with 3rd party libraries, use `async def`
+* If you don't know what to do, use `def`
+
+* Concurrency (async) is great for I/O bound operations (web).
+* Parallelism (multiprocessor) is great for CPU bound operations.
+
+FastAPI is based on AnyIO, which makes it compatible with `asyncio` (python's
+standard libarry and `trio`.
 
 """
 
