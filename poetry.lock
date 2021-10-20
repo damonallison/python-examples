@@ -514,10 +514,21 @@ python-versions = ">=3.6"
 [package.extras]
 watchdog = ["watchdog"]
 
+[[package]]
+name = "yappi"
+version = "1.3.3"
+description = "Yet Another Python Profiler"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.extras]
+test = ["gevent (>=20.6.2)"]
+
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "6c166d60ac66ad30bdd5fee8d9aa7b5defdcfd57eb1e7d7cd76c1145185920c3"
+content-hash = "2a3b680c889458c12fad79fa207835656ebd4ed9b4ebf5fd141d21823b9bda1c"
 
 [metadata.files]
 appnope = [
@@ -859,4 +870,7 @@ wcwidth = [
 werkzeug = [
     {file = "Werkzeug-2.0.1-py3-none-any.whl", hash = "sha256:6c1ec500dcdba0baa27600f6a22f6333d8b662d22027ff9f6202e3367413caa8"},
     {file = "Werkzeug-2.0.1.tar.gz", hash = "sha256:1de1db30d010ff1af14a009224ec49ab2329ad2cde454c8a708130642d579c42"},
+]
+yappi = [
+    {file = "yappi-1.3.3.tar.gz", hash = "sha256:855890cd9a90d833dd2df632d648de8ccd0a4c3131f1edc8abd004db0625b5e8"},
 ]
