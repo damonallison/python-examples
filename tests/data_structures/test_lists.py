@@ -3,24 +3,39 @@ import copy
 """Python's list() is an ordered, mutable data structure which can elements of different types."""
 
 
-def test_mutability() -> None:
-    """Lists are mutable "reference" types"""
+def test_list_manipulation() -> None:
+    lst = [0]
 
-    a = [1, 2]
-    b = a
-    a[0] = 3
+    # Append an element to the end of a list
+    lst.append(1)
+    assert [0, 1] == lst
 
-    assert a == b
-    assert 3 == b[0]
+    lst.extend([3, 4])
+    assert [0, 1, 3, 4] == lst
+
+    lst.insert(2, 2)
+    assert [0, 1, 2, 3, 4] == lst
+
+    # Remove raises a value error if the value doesn't exist
+    try:
+        lst.remove(4)
+    except ValueError:
+        assert False
+    assert [0, 1, 2, 3] == lst
+
+    # By default, pop removes the last element in the list
+    assert 3 == lst.pop()
+    assert [0, 1, 2] == lst
+
+    # Test membership
+    assert 2 in lst
+    assert 3 not in lst
 
 
 def test_copy() -> None:
-    """Lists are ordered, mutable.
+    """To copy, use [:] or copy().
 
-    Lists can contain elements of multiple types.
-
-    To copy, use [:] or copy(). Always copy when iterating when you are
-    modifying the list. [:] is idomatic python.
+    Always copy when iterating when you are modifying the list. [:] is idomatic python.
     """
 
     lst = ["damon", "kari", 10, ["another", "list"]]
@@ -43,8 +58,9 @@ def test_copy() -> None:
     assert cp == [3, 2]
 
     #
-    # Here, we are copying reference types. lst2 will contain a pointer to
-    # the same lst[0] element.
+    # Here, we are copying reference types. lst2 will contain a pointer to the
+    # same lst[0] element. Note that [:] and list.copy() are both "shallow"
+    # copies.
     #
     lst = [[1], 2]
     cp = lst.copy()
@@ -52,11 +68,19 @@ def test_copy() -> None:
 
     assert lst == [[3], 2]
 
-    # deepcopy() will
-    lst = [[1], 2]
+    # deepcopy will recursively copy an object. There are some values which
+    # can't be deep copied (like functions, file handles). In those cases, the
+    # reference is "copied".
+
+    def add(x: int, y: int) -> int:
+        return x + y
+
+    lst = [[1], 2, add]
     cp = copy.deepcopy(lst)
+
     cp[0][0] = 3
-    assert lst == [[1], 2]
+    assert lst == [[1], 2, add]
+    assert cp == [[3], 2, add]
 
 
 def test_sorting() -> None:
@@ -77,32 +101,11 @@ def test_sorting() -> None:
     # Sorted returns a copy
     assert a == [10, 20, 1, 2, 3]
 
-    b = a.copy()
-
+    b = copy.deepcopy(a)
     a.sort()  # sort() will sort in place.
 
     assert a == [1, 2, 3, 10, 20]
     assert b == [10, 20, 1, 2, 3]
-
-
-def test_list_append() -> None:
-    """Use .append(elt) and .extend(iterable) to append to a list."""
-
-    # Append will add a single value.
-    lst = ["damon"]
-    lst.append(42)
-
-    assert lst == ["damon", 42]
-
-    # + will concatentate the two lists (use extend() instead for clarity)
-    lst = lst + ["cole", 11]
-    assert lst == ["damon", 42, "cole", 11]
-
-    # .extend(iterable) will append all items from iterable.
-    # This is preferred over using `+` since it's clear what
-    # you expect.
-    lst.extend(["grace", 13])
-    assert lst == ["damon", 42, "cole", 11, "grace", 13]
 
 
 def test_iteration() -> None:
@@ -111,13 +114,16 @@ def test_iteration() -> None:
     lst = ["damon", "kari", "grace", "lily", "cole"]
     expected = []
 
-    # Remember to always iterate over a *copy* of the list
+    # Remember to always iterate over a *copy* of the list if you are deleting from the list
     for name in lst.copy():
         expected.append(name)
 
     assert lst == expected
 
-    # To iterate over the indices of a sequence, use range(len(lst))
+    # To iterate over just the indices of a sequence, use range(len(lst)).
+    # or enumerate()
+    #
+    # for i, _ in enumerate(lst):
     expected = []
     for i in range(len(lst)):
         expected.append(lst[i])
