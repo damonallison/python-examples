@@ -4,11 +4,11 @@ from typing import Any, List, Dict, Tuple
 def test_nested_functions() -> None:
     """Functions can be nested within functions."""
 
-    def add(x: int, y: int):
+    def add(x: int, y: int) -> int:
         return x + y
 
     assert 4 == add(2, 2)
-    assert 4 == add(2, y=2)
+    assert 4 == add(x=2, y=2)
 
 
 def test_defaults() -> None:

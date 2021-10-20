@@ -9,12 +9,12 @@ import os
 import sys
 from tests.algorithms.fibonacci import fib
 
-f = logging.Formatter("%(levelname)s:%(message)s")
+logger = logging.getLogger(__name__)
 
-h = logging.StreamHandler(sys.stdout)
-h.setFormatter(f)
-logging.getLogger().setLevel(os.environ.get("LOG_LEVEL", "DEBUG"))
-logging.getLogger().addHandler(h)
+if not getattr(logger, "handler_set", False):
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.handler_set = True
 
 
 def print_environment():
@@ -27,22 +27,20 @@ def print_environment():
     # If executed as a module, (python -m simple), sys.argv[0] is the full path
     # to the script. (i.e., sys.argv[0] == "/Users/dra/projects/python-examples/simple.py"
 
-    logging.info(f"argv len={len(sys.argv)} = {sys.argv}")
+    logger.info(f"argv len={len(sys.argv)} = {sys.argv}")
 
     # The module search path is the list of:
     # * Current directory
     # * $PYTHONPATH environment variable. Takes same format as $PATH (/usr/local:/usr/bin).
     # * Installation dependent default
-    logging.info(f"path == {str(sys.path)}")
-    logging.info(f"platform == {sys.platform}")
+    logger.info(f"path == {str(sys.path)}")
+    logger.info(f"platform == {sys.platform}")
 
 
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
 #
 if __name__ == "__main__":
-    logging.debug("hello from " + __name__)
+    logger.debug("hello from " + __name__)
     print_environment()
     fib.fib_to(1000)
-
-    logging.exception("boom", ValueError("wtf"))
