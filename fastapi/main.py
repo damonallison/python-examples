@@ -107,6 +107,7 @@ async def time_request(request: requests.Request, call_next):
 )
 async def get_root() -> echo.EchoResult:
     j = {"echo": "hello world", "updated_at": datetime.utcnow()}
+    # time.sleep(0.1)
     return echo.EchoResult(**j)
 
 
