@@ -1,12 +1,5 @@
 # Python Concurrency
 
-## Questions
-
-* What are the concurrency options in python and how do they work / compare / differ?
-* Threading / asyncio both run a single thread at a time?
-
-* How to use a thread's address space (thread local storage)? Why?
-
 ## Terminology
 
 ### Concurrency
@@ -19,7 +12,10 @@
 * Two tasks actually executing at the same time.
 * Requires multiple CPUs.
 
-> A system is said to be concurrent if it can support two or more actions in progress at the same time. A system is said to be parallel if it can support two or more actions executing simultaneously.
+### Parallel vs. Concurrent
+
+> A system is said to be concurrent if it can support two or more actions in progress at the same time, but not running simultaneously.
+* . A system is said to be parallel if it can support two or more actions executing simultaneously.
 
 > An application can be parallel but not concurrent (multiprocess). An application can be concurrent but not parallel (threading, asyncio).
 

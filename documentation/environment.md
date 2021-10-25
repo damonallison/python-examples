@@ -12,6 +12,12 @@ uses a different python version.
 All python development should be done within a `virtualenv` to prevent polluting
 the global environment.
 
+[Poetry](https://python-poetry.org) is a packaging and dependency management
+system that many projects use. Poetry creates it's own virtual environments
+*outside* of pyenv. (run `poetry env info` to determine what virtual environment
+is in use.)
+
+
 ## Installation
 
 ```shell
@@ -22,6 +28,10 @@ brew install pyenv pyenv-virtualenv
 # Install the pyenv plugin for fish command line completion
 omf update
 omf install pyenv
+
+# Install poetry via the poetry installation instructions (not via homebrew)
+# https://python-poetry.org/docs/
+
 ```
 
 ## Configuration
@@ -67,4 +77,26 @@ pyenv deactivate
 # Delete a virtualenv (both commands are identical)
 pyenv virtualenv-delete `env`
 pyenv uninstall `env`
-````
+
+```
+
+## Poetry
+
+Poetry installs itself to `~/.poetry`. This is *just* where the `poetry`
+executable is installed. Add `~/.poetry/bin` to your path. You can also set the
+`$POETRY_HOME` environment variable to have poetry install into a different
+location.
+
+```shell
+# Add `poetry` to fish's $fish_user_paths
+fish_add_path -g "~/.poetry/bin"
+
+# Poetry will create virtualenvs in it's `cache-dir` configuration variable.
+poetry config --list
+poetry config cache-dir ~/.cache/pypoetry
+```
+
+Poetry works by creating and executing it's commands in virtual environments. A
+virtual environment is created using the current python version. Therefore,
+before creating the virtual environment (using `poetry init` or `poetry
+install`, the correct version of python.
