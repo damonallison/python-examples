@@ -40,6 +40,7 @@ def hello_yall(username):
 
 @app.route('/test', methods=["POST"])
 def test_request():
+    request.headers
     """Retrieve a JSON payload."""
     print(request.get_json())
     return "thanks!"
