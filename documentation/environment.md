@@ -99,4 +99,26 @@ poetry config cache-dir ~/.cache/pypoetry
 Poetry works by creating and executing it's commands in virtual environments. A
 virtual environment is created using the current python version. Therefore,
 before creating the virtual environment (using `poetry init` or `poetry
-install`, the correct version of python.
+install`, you need to be running a python version compatible with the project.
+
+```shell
+pyenv install 3.9.7
+#
+# Set the python version for the local directory.
+# pyenv will switch to this python version when
+# entering the local directory.
+#
+pyenv local 3.9.7
+
+# Verify we are running 3.9.7
+python --version
+
+# Create a new virtual environment
+poetry install
+```
+
+Note that if a python virtualenv is current active, poetry will *not* attempt to
+create a virtualenv. It will use the active virtualenv. This allows you to
+control the virtualenv used py poetry and also prevents the need to use `poetry
+run` to run commands in the virtualenv. However it requires you to manually
+active the virtualenv when you switch between projects.
