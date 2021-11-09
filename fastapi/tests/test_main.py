@@ -1,11 +1,24 @@
-from main import app
+import pytest
 from fastapi.testclient import TestClient
+
+from main import app
 
 import yappi
 
 
 class TestMain:
+    @pytest.mark.integration
     def test_app(self):
+        """An 'integration' tests which profiles HTTP handling.
+
+        Note that pyproject.toml is configured to *not* run integration tests by
+        default.
+
+        To run integration tests from the command line:
+
+        pytest -m integration
+
+        """
         yappi.set_clock_type("wall")
         yappi.start()
 
