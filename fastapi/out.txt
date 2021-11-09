@@ -1,9 +1,0 @@
-
-Clock type: WALL
-Ordered by: totaltime, desc
-
-name                                                                                                                                                                                                      ncall  tsub      ttot      tavg      
-/Users/damon/dra/python-examples/fastapi/main.py:79 time_request                                                                                                                                          20     0.001131  2.133938  0.106697
-/Users/damon/dra/python-examples/fastapi/main.py:102 get_root                                                                                                                                             20     0.000762  2.093274  0.104664
-/Users/damon/dra/python-examples/fastapi/main.py:73 shutdown                                                                                                                                              1      0.000003  0.000201  0.000201
-/Users/damon/dra/python-examples/fastapi/main.py:64 startup_logging                                                                                                                                       1      0.000005  0.000134  0.000134
