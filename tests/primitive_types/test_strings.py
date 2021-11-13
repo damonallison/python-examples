@@ -25,11 +25,11 @@ class TestStrings:
 
         # Multi-line string literal
         # \ at the end of line will prevent a newline from being added.
-        z = """\
-    Usage: test [OPTIONS]
-        -h        help
-        -H        hostname
-    """
+        """\
+Usage: test [OPTIONS]
+    -h        help
+    -H        hostname
+"""
 
         # Raw strings do not escape special special characters
         assert r"damon\nallison" == "damon\\nallison"
@@ -65,6 +65,8 @@ class TestStrings:
         assert (
             "Hello {name}, {num:d}".format(name="damon", num=num) == "Hello damon, 100"
         )
+        pi = 3.14159
+        assert "Hello 3.14" == "Hello {num:.2f}".format(num=pi)
 
     def test_string_formatting_f_strings(self):
         """Python 3.6+ added formatted string literals, or 'f-strings'.
