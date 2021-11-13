@@ -3,14 +3,14 @@
     There are two classes of errors in Python:
 
     * SyntaxError : the code couldn't be parsed
-    * Exception   : runtime error
+    * Exception   : runtime errors
 """
 
 import pytest
 import sys
 
-from .custom_derived_error import CustomDerivedError
-from .custom_error import CustomError
+from tests.exceptions.custom_derived_error import CustomDerivedError
+from tests.exceptions.custom_error import CustomError
 
 
 class TestExceptions:
@@ -65,10 +65,14 @@ class TestExceptions:
             assert "Zero" in err.value
 
     def test_base_exception(self) -> None:
-        """Exception is the base class for all built in exceptions"""
+        """BaseException is the base class for all built in exceptions.
+
+        You typically do *not* want to catch BaseException as it would hide the
+        *real* error.
+        """
         try:
             1 / 0
-        except Exception as e:
+        except BaseException as e:
             assert isinstance(e, ZeroDivisionError)
 
     def test_exception_class_hierarchy(self) -> None:
@@ -95,12 +99,14 @@ class TestExceptions:
             assert False, "CustomDerivedError should have caught the exception."
         except:
             assert False, f"Unhandled exception: {sys.exc_info()[0]}"
-            raise
 
     def test_exception_chaining(self) -> None:
         """Exception chaining allows you to keep a back stack of exceptions.
 
         Whenever you are catching and re-raising an exception, chain it.
+
+        Exception chaining happens automatically when an exception is raised
+        inside an except or finally section.
         """
 
         def f():
