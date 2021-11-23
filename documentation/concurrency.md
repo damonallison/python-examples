@@ -17,8 +17,8 @@
 > A system is said to be concurrent if it can support two or more actions in progress at the same time, but not running simultaneously.
 * . A system is said to be parallel if it can support two or more actions executing simultaneously.
 
-> An application can be parallel but not concurrent (multiprocess). An application can be concurrent but not parallel (threading, asyncio).
-
+> An application can be parallel but not concurrent (multiprocess). An
+> application can be concurrent but not parallel (threading, asyncio).
 
 ### Global Interpreter Lock (GIL)
 
@@ -37,4 +37,14 @@ Multiple processes. The only way to achieve true parallelism in Python is to spa
 
 ### asyncio
 
-* Cooperative multitasking (process managed)
+* Cooperative multitasking (process managed). The code must `await` to return
+  control back to the executor.
+* The benefit of `asyncio` is you don’t have to worry about locking. You can
+  guarantee only one task will be running and will not be preemptively
+  cancelled.
+* Coroutines are functions which have multiple exit points (async def).
+* Task. A wrapper around a coroutine.
+
+
+
+
