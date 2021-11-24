@@ -1,3 +1,9 @@
+from collections import namedtuple
+import pandas as pd
+
+Driver = namedtuple("Driver", ["driver_id", "first", "last"])
+
+
 class TestTuples:
     """Tuples are immutable, ordered sequence of elements."""
 
@@ -60,3 +66,33 @@ class TestTuples:
 
         assert type(lst2) == list
         assert lst2 == [1, 2]
+
+    def test_namedtuple(self) -> None:
+        Person = namedtuple("Person", ["first", "last"])
+        """namedtuple(s) are tuples with named atribute access."""
+
+        t1 = Person(first="damon", last="allison")
+        assert t1.first == "damon" and t1.last == "allison"
+
+        d = {"first": "cole", "last": "allison"}
+        t2 = Person(**d)
+        assert t2.first == "cole" and t2.last == "allison"
+
+    def test_pandas(self) -> None:
+        d = {
+            "driver_id": [1, 2],
+            "first": ["damon", "cole"],
+            "last": ["allison", "allison"],
+        }
+        df = pd.DataFrame(d)
+
+        for i in range(5):
+            print(df.shape)
+            df = df.append(df, ignore_index=True)
+
+        cache = {}
+        for t in df.itertuples(index=False, name="Driver"):
+            cache[t.driver_id] = t
+
+        print(df.shape)
+        print(df.head())
