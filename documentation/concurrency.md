@@ -43,7 +43,7 @@ Multiple processes. The only way to achieve true parallelism in Python is to spa
   guarantee only one task will be running and will not be preemptively
   cancelled.
 * Coroutines are functions which have multiple exit points (async def).
-* Task. A wrapper around a coroutine.
+* safTask. A wrapper around a coroutine.
 
 
 
