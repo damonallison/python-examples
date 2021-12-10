@@ -1,10 +1,27 @@
 """Tests showing the use of requests and requests-mock."""
 import json
+import pytest
 import requests
 from requests_mock import Mocker, ANY
 
 
 class TestRequests:
+    def test_wire_failures(self) -> None:
+        """All exceptions that Requests raises derive from RequestException.
+
+        If you want to get more granular, you could also catch one or more derived exceptions:
+
+        * ConnectionError
+        * HTTPError
+        * Timeout
+        * TooManyRedirects
+
+        https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
+        """
+
+        with pytest.raises(requests.exceptions.RequestException):
+            requests.get("http://23423iu4iijsdfajdfh.coms")
+
     def test_requests_mock_using_kwargs(self, requests_mock: Mocker) -> None:
         """Shows mocking out a GET call to any URL and returning a mocked response.
 
@@ -13,7 +30,7 @@ class TestRequests:
         Settable args:
 
         status_code: The HTTP status code to return. Defaults to 200.
-        reason: The reason text that accompanies the status_code.
+        reason: The text reason text that accompanies the status_code.
         headers: A dictionary of headers to be included in the response.
 
         To specify the body:
@@ -101,5 +118,6 @@ class TestRequests:
         assert req1.hostname == "shipt.com"
         assert req1.text == "some data"
         assert "X-TEST" in req1.headers.keys()
+        assert "damon" == req1.headers["X-TEST"]
 
         req2 = requests_mock.request_history[1]
