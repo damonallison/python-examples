@@ -1,0 +1,51 @@
+//
+// Installation instructions
+//
+// 1. Install protoc and ensure it's linked
+//
+// brew install protobuf
+// brew link --overwrite protobuf
+//
+// 2. Compile proto
+//
+// protoc -I=. --python_out=compiled ./messages.proto
+//
+//
+// Advantages of proto:
+//
+// * Schema evolution
+// * Tight compression
+// * Multiple language bindings
+//
+
+syntax = "proto2";
+
+// TODO: what are the package naming guidelines?
+package tutorial;
+
+// TODO: what types are available?
+// bool, int32, float, double, string
+
+// `required` is forever. An exception is raised if required fields do not exist.
+message Person {
+    optional int32 id = 1;
+    optional string name = 2;
+    optional string email = 3;
+
+    enum PhoneType {
+        MOBILE = 0;
+        HOME = 1;
+        WORK = 2;
+    }
+
+    message PhoneNumber {
+        optional string number = 1;
+        optional PhoneType type = 2 [default = HOME];
+    }
+
+    repeated PhoneNumber phones = 4;
+}
+
+message AddressBook {
+    repeated Person people = 1;
+}
