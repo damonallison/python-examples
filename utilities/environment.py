@@ -5,9 +5,8 @@
 # The sys module holds information about how the script was executed. Including
 # it's command line arguments.
 import logging
-import os
 import sys
-from tests.algorithms.fibonacci import fib
+import pkg_resources
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +18,7 @@ if not getattr(logger, "handler_set", False):
 
 def print_environment():
     """Prints relevant information about the current runtime environment"""
+    print(f"python version: {sys.version}")
 
     # sys.argv will *always* contain 1 element, depending on how the script was
     # executed.
@@ -36,6 +36,10 @@ def print_environment():
     logger.info(f"path == {str(sys.path)}")
     logger.info(f"platform == {sys.platform}")
 
+    print("--- packages ---")
+    print(sorted([f"{i.key} = {i.version}" for i in pkg_resources.working_set]))
+    print("--- END packages ---")
+
 
 # If the file is being executed as a script, i.e. `python3 hellp.py`
 # the module's __name__ property is set to __main__.
@@ -43,4 +47,3 @@ def print_environment():
 if __name__ == "__main__":
     logger.debug("hello from " + __name__)
     print_environment()
-    fib.fib_to(1000)
