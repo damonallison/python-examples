@@ -39,9 +39,9 @@ Classes add another
 
 import builtins
 
-from .logger import Logger
-from .person import Person
-from .manager import Manager
+from tests.classes.logger import Logger
+from tests.classes.person import Person
+from tests.classes.manager import Manager
 
 
 class TestClasses:
