@@ -8,6 +8,8 @@ def test_numpy_creation() -> None:
     lists. Numpy allows you to specify a data types, which allows further
     optimization.
     """
+
+    # You can create a numpy array from a python array
     a = np.array([1, 2, 3], dtype=np.int64)
     assert a.shape == (3,)
     assert a.dtype == np.int64
@@ -17,6 +19,8 @@ def test_numpy_creation() -> None:
     assert a2.dtype == np.int64
     assert a2.shape == (3, 3)
     assert a2.ndim == 2
+
+    # ndarray.size() == total element count
     assert a2.size == 9
 
     # Creating arrays of zeros / ones
@@ -89,6 +93,14 @@ def test_numpy_indexing() -> None:
         mask,
         np.array([[False, False, False], [False, False, True], [True, False, False]]),
     )
+
+
+def test_numpy_adding_removing() -> None:
+    a1 = np.array([1, 2, 3])
+    a2 = np.array([4, 5])
+
+    a3 = np.append(a1, [4])
+    assert np.array_equal(a3, np.array([1, 2, 3, 4]))
 
 
 def test_numpy_array_operations() -> None:
