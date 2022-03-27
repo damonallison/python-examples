@@ -24,5 +24,20 @@
             //     "order": 1
             // }
         },
+        {
+            "name": "fastapi",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "python_examples.fastapi.main:app",
+                "--reload"
+            ],
+            "jinja": true,
+            "env": {
+                "SEED_DIR": "./seed"
+            },
+            "justMyCode": false,
+        }
     ]
 }

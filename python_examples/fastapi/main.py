@@ -53,8 +53,7 @@ from fastapi import requests, responses, Body, Path, Query
 from typing import List, Optional
 from datetime import datetime
 
-from models import estimate
-from models import echo
+from python_examples.fastapi.models import echo, estimate
 
 logger: logging.Logger
 
