@@ -3,6 +3,7 @@
 Enums:
 https://docs.python.org/3/library/enum.html
 """
+import sys
 
 import pytest
 

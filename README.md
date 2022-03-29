@@ -1,10 +1,16 @@
 # Python Examples
 
-Simple python examples as unit tests.
+Simple python code examples as unit tests.
 
 ## Running Tests
 
 ```shell
-pip install -U pytest
-pytest
+# install the latest version of python
+pyenv install 3.9.11
+
+# ensure poetry is installed
+poetry install
+
+# run the tests
+poetry run pytest
 ```
