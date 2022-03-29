@@ -327,7 +327,7 @@ pyparsing = ">=2.0.2,<3.0.5 || >3.0.5"
 name = "pandas"
 version = "1.4.1"
 description = "Powerful data structures for data analysis, time series, and statistics"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 
@@ -514,7 +514,7 @@ testing = ["coverage", "hypothesis (>=5.7.1)"]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 
@@ -525,7 +525,7 @@ six = ">=1.5"
 name = "pytz"
 version = "2022.1"
 description = "World timezone definitions, modern and historical"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -616,7 +616,7 @@ numpy = ">=1.17.3,<1.25.0"
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -751,7 +751,7 @@ test = ["gevent (>=20.6.2)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.9.0"
-content-hash = "45dd49134ecb5e76680d87fcbfd1f34226461f3f50afa2eeb32305db6d09a0f1"
+content-hash = "7372124c27505ee8fbd79a5c698d05061b9281bbda564ba115e9bbe289b32240"
 
 [metadata.files]
 appnope = [
