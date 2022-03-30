@@ -2,7 +2,6 @@ from typing import Type, TypeVar
 
 from tests.libraries.test_proto.compiled import messages_pb2
 from google.protobuf.message import Message
-from google.protobuf.json_format import MessageToDict
 
 
 ProtoMessage = TypeVar("ProtoMessage", bound=Message)
