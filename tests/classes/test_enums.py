@@ -1,56 +1,57 @@
-"""An enum is a set of symbollic names (members) bound to unique, constant values.
+"""Python enums are a set of symbolic names bound to unique, constant values.
 
-Enums:
 https://docs.python.org/3/library/enum.html
+
+* IntEnum: A base class for creating an enum which is a subclass of int
+* @unique: Class decorator which ensures only one name is bound to any one value.
 """
-import sys
 
-import pytest
+import enum
+import pydantic
 
-from enum import Enum, unique
 
-# By default, Python enums allow you to define multiple enum members with the
-# same value. That should *not* be allowed, but because it's "Python", of course
-# it is. In order to ensure all member values are unique, use the @unique
-# decorator.
-@unique
-class Color(Enum):
-    RED = "red"
-    GREEN = "green"
-    BLUE = "blue"
+_GENIUS_MAP = {
+    0: "unknown",
+    1: "low",
+    2: "mid",
+    3: "high",
+}
 
-    def __str__(self):
+
+@enum.unique
+class GeniusLevel(str, enum.Enum):
+    UNKNOWN = "unknown"
+    LOW = "low"
+    MID = "mid"
+    HIGH = "high"
+
+    def __str__(self) -> str:
         return self.value
 
-
-def test_enum() -> None:
-    c = Color.RED
-
-    assert type(c) is Color
-
-    # It's preferred to compare enums by identity, not "=="
-    assert c is Color.RED
-    assert c == Color.RED
-    assert c.name == "RED"
-    assert c.value == "red"
-
-    assert str(c) == c.value == "red"
-
-    # Creating an instance by value.
-    assert Color("red") == c
-
-    # By defining __str__, we avoid having to call `.value` when using the enum
-    # as a string.
-    assert f"c == {c}" == "c == red"
+    @classmethod
+    def from_int(cls, value: int) -> "GeniusLevel":
+        return GeniusLevel(_GENIUS_MAP[value])
 
 
-def test_creation_by_value() -> None:
-    """An example showing creating an enum by value.
+class Payload(pydantic.BaseModel):
+    genius: GeniusLevel
 
-    Create an enum instance by value using the enum constructor. An invalid enum
-    value will raise a ValueError.
-    """
-    assert Color("red") == Color.RED
 
-    with pytest.raises(ValueError):
-        Color(10)
+def test_enum_basics() -> None:
+    g = GeniusLevel.MID
+    print(f"g.name == {g.name}, g.value == {g.value}")
+    p = Payload(genius=g)
+    print(g)
+    print(str(g))
+    print(p.json())
+
+    # From value
+    p2 = Payload(genius=GeniusLevel("high"))
+    print(p2.json())
+
+    print(GeniusLevel.MID == "mid")
+
+    for v in GeniusLevel:
+        print(v)
+
+    print(f"here we are: {GeniusLevel.from_int(2)}")
