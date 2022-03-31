@@ -5,7 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "simple",
+            "name": "coro",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/coro.py",
+            "justMyCode": true,
+        },
+        {
+            "name": "envt",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/utilities/environment.py",
