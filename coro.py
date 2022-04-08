@@ -1,57 +1,78 @@
 from typing import Any
 import asyncio
 import inspect
+
+import logging
 import time
+import threading
+
+FORMAT = "%(asctime)s %(message)s"
+logging.basicConfig(level=logging.INFO, format=FORMAT)
+logger = logging.getLogger(__name__)
+
+
+def log(val: str) -> None:
+    # logger.info(f"{time.ctime()}: {val}")
+    logger.info(val)
 
 
 async def run_for(delay: int) -> None:
     try:
-        print(f"run_for starting w/ delay: {delay}")
-        for i in range(delay + 1):
-            print(f"run_for sleeping {i} of {delay}")
+        log(
+            f"run_for starting on thread {threading.current_thread().getName()} w/ delay: {delay}"
+        )
+        for i in range(delay):
+            log(f"run_for sleeping {i + 1} of {delay}")
             await asyncio.sleep(1.0)
+        log(f"run_for complete")
     except Exception as ex:
-        print(f"run_for received exception: {str(ex)}")
+        log(f"run_for received exception: {str(ex)}")
 
 
 def run_for_blocking(delay: int) -> None:
     try:
-        print(f"run_for_blocking starting w/ delay: {delay}")
-        for i in range(delay + 1):
-            print(f"run_for_blocking sleeping {i} of {delay}")
+        threading.current_thread().getName()
+        log(
+            f"run_for_blocking starting on thread {threading.current_thread().getName()} w/ delay: {delay}"
+        )
+        for i in range(delay):
+            log(f"run_for_blocking sleeping {i + 1} of {delay}")
             time.sleep(1.0)
+        log(f"run_for_blocking complete")
     except Exception as ex:
-        print(f"run_for_blocking received exception: {str(ex)}")
+        log(f"run_for_blocking received exception: {str(ex)}")
 
 
 async def spawn(delay: int) -> None:
-    print(f"spawning w/ delay: {delay}")
-    # in an async function, this is how you get a pointer to the loop
+    log(f"spawning w/ delay: {delay}")
+    # in an async function, this is how you get the run loop pointer
     loop = asyncio.get_running_loop()
-    # creates a task and adds it to the the run_loop. this "starts" the task.
+    # creates a task and adds it to the the run_loop. this "starts" the task
     loop.create_task(run_for(delay))
-    print("spawn returning")
+    log("spawn returning")
 
 
 async def say_hello(name: str) -> str:
+    """An async, quick function that returns a value"""
     await asyncio.sleep(0.1)
     return f"{time.ctime()}: hello, {name}"
 
 
-def echo(x: Any) -> None:
-    print(x)
+def echo(x: Any) -> str:
+    return f"exhoing {x}"
 
 
 def run():
     # run() is a convenience function for creating and managing a asyncio event
-    # loop. It will always create a new event loop (and fail if an event loop
-    # already exists).
-
-    greeting = asyncio.run(say_hello("damon"))
-    print(greeting)
-
-    loop = asyncio.get_running_loop()
-    loop.create_task(echo("hello"))
+    # loop. It will always create (and terminate) a new event loop (and fail if
+    # an event loop already exists).
+    #
+    # This function always creates a new event loop and closes it at the end. It
+    # should be used as a main entry point for asyncio programs, and should
+    # ideally only be called once.
+    #
+    # The top level of most code probably use this method.
+    log(asyncio.run(say_hello("damon")))
 
 
 def run_with_loop():
@@ -61,16 +82,32 @@ def run_with_loop():
     assert inspect.iscoroutinefunction(say_hello)
     assert asyncio.iscoroutinefunction(say_hello)
 
+    # You need a loop instance before you can run any coroutines. Anywhere you
+    # call `get_event_loop`, you'll get he same loop instance (assuming you're
+    # using a single thread). If you're inside an async function, you should
+    # call `asyncio.get_running_loop()` instead.
     loop = asyncio.get_event_loop()
 
-    # Create a few tasks
+    # Create a task and schedule it on the run loop.
     task_async = loop.create_task(run_for(5))
 
+    # Executors run synchronous (blocking) code in asyncio in a separate thread.
+    #
     # NOTE: The blocking task finishes before the async task. If the executor is
     # running when we attempt to close the loop, bad things happen. We need to
     # manually wait for the executor to finish before closing the loop.
+    #
+    future_sync = loop.run_in_executor(None, run_for_blocking, 2)
 
-    task_sync = loop.run_in_executor(None, run_for_blocking, 2)
+    # def on_cancelled(fut: asyncio.Future):
+    #     log(f"future: {fut}")
+    #     log(f"future cancelled: {fut.cancelled()}")
+    #     log(f"future done: {fut.done()}")
+    #     log(f"future exc: {fut.exception()}")
+
+    # future_sync.add_done_callback(on_cancelled)
+    # assert future_sync.cancel("you're done")
+
     loop.create_task(say_hello("damon"))
 
     # Starts the event loop. Until this point, *nothing* has started.
@@ -82,19 +119,22 @@ def run_with_loop():
     pending = asyncio.all_tasks(loop=loop)
     for task in pending:
         if task.done():
-            print(f"task is done: {task.get_name()}")
+            log(f"task is done: {task.get_name()}")
         elif task.cancelled():
-            print(f"task was cancelled: {task.get_name()}")
+            log(f"task was cancelled: {task.get_name()}")
         else:
-            print(f"cancelling: {task.get_name()}")
+            log(f"cancelling: {task.get_name()}")
             task.cancel()
 
     group = asyncio.gather(*pending, return_exceptions=True)
     loop.run_until_complete(group)
+
+    # A closed loop cannot be restarted.
     loop.close()
 
 
-print(f"__name__ == {__name__}")
+log(f"__name__ == {__name__}")
 
 if __name__ == "__main__":
+    # run()
     run_with_loop()
