@@ -2,22 +2,21 @@
 
 Coroutines are subroutines that can be entered, exited, and resumed at many
 different points (similar to generators). All coroutines are run independently
-on the same run loop. asyncio is "cooperative multitasking". Couroutines must
-yield by `await`ing on another coroutine.
+on the same run loop. asyncio is a form of "cooperative multitasking".
+Couroutines must yield by `await`ing on another coroutine.
 
 Tasks are used to control coroutine execution. Tasks can be used to run multiple
 coroutines concurrently.
 
-pytest-asyncio:
-     https://pypi.org/project/pytest-asyncio/
-
 Key asyncio concepts:
 
-* coroutine
-* event loop
-* executor: for running blocking code
-* queue: for sending data into a coroutine
+* coroutines: functions which can be paused (via await) and resumed.
+* event loop: manages running coroutines
+* executor: for running blocking code on the event loop using threads or
+  processes
+* queue: for sending data between coroutines (similar to threading.Queue)
 
+---
 
 Asyncio in Python (Book)
 
@@ -70,36 +69,149 @@ The work for end-user developers:
 
 * Create and manage (i.e., close) the event loop.
 * Create and schedule tasks to run on the event loop.
+* Cancel and teardown the event loop, gracefully exiting.
 
 
+---
+
+To run asyncio tests w/ pytest, pip install pytest-asyncio:
+
+pytest-asyncio:
+     https://pypi.org/project/pytest-asyncio/
+
+@pytest.mark.asyncio will execute the test within a default run loop.
 
 """
 
+from typing import Optional
+
 import asyncio
+import inspect
 import pytest
 
 
 async def say_hi(name: str) -> str:
-    await asyncio.sleep(0.1)
+    """An example coroutine function.
+
+    A coroutine function is a "normal" function with the ability to suspend /
+    resume. A coroutine is suspended when an `await` is encountered. When
+    suspended, control is returned to the run loop.
+    """
     return f"hi {name}"
 
 
+async def raise_exc(msg: str) -> None:
+    raise Exception(msg)
+
+
+async def long_running(seconds: float) -> str:
+    try:
+        while True:
+            await asyncio.sleep(1.0)
+    except asyncio.CancelledError:
+        return "cancelled"
+
+
 @pytest.mark.asyncio
-async def test_coro_type() -> None:
+async def test_coro_manual_invocation() -> None:
+    #
+    # `async` functions are still functions.
+    #
+    assert inspect.isfunction(say_hi)
+    assert inspect.iscoroutinefunction(say_hi)
+    assert asyncio.iscoroutinefunction(say_hi)
+
+    #
     # A cororutine is an instance of a coroutine function. It is *not* the
     # function itself.
-    assert asyncio.iscoroutinefunction(say_hi)
+    #
     assert not asyncio.iscoroutine(say_hi)
-    assert asyncio.iscoroutine(say_hi("damon"))
 
+    #
+    # Evaluating (invoking) the function will create an instance of a coroutine.
+    #
+    # Evaluating does *not* execute the coroutine, it simply creates the
+    # coroutine for later execution.
+    #
     coro = say_hi("damon")
-    print(coro.send(None))
-    # with pytest.raises(StopIteration) as si:
-    #     print(si)
+    assert asyncio.iscoroutine(coro)
+
+    #
+    # Manually resume (start) the coroutine. Typically this is done by the event
+    # loop.
+    #
+    # When a coroutine returns, a special `StopIteration` exception is raised,
+    # which contains the coroutine result.
+    #
+    value: Optional[str] = None
+    try:
+        coro.send(None)  # Start the coroutine.
+        assert False  # StopIteration should have been raised - coro is complete.
+    except StopIteration as e:
+        value = e.value
+
+    assert value == "hi damon"
+
+
+@pytest.mark.asyncio
+async def test_coro_manual_exception() -> None:
+    """Shows manually handling an exception raised by a coroutine."""
+
+    coro = raise_exc("boom")
+    value: Optional[Exception] = None
+    try:
+        coro.send(None)
+    except Exception as e:
+        value = e
+
+    assert str(value) == "boom"
+
+
+@pytest.mark.asyncio
+async def test_coro_inject_exception() -> None:
+    """Shows injecting an exception into the coroutine.
+
+    When a coroutine calls `await`, the awaited function may throw an exception,
+    which the calling coroutine will need to handle.
+
+    Here, we manually simulate an exception being returned into coro. This
+    raises the exception in the coroutine at the "await" point.
+    """
+    coro = long_running(1000.0)
+    value: Optional[Exception] = None
+    try:
+        coro.send(None)
+        coro.throw(Exception("boom"))
+    except Exception as e:
+        value = e
+
+    assert str(value) == "boom"
+
+
+@pytest.mark.asyncio
+async def test_coro_cancellation() -> None:
+    coro = long_running(1000.0)
+    value: Optional[str] = None
+    try:
+        coro.send(None)
+        coro.throw(
+            asyncio.CancelledError
+        )  # Simulates task cancellation, which throws a "CancelledError" into the coroutine.
+    except StopIteration as e:
+        value = e.value
+
+    assert value == "cancelled"
 
 
 @pytest.mark.asyncio
 async def test_simple() -> None:
+    #
+    # You don't typically drive the coroutine manually as we did in
+    # `test_coro_manual_invocation`.
+    #
+    # Rather, you simply `await` the coroutine function. The event loop will
+    # handle advancing the coroutine and handling `StopIteration` for you.
+    #
     assert await say_hi("damon") == "hi damon"
 
 
