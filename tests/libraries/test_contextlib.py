@@ -1,4 +1,4 @@
-"""contextlib provides helper functions for working with contexts (with statementse"""
+"""contextlib provides helper functions for working with contexts (with statements)"""
 import dataclasses
 import contextlib
 import pytest
