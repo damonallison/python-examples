@@ -129,6 +129,12 @@ def run_with_loop():
     group = asyncio.gather(*pending, return_exceptions=True)
     loop.run_until_complete(group)
 
+    # Scan for any exceptions returned from the group tasks
+    for res in group.result():
+        assert not isinstance(
+            res, Exception
+        ), f"Unexpected exception was thrown in a task: {str(res)}"
+
     # A closed loop cannot be restarted.
     loop.close()
 

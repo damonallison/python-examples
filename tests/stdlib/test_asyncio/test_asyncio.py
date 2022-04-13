@@ -83,15 +83,18 @@ pytest-asyncio:
 
 """
 
-from typing import Optional, AsyncGenerator
+from typing import List, Optional
 
 import asyncio
 import contextlib
 import inspect
+import logging
 import math
 import pytest
 import threading
 import time
+
+logger = logging.getLogger(__name__)
 
 
 async def say_hi(name: str) -> str:
@@ -251,9 +254,9 @@ async def test_tasks(event_loop: asyncio.AbstractEventLoop) -> None:
 
 @pytest.mark.asyncio
 async def test_executor(event_loop: asyncio.AbstractEventLoop) -> None:
-    """Functions which are not async must be wrapped in an executor if you want
-    to use them with asyncio. For example, an I/O based function that doesn't
-    have an async version would need to be ran in an executor.
+    """Functions which are not async must be wrapped in an executor
+    to use with asyncio. For example, an I/O based function that doesn't have an
+    async version would need to be ran in an executor.
 
     The default executor is a ThreadPoolExecutor, which runs in a background
     thread.
@@ -266,21 +269,150 @@ async def test_executor(event_loop: asyncio.AbstractEventLoop) -> None:
         assert threading.current_thread() is not threading.main_thread()
         return value
 
-    f: asyncio.Future = event_loop.run_in_executor(None, echo, "damon")
+    val = "damon"
+    f: asyncio.Future = event_loop.run_in_executor(None, echo, val)
     await asyncio.wait_for(f, timeout=1.0)
 
     assert f.done()
-    assert f.result() == "damon"
+    assert f.result() == val
 
 
 @pytest.mark.asyncio
 async def test_async_context_manager() -> None:
-    """Async context managers allow you to create asyncio friendly context managers."""
+    """@asynccontextmanager is an decorator for creating async context managers
+    without having to define __aenter__ and __aexit__
+
+    https://docs.python.org/3/library/contextlib.html#contextlib.asynccontextmanager
+    """
+
+    val = "data"
 
     @contextlib.asynccontextmanager
     async def download_data(data: str):
         await asyncio.sleep(0.01)  # assume a long running I/O operation
-        yield "data"
+        yield data
 
-    async with download_data("data") as d:
-        assert d == "data"
+    async with download_data(val) as d:
+        assert d == val
+
+
+@pytest.mark.asyncio
+async def test_async_generators() -> None:
+    """Async iterators provide support for `async for` - the ability to iterate
+    over a sequence which has async operations.
+
+    Async generators return async iterator instances with each invocation.
+    """
+
+    async def async_gen(val: int):
+        for i in range(val):
+            await asyncio.sleep(0)  # do something async
+            yield i
+
+    expected = [0, 1, 2, 3, 4]
+    # async list comp works as you'd expect
+    assert [i async for i in async_gen(5)] == expected
+
+    # As does async for
+    lst: List[int] = []
+    async for i in async_gen(5):
+        lst.append(i)
+    assert lst == expected
+
+
+def test_asyncio_lifecycle() -> None:
+    """You typically won't have to deal with the asyncio lifecycle, as it is
+    taken care of by an underlying framework you use.
+
+    This test shows how to startup and shutdown an asyncio runloop.
+    """
+
+    async def run_for(delay: int) -> None:
+        try:
+            for i in range(delay):
+                logger.info(f"run_for sleeping {i + 1} of {delay}")
+                await asyncio.sleep(1.0)
+            logger.info(f"run_for complete")
+        except Exception as ex:
+            logger.info(f"run_for received exception: {str(ex)}")
+
+    def run_for_blocking(delay: int) -> None:
+        try:
+            threading.current_thread().getName()
+            logger.info(
+                f"run_for_blocking starting on thread {threading.current_thread().getName()} w/ delay: {delay}"
+            )
+            for i in range(delay):
+                logger.info(f"run_for_blocking sleeping {i + 1} of {delay}")
+                time.sleep(1.0)
+            logger.info(f"run_for_blocking complete")
+        except Exception as ex:
+            logger.info(f"run_for_blocking received exception: {str(ex)}")
+
+    async def main() -> int:
+        loop = asyncio.get_event_loop()
+        #
+        # Executors run synchronous (blocking) code in asyncio in a separate thread.
+        #
+        # Here, we start a long running task on a separate thread. This task will
+        #
+        # NOTE: The blocking task finishes before the async task. If the executor is
+        # running when we attempt to close the loop, bad things happen. We need to
+        # manually wait for the executor to finish before closing the loop.
+        #
+        # loop.run_in_executor(None, run_for_blocking, 10)
+
+        #
+        # Spawn another long running task.
+        #
+        loop.create_task(run_for(10))
+        logger.info("sleeping...")
+        await asyncio.sleep(1.0)
+
+    # You need a loop instance before you can run any coroutines. Anywhere you
+    # call `get_event_loop`, you'll get he same loop instance (assuming you're
+    # using a single thread). If you're inside an async function, you should
+    # call `asyncio.get_running_loop()` instead.
+    loop = asyncio.get_event_loop()
+
+    #
+    # Start the main task on the loop.
+    #
+    m = loop.create_task(main())
+
+    # Starts the event loop. Until this point, *nothing* has started.
+    result = loop.run_until_complete(m)
+
+    # Gather and cancel all tasks. Note the future running in the executor is
+    # *not* a task and will not be returned in all_tasks. You'd have to manually
+    # wait for the executor to finish.
+    pending = asyncio.all_tasks(loop=loop)
+    for task in pending:
+        if task.done():
+            logger.info(f"task is done: {task.get_name()}")
+        elif task.cancelled():
+            logger.info(f"task was cancelled: {task.get_name()}")
+        else:
+            logger.info(f"cancelling: {task.get_name()}")
+            task.cancel()
+
+    #
+    # return_exceptions=False is the default. In this mode, one raised exception
+    # from any tasks in the group will stop the loop before all tasks are
+    # completed.
+    #
+    # raise_exceptions=True will force all tasks in the group to be completed.
+    # Exceptions will be returned as return values.
+    #
+    group = asyncio.gather(*pending, return_exceptions=True)
+    loop.run_until_complete(group)
+
+    # Scan for any exceptions returned from the group tasks
+    for res in group.result():
+        assert not isinstance(
+            res,
+            asyncio.CancelledError,
+        ), f"Unexpected exception was thrown in a task: {str(res)}"
+
+    # A closed loop cannot be restarted.
+    loop.close()
