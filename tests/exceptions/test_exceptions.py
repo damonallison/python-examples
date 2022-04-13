@@ -4,6 +4,7 @@
 
     * SyntaxError : the code couldn't be parsed
     * Exception   : runtime errors
+
 """
 
 import pytest
@@ -61,8 +62,7 @@ class TestExceptions:
         # From within tests, use `pytest.raises` to write assertions about raised exceptions
         with pytest.raises(ZeroDivisionError) as err:
             1 / 0
-            assert isinstance(err.type, ZeroDivisionError)
-            assert "Zero" in err.value
+        assert isinstance(err.value, ZeroDivisionError)
 
     def test_base_exception(self) -> None:
         """BaseException is the base class for all built in exceptions.
@@ -70,14 +70,13 @@ class TestExceptions:
         You typically do *not* want to catch BaseException as it would hide the
         *real* error.
         """
-        try:
+        with pytest.raises(BaseException) as e:
             1 / 0
-        except BaseException as e:
-            assert isinstance(e, ZeroDivisionError)
+        assert isinstance(e.value, ZeroDivisionError)
 
     def test_exception_class_hierarchy(self) -> None:
         """The except clause will match the actual exception type as well as any
-        base class thereof.
+        derived classes thereof.
 
         Catch the most derived exceptions first, followed by the most generic.
 
