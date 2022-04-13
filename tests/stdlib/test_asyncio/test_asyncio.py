@@ -83,11 +83,15 @@ pytest-asyncio:
 
 """
 
-from typing import Optional
+from typing import Optional, AsyncGenerator
 
 import asyncio
+import contextlib
 import inspect
+import math
 import pytest
+import threading
+import time
 
 
 async def say_hi(name: str) -> str:
@@ -101,6 +105,8 @@ async def say_hi(name: str) -> str:
 
 
 async def raise_exc(msg: str) -> None:
+    """Exceptions thrown from a coroutine are raised in the function `await`ing
+    the result."""
     raise Exception(msg)
 
 
@@ -137,8 +143,8 @@ async def test_coro_manual_invocation() -> None:
     assert asyncio.iscoroutine(coro)
 
     #
-    # Manually resume (start) the coroutine. Typically this is done by the event
-    # loop.
+    # Manually resume (start) the coroutine by sending it `None`. Typically this
+    # is done by the event loop.
     #
     # When a coroutine returns, a special `StopIteration` exception is raised,
     # which contains the coroutine result.
@@ -146,7 +152,7 @@ async def test_coro_manual_invocation() -> None:
     value: Optional[str] = None
     try:
         coro.send(None)  # Start the coroutine.
-        assert False  # StopIteration should have been raised - coro is complete.
+        assert False, "StopIteration should have been raised - coro is completed."
     except StopIteration as e:
         value = e.value
 
@@ -194,9 +200,8 @@ async def test_coro_cancellation() -> None:
     value: Optional[str] = None
     try:
         coro.send(None)
-        coro.throw(
-            asyncio.CancelledError
-        )  # Simulates task cancellation, which throws a "CancelledError" into the coroutine.
+        # Simulates task cancellation, which throws a "CancelledError" into the coroutine.
+        coro.throw(asyncio.CancelledError)
     except StopIteration as e:
         value = e.value
 
@@ -206,16 +211,76 @@ async def test_coro_cancellation() -> None:
 @pytest.mark.asyncio
 async def test_simple() -> None:
     #
-    # You don't typically drive the coroutine manually as we did in
-    # `test_coro_manual_invocation`.
+    # You don't typically drive the coroutine manually as we did above.
     #
     # Rather, you simply `await` the coroutine function. The event loop will
     # handle advancing the coroutine and handling `StopIteration` for you.
     #
     assert await say_hi("damon") == "hi damon"
+    with pytest.raises(Exception) as e:
+        await raise_exc("boom")
+
+    assert str(e.value) == "boom"
 
 
 @pytest.mark.asyncio
-async def test_task() -> None:
-    t = asyncio.create_task(say_hi("damon"))
-    assert await t == "hi damon"
+async def test_tasks(event_loop: asyncio.AbstractEventLoop) -> None:
+    """Tasks are coroutine instances running on the event loop.
+
+    Tasks can be used to start multiple coroutines concurrently.
+    """
+
+    async def sleep(seconds: float):
+        await asyncio.sleep(seconds)
+
+    start = time.time()
+
+    # Start both tasks
+    t1 = event_loop.create_task(sleep(0.1))
+    t2 = event_loop.create_task(sleep(0.2))
+    await t2
+    await t1
+
+    end = time.time()
+    elapsed = end - start
+
+    # Since both tasks were running concurrently, their total elapsed time will
+    # be around the longest task.
+    assert math.isclose(elapsed, 0.2, abs_tol=0.05)
+
+
+@pytest.mark.asyncio
+async def test_executor(event_loop: asyncio.AbstractEventLoop) -> None:
+    """Functions which are not async must be wrapped in an executor if you want
+    to use them with asyncio. For example, an I/O based function that doesn't
+    have an async version would need to be ran in an executor.
+
+    The default executor is a ThreadPoolExecutor, which runs in a background
+    thread.
+
+    This test verifies the executor truly runs tasks in a non-main thread.
+    """
+
+    def echo(value: str) -> str:
+        """A non-async function which can't be awaited."""
+        assert threading.current_thread() is not threading.main_thread()
+        return value
+
+    f: asyncio.Future = event_loop.run_in_executor(None, echo, "damon")
+    await asyncio.wait_for(f, timeout=1.0)
+
+    assert f.done()
+    assert f.result() == "damon"
+
+
+@pytest.mark.asyncio
+async def test_async_context_manager() -> None:
+    """Async context managers allow you to create asyncio friendly context managers."""
+
+    @contextlib.asynccontextmanager
+    async def download_data(data: str):
+        await asyncio.sleep(0.01)  # assume a long running I/O operation
+        yield "data"
+
+    async with download_data("data") as d:
+        assert d == "data"
