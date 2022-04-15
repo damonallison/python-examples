@@ -85,6 +85,7 @@ pytest-asyncio:
 
 from typing import List, Optional
 
+from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import contextlib
 import inspect
@@ -327,47 +328,32 @@ def test_asyncio_lifecycle() -> None:
     This test shows how to startup and shutdown an asyncio runloop.
     """
 
+    blocking_completed = False
+    non_blocking_completed = False
+
     async def run_for(delay: int) -> None:
-        try:
-            for i in range(delay):
-                logger.info(f"run_for sleeping {i + 1} of {delay}")
-                await asyncio.sleep(1.0)
-            logger.info(f"run_for complete")
-        except Exception as ex:
-            logger.info(f"run_for received exception: {str(ex)}")
+        for i in range(delay):
+            logger.info(f"run_for sleeping {i + 1} of {delay}")
+            await asyncio.sleep(1.0)
+        logger.info(f"run_for complete")
+        nonlocal non_blocking_completed
+        non_blocking_completed = True
 
     def run_for_blocking(delay: int) -> None:
-        try:
-            threading.current_thread().getName()
-            logger.info(
-                f"run_for_blocking starting on thread {threading.current_thread().getName()} w/ delay: {delay}"
-            )
-            for i in range(delay):
-                logger.info(f"run_for_blocking sleeping {i + 1} of {delay}")
-                time.sleep(1.0)
-            logger.info(f"run_for_blocking complete")
-        except Exception as ex:
-            logger.info(f"run_for_blocking received exception: {str(ex)}")
+        for i in range(delay):
+            logger.info(f"run_for_blocking {i + 1} of {delay}")
+            time.sleep(1.0)
+        logger.info(f"run_for_blocking complete")
+        nonlocal blocking_completed
+        blocking_completed = True
 
-    async def main() -> int:
+    async def spawn(delay: int, blocking: bool) -> None:
+        """Spawn another long running task."""
         loop = asyncio.get_event_loop()
-        #
-        # Executors run synchronous (blocking) code in asyncio in a separate thread.
-        #
-        # Here, we start a long running task on a separate thread. This task will
-        #
-        # NOTE: The blocking task finishes before the async task. If the executor is
-        # running when we attempt to close the loop, bad things happen. We need to
-        # manually wait for the executor to finish before closing the loop.
-        #
-        # loop.run_in_executor(None, run_for_blocking, 10)
-
-        #
-        # Spawn another long running task.
-        #
-        loop.create_task(run_for(10))
-        logger.info("sleeping...")
-        await asyncio.sleep(1.0)
+        if blocking:
+            loop.run_in_executor(run_for_blocking(delay))
+        else:
+            loop.create_task(run_for(delay))
 
     # You need a loop instance before you can run any coroutines. Anywhere you
     # call `get_event_loop`, you'll get he same loop instance (assuming you're
@@ -376,25 +362,46 @@ def test_asyncio_lifecycle() -> None:
     loop = asyncio.get_event_loop()
 
     #
-    # Start the main task on the loop.
+    # Create our own executor so we can manually control shutdown.
     #
-    m = loop.create_task(main())
+    # NOTE: asyncio.run() will properly wait for the default executor to
+    # shutdown. You don't need to create your own.
+    #
+    executor = ThreadPoolExecutor()
+    loop.set_default_executor(executor)
 
-    # Starts the event loop. Until this point, *nothing* has started.
-    result = loop.run_until_complete(m)
+    #
+    # Create async and blocking tasks
+    #
+    t = loop.create_task(spawn(1, False))
+    t2 = loop.create_task(spawn(2, True))
 
+    #
+    # Starts the event loop. Until this point, *nothing* was started.
+    #
+    group = asyncio.gather(t, t2, return_exceptions=True)
+    loop.run_until_complete(group)
+    assert t.done()
+    assert not t.cancelled()
+    assert t2.done()
+    assert not t2.cancelled()
+
+    #
+    # Start the shutdown process.
+    #
+    # We now have running async and blocking tasks. Both need to be terminated.
+    #
+    # The non-blocking coro is running on the event loop. The blocking coro is
+    # running on the executor, it's *not* a task.
+    #
+    # Let's start by shutting down the non-blocking task first, then the
+    # executor.
+    #
     # Gather and cancel all tasks. Note the future running in the executor is
     # *not* a task and will not be returned in all_tasks. You'd have to manually
     # wait for the executor to finish.
     pending = asyncio.all_tasks(loop=loop)
-    for task in pending:
-        if task.done():
-            logger.info(f"task is done: {task.get_name()}")
-        elif task.cancelled():
-            logger.info(f"task was cancelled: {task.get_name()}")
-        else:
-            logger.info(f"cancelling: {task.get_name()}")
-            task.cancel()
+    assert len(pending) == 1
 
     #
     # return_exceptions=False is the default. In this mode, one raised exception
@@ -406,13 +413,54 @@ def test_asyncio_lifecycle() -> None:
     #
     group = asyncio.gather(*pending, return_exceptions=True)
     loop.run_until_complete(group)
+    assert non_blocking_completed
 
-    # Scan for any exceptions returned from the group tasks
-    for res in group.result():
-        assert not isinstance(
-            res,
-            asyncio.CancelledError,
-        ), f"Unexpected exception was thrown in a task: {str(res)}"
+    #
+    # Now close the executor.
+    #
+    executor.shutdown(wait=True, cancel_futures=False)
+    assert blocking_completed
 
+    #
     # A closed loop cannot be restarted.
+    #
     loop.close()
+
+
+def test_asyncio_run() -> None:
+    """asyncio.run() cleanly handles shutdown of both tasks running on the event
+    loop, as well as futures running in executors.
+
+    asyncio.run() is typically how you'd start the main run loop for your
+    application.
+    """
+
+    blocking_complete = False
+    non_blocking_complete = False
+
+    def run_for_blocking(delay: int) -> None:
+        nonlocal blocking_complete
+        for i in range(delay):
+            logger.info("run_for_blocking sleeping...")
+            time.sleep(1.0)
+        blocking_complete = True
+
+    async def main() -> None:
+        #
+        # Executors run synchronous (blocking) code in asyncio in a separate thread.
+        #
+        # Here, we start a long running task on a separate thread.
+        #
+        loop = asyncio.get_running_loop()
+        loop.run_in_executor(None, run_for_blocking, 1)
+        nonlocal non_blocking_complete
+        non_blocking_complete = True
+
+    #
+    # asyncio.run() will wait for all pending tasks and executor tasks spawned
+    # from the main() coroutine to finish before returning.
+    #
+    asyncio.run(main())
+
+    assert non_blocking_complete
+    assert blocking_complete
