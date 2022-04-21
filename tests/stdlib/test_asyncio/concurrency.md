@@ -1,5 +1,62 @@
 # Python Concurrency
 
+David Beazley - [Understanding the Python GIL](https://www.youtube.com/watch?v=Obt-vMVdM8s)
+
+Python concurrency from the ground up.
+
+
+## GIL
+
+* The GIL was implemented to simplify the runtime (memory management)
+* The GIL makes your code cooperatively multitasking.
+* The runtime context switches between threads. Threads are pushed onto a wait
+  queue. When a thread is popped off the wait queue, it's handed to the OS.
+
+NOTE: This was pre-Python 3.2, before a new GIL was implemented:
+
+* Single CPU: Threads alternate between longer time period (less thrashing /
+  context switching)
+
+* Multiple CPUs: Shorter time periods, constant thrashing (CPU cores fight). The
+  OS is trying to start a thread per process, which the GIL will not allow.
+
+* Do I/O bound threads cause thrashing? YES! The cores fight with each other
+  when the core count is higher.
+
+* tl;dr: The old GIL didn't account for multi-core computers well and caused a
+  lot of thrashing.
+
+
+The new GIL (Python 3.2)
+
+* Rather than using ticks, threads wait for a longer duration and signal to each
+  other. This reduces churn.
+
+* CPU and I/O bound tasks are MUCH slower in the new GIL.
+
+* tl;dr: The new GIL needs priority and the ability to preempt (similar to OS
+  threads).
+
+What's the preferred way to do multithreading in python?
+  * `asyncio` and `multiprocessing`?
+
+## Python Concurrency From the Ground Up (PyCon 2015)
+
+Python 3.5
+
+The GIL prioritizes CPU bound threads. That is *not* how operating system works
+(the OS gives priority to short running tasks).
+
+Should you use threads?
+* Threads were solving the problems of blocking.
+
+Generators `yield`, which allows a function to pause / resume. This allows you
+to setup cooperative multi-tasking (a.k.a., coroutines).
+
+Once you go to asyncio, you have to use asyncio all the way down (to prevent
+blocking).
+
+
 ## Terminology
 
 ### Concurrency
