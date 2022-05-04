@@ -332,3 +332,32 @@ def test_grid_search() -> None:
     # final model scoring. The test set is *NOT* used to find the best model.
     #
     print(f"gs score: {gs.score(X_test, y_test)}")
+
+
+def test_grid_search_numtiple_grids() -> None:
+    """In some cases, not all parameters will be valid when used together.
+
+    For example, when using SVC with a kernel parameter, when kernel='linear',
+    only C is used. When kernel='rbf', C and gamma are used.
+
+    GridSearchCV allows you to pass a list of grids.
+    """
+
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+
+    param_grid = [
+        {"kernel": ["rbf"], "C": [0.01, 0.1], "gamma": [0.01, 0.1]},
+        {"kernel": ["linear"], "C": [0.01, 0.1]},
+    ]
+    grid_search = model_selection.GridSearchCV(
+        svm.SVC(), param_grid, cv=5, return_train_score=True
+    )
+    grid_search.fit(X_train, y_train)
+    print("Best parameters: {}".format(grid_search.best_params_))
+    print("Best cross-validation score: {:.2f}".format(grid_search.best_score_))
+    print("Test score: {:.2f}".format(grid_search.score(X_test, y_test)))
