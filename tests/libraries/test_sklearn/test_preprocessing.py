@@ -37,8 +37,6 @@ def test_one_hot_encoding() -> None:
     ohe = preprocessing.OneHotEncoder(sparse=False)
     ohe.fit_transform(df)
 
-    print(ohe.get_feature_names())
-
     assert set(ohe.get_feature_names()) == set(
         ["x0_0", "x0_1", "x0_2", "x1_yellow", "x1_green", "x1_red"]
     )
@@ -67,19 +65,24 @@ def test_one_hot_encoding() -> None:
     # return an np.ndarray.
     #
     vals: np.ndarray = ct.fit_transform(df)
+    df = pd.DataFrame(vals, columns=ct.get_feature_names_out())
+    assert (
+        set(
+            [
+                "scaling__int_feature",
+                "onehot__categorical_feature_green",
+                "onehot__categorical_feature_red",
+                "onehot__categorical_feature_yellow",
+            ]
+        )
+        == set(df.columns)
+    )
 
-    print(vals)
-    ohe_features = list(ct.named_transformers_.onehot.get_feature_names())
-    assert set(["x0_green", "x0_red", "x0_yellow"]) == set(ohe_features)
 
-    ohe_features.insert(0, "int_feature_scaled")
-    print(ohe_features)
-
-    #
-    # Turn the back into a DataFrame
-    #
-    df = pd.DataFrame(vals, columns=ohe_features)
-    print(df.head())
+def test_ravel() -> None:
+    a = np.array([[1, 2], [3, 4]])
+    print(a.flatten())
+    print(a.flatten().astype(str))
 
 
 def test_binning() -> None:
@@ -122,11 +125,17 @@ def test_binning() -> None:
 
     X_binned = binner.transform(X)
 
-    print(type(binner.bin_edges_))
+    # Each feature is given an array of bins. Flatten them out to receive a list
+    # of all bins for all features.
+    cols: list = []
+    for feature_bins in binner.bin_edges_:  # Each feature has a list of bins
+        for idx in range(len(feature_bins) - 1):
+            cols.append(f"col_{feature_bins[idx]}_{feature_bins[idx+1]}")
 
-    # bin_edges_ can be used for column names.
-    print(binner.bin_edges_)
-    print(X_binned)
+    df = pd.DataFrame(X_binned, columns=cols)
+
+    # Each bin now has a column name which reflects its bin range.
+    assert df.columns[0] == "col_4.0_12.9"
 
 
 def test_interaction_features() -> None:
@@ -165,11 +174,15 @@ def test_interaction_features() -> None:
     poly = preprocessing.PolynomialFeatures(degree=3, interaction_only=False)
     X_poly = poly.fit_transform(X)
 
-    print(f"Features in: {poly.feature_names_in_}")
-    print(f"Features out: {poly.get_feature_names()}")
+    assert np.array_equal(poly.feature_names_in_, ["x", "y"])
 
-    df_poly = pd.DataFrame(X_poly, columns=poly.get_feature_names())
-    print(df_poly.head())
+    df = pd.DataFrame(X_poly, columns=poly.get_feature_names_out())
+    assert np.array_equal(
+        df.columns,
+        ["1", "x", "y", "x^2", "x y", "y^2", "x^3", "x^2 y", "x y^2", "y^3"],
+    )
+    # Verify one polynomial feature
+    assert np.array_equal(df["x y"], [2, 8, 18, 32])
 
 
 def test_nonlinear_transformations() -> None:
