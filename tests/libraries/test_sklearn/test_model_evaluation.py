@@ -18,13 +18,40 @@ most common.
 
 Grid Search
 -----------
+Grid search is the process of finding the best model hyperparameters by
+"searching" thru a grid of possible hyperparameter combinations.
+
+When performing grid search, we split the training set into "training" and
+"validatin" sets. The validation set is used to determine how well the model
+*should* perform on new data. We select the best model based on it's performance
+on the validation set. We then test the model with the test set.
+
+We do *not* want to include the test set in any grid search validation.
+Otherwise, we "leak" data - the model's hyperparameters will be learned in part
+on the test set, which we need to avoid.
+
+The grid search process:
+------------------------
+1. Define a grid of hyperparameter values to test.
+2. Split the training set into training / validation sets.
+3. Train and validate a model w/ each hyperparameter combination.
+4. Save the hyperparameter combination which scored the best on the validation
+   set using cross validation.
+5. Retrain the model with the saved hyperparameters and full training set.
+6. Evaluate the model on the test set.
+
+Important: grid search is an expensive process. For each hyperparameter
+combination, we generate `k` models to perform cross validation. Assuming you
+have a 3*4 grid of parameters with ``5 fold CV, 12 * 5 == 60 models will be
+created and evaluated.
+
 """
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn import datasets, linear_model, model_selection
+from sklearn import datasets, linear_model, model_selection, svm
 
 
 def test_score() -> None:
@@ -226,4 +253,43 @@ def test_cv_with_groups() -> None:
 
 
 def test_grid_search() -> None:
-    pass
+    iris = datasets.load_iris()
+    X = iris.data
+    y = iris.target
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+
+    param_grid = {
+        "C": [0.001, 0.01, 0.1, 1, 10, 100],
+        "gamma": [0.001, 0.01, 0.1, 1, 10, 100],
+    }
+    # Since SVC is a classifier, stratified CV is used
+    gs = model_selection.GridSearchCV(
+        svm.SVC(), param_grid=param_grid, cv=5, return_train_score=True
+    )
+
+    #
+    # GridSearchCV will find the best hyperparameters and fit / return a new
+    # model w/ them, which can be found with `best_estimator_`. Calling `score`
+    # or `predict` on the grid search object will use the best estimator.
+    #
+    gs.fit(X_train, y_train)
+    print(f"gs best params: {gs.best_params_}")
+
+    #
+    # All CV results are stored in cv_results_. Each record in cv_results_
+    # represents a different parameter combination.
+    #
+    cv_results = pd.DataFrame(gs.cv_results_)
+    print(cv_results.head())
+    #
+    # Plot the results in a heat map
+    #
+    scores = np.array(cv_results["mean_test_score"]).reshape(6, 6)
+
+    #
+    # The only place in the grid search process the test set is used is during
+    # final model scoring. The test set is *NOT* used to find the best model.
+    #
+    print(f"gs score: {gs.score(X_test, y_test)}")
