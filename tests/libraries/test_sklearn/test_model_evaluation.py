@@ -45,12 +45,38 @@ combination, we generate `k` models to perform cross validation. Assuming you
 have a 3*4 grid of parameters with ``5 fold CV, 12 * 5 == 60 models will be
 created and evaluated.
 
+The goal of grid search is to find the optimal set of hyperparameters. Every
+grid will have an "optimal" set of parameters chosen from the values in the
+grid. But how do you know if you have the correct values in your grid? How do
+you know better values don't exist?
+
+Examining accuracy results either textually or in a heatmap will show you how
+each combination scored. There are a few indicators that will tell you if you've
+chosen the correct ranges of hyperparameters.
+
+* Ideally, the highest accuracy model will fall in the middle of the
+  hyperparameter grid for each parameter. That reflects each parameter's range
+  has been set correctly. Both ends of the parameter's range have been
+  evaluated.
+
+* If the best stores are on the edges (w/ maximum or minimum values for 1 or
+  more parameters), your search space is not wide enough for those parameters.
+  The model may get more accurate if you increase or decrease those parameter
+  values.
+
+* If accuracy is not changing between the min / max values of a parameter,
+  either the parameter is not important to the results or you haven't chosen a
+  wide enough search space for that parameter. Try increasing the range of the
+  parameter. If the increased range still yields consistent accuracy, that
+  parameter is not important to tune.
+
 """
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn import datasets, linear_model, model_selection, svm
 
 
@@ -283,11 +309,24 @@ def test_grid_search() -> None:
     #
     cv_results = pd.DataFrame(gs.cv_results_)
     print(cv_results.head())
-    #
-    # Plot the results in a heat map
-    #
-    scores = np.array(cv_results["mean_test_score"]).reshape(6, 6)
 
+    #
+    # Plot the results in a heat map.
+    #
+    # This is an important step to determine if you're grid is setup correctly.
+    # It shows you if you have selected the right parameters to tune and have
+    # set appropriate ranges for each parameter.
+    #
+    # scores = np.array(cv_results["mean_test_score"]).reshape(6, 6)
+
+    # sns.heatmap(
+    #     scores,
+    #     xticklabels=param_grid["gamma"],
+    #     yticklabels=param_grid["C"],
+    #     annot=True,
+    #     fmt=".2f",
+    # )
+    # plt.show()
     #
     # The only place in the grid search process the test set is used is during
     # final model scoring. The test set is *NOT* used to find the best model.
