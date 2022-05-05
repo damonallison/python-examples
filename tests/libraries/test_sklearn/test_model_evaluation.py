@@ -70,6 +70,31 @@ chosen the correct ranges of hyperparameters.
   parameter. If the increased range still yields consistent accuracy, that
   parameter is not important to tune.
 
+
+
+Model metrics and scoring
+------------------------
+
+Metrics for binary classification
+---------------------------------
+
+* False positive: incorrect true prediction. Type 1 error.
+* False negative: incorrect false prediction. Type 2 error.
+
+When evaluating a binary classifier, associate a cost to each error type.
+
+Watch for imbalanced data sets. If 99% of emails are spam, just predicting every
+email will be spam will be 99% accurate. With imbalanced data sets, accuracy is
+an inadequate measure for quantifying predictive performance.
+
+We need alternative metrics to determine which models perform well.
+
+Confusion Matrix
+----------------
+A confusion matrix gives you the true / false positive / negative counts.
+
+
+
 """
 
 
@@ -77,7 +102,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sklearn import datasets, linear_model, model_selection, svm
+from sklearn import datasets, linear_model, metrics, model_selection, svm
 
 
 def test_score() -> None:
@@ -140,10 +165,7 @@ def test_cross_validation() -> None:
     confidence you get from using CV is typically worth the extra compute cost.
     """
 
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
-
+    X, y = datasets.load_iris(return_X_y=True)
     lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
 
     # At least 5-fold CV is recommended
@@ -194,10 +216,8 @@ def test_cross_validation_custom_splitter() -> None:
     Since the data set is ordered by label (all 0's first, 1's, second, etc),
     and we have 3 classes, model performance will be 0 for 3 fold CV.
     """
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
 
+    X, y = datasets.load_iris(return_X_y=True)
     lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
 
     kfold = model_selection.KFold(n_splits=3)
@@ -222,9 +242,7 @@ def test_leave_one_out_cv() -> None:
     This is really expensive (n folds == n models) but could produce better
     results when you have smaller data sets.
     """
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
+    X, y = datasets.load_iris(return_X_y=True)
 
     lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
     loo = model_selection.LeaveOneOut()
@@ -244,9 +262,8 @@ def test_shuffle_split() -> None:
     This can be used with large data sets. This can be useful for experimenting
     with large data sets.
     """
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
+
+    X, y = datasets.load_iris(return_X_y=True)
 
     lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
     shuffle = model_selection.StratifiedShuffleSplit(
@@ -279,9 +296,7 @@ def test_cv_with_groups() -> None:
 
 
 def test_grid_search() -> None:
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
+    X, y = datasets.load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         X, y, random_state=0
     )
@@ -343,9 +358,7 @@ def test_grid_search_numtiple_grids() -> None:
     GridSearchCV allows you to pass a list of grids.
     """
 
-    iris = datasets.load_iris()
-    X = iris.data
-    y = iris.target
+    X, y = datasets.load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         X, y, random_state=0
     )
@@ -361,3 +374,95 @@ def test_grid_search_numtiple_grids() -> None:
     print("Best parameters: {}".format(grid_search.best_params_))
     print("Best cross-validation score: {:.2f}".format(grid_search.best_score_))
     print("Test score: {:.2f}".format(grid_search.score(X_test, y_test)))
+
+
+def test_nested_cross_validation() -> None:
+    """Nested cross validation performs two cross validations.
+
+    First, For each parameter combination, GridSearchCV will use cross
+    validation to determine the mean test score by splitting the training set
+    into training / validation and building / testing a model for each fold.
+
+    Second, CV is used to vary the training / test split.
+
+    In the examples above, we are only splitting the data once into train / test
+    sets. This makes model performance dependent on a single split of the data
+    (which is why we do CV).
+
+    In nested cross-validation, there is an outer loop over splits of the data
+    into training and test sets. For each of them, a grid search is run (which
+    might result in different best parameters for each split in the outer loop).
+    Then, for each outer split, the test set score using the best settings is
+    reported.
+
+    Nested CV does *not* return a model, it returns a list of scores. The scores
+    tells us how well a model generalizes. Nested CV is used to determine how
+    well a given model works on a dataset.
+
+    Note that nested CV is expensive. Here, we have 4 * 2 = 6 parameter
+    combinations. We use 5-fold CV within GridSearchCV, resulting in 6 * 5 = 30
+    models being trained. We use 5-fold CV to validate the entire dataset, which
+    results in a total of 30 * 5 == 150 models.
+    """
+
+    X, y = datasets.load_iris(return_X_y=True)
+
+    param_grid = [
+        {"kernel": ["rbf"], "C": [0.01, 0.1], "gamma": [0.01, 0.1]},
+        {"kernel": ["linear"], "C": [0.01, 0.1]},
+    ]
+    grid_search = model_selection.GridSearchCV(svm.SVC(), param_grid, cv=5, n_jobs=-1)
+    scores = model_selection.cross_val_score(grid_search, X, y, cv=5, n_jobs=-1)
+    #
+    # The result of nested CV can be summarized as "SVC can achieve a 97% mean
+    # CV accuracy on the iris dataset". It will *not* produce a model.
+    #
+    # print(f"CV scores: {scores}")
+    # print(f"Mean CV Score: {scores.mean()}")
+    assert scores.mean() > 0.0
+
+
+#
+# Binary Classifier Metrics
+#
+
+
+def test_confusion_matrix() -> None:
+    """A confusion matrix is one of the best ways to evaluate a binary classifier.
+
+    [
+        [
+            TN, FP
+        ],
+        [
+            FN, TP
+        ]
+    ]
+
+    Accuracy = (TP + TN) / (TP + TN + FP + FN)
+    Precision = TP / (TP + FP)
+    Recall = TP / (FP + FN)
+
+    F-score = 2 * (precision * recall) / precision + recall
+
+    """
+
+    digits = datasets.load_digits()  # 8x8 image of a digit
+    y = digits.target == 9
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        digits.data, y, random_state=0
+    )
+
+    logreg = linear_model.LogisticRegression(C=0.1, max_iter=10000).fit(
+        X_train, y_train
+    )
+    logreg_pred = logreg.predict(X_test)
+
+    confusion = metrics.confusion_matrix(y_test, logreg_pred)
+    print(f"Confusion matrix {confusion}")
+
+    print(f"True negative: {confusion[0][0]}")
+    print(f"False positive: {confusion[0][1]}")
+    print(f"False negative: {confusion[1][0]}")
+    print(f"True positive: {confusion[1][1]}")
