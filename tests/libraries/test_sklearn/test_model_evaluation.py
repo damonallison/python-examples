@@ -443,8 +443,24 @@ def test_confusion_matrix() -> None:
     Precision = TP / (TP + FP)
     Recall = TP / (FP + FN)
 
-    F-score = 2 * (precision * recall) / precision + recall
+    F1 score = 2 * (precision * recall) / precision + recall
 
+    Precision: How accurate is the model's positive predictions?
+    Look for high precision when you want to avoid false positives.
+
+    Recall: How accurate is the model at predicting positives?
+    Look for high recall when you want to avoid false negatives.
+
+    There is a tradeoff between precision and recall.
+
+    You can easily obtain a perfect recall by predicting positive for
+    everything, however precision will be low.
+
+    You can easily obtain a perfect precision by predicting a single positive
+    prediction correctly, however recalll will be low.
+
+    F1 considers both precision and recall for an overall better measure of
+    model performance than accuracy, precision, and recall.
     """
 
     digits = datasets.load_digits()  # 8x8 image of a digit
@@ -454,15 +470,20 @@ def test_confusion_matrix() -> None:
         digits.data, y, random_state=0
     )
 
-    logreg = linear_model.LogisticRegression(C=0.1, max_iter=10000).fit(
-        X_train, y_train
-    )
+    logreg: linear_model.LogisticRegression = linear_model.LogisticRegression(
+        C=0.1, max_iter=10000
+    ).fit(X_train, y_train)
     logreg_pred = logreg.predict(X_test)
 
-    confusion = metrics.confusion_matrix(y_test, logreg_pred)
-    print(f"Confusion matrix {confusion}")
+    # Accuracy
+    logreg.score(X_test, y_test)
 
-    print(f"True negative: {confusion[0][0]}")
-    print(f"False positive: {confusion[0][1]}")
-    print(f"False negative: {confusion[1][0]}")
-    print(f"True positive: {confusion[1][1]}")
+    tn, fp, fn, tp = metrics.confusion_matrix(y_test, logreg_pred).ravel()
+
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    f1 = 2 * (precision * recall) / (precision + recall)
+
+    assert precision == metrics.precision_score(y_test, logreg_pred)
+    assert recall == metrics.recall_score(y_test, logreg_pred)
+    assert f1 == metrics.f1_score(y_test, logreg_pred)
