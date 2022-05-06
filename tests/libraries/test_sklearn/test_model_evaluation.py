@@ -102,7 +102,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sklearn import datasets, linear_model, metrics, model_selection, svm
+from sklearn import datasets, ensemble, linear_model, metrics, model_selection, svm
 
 
 def test_score() -> None:
@@ -460,7 +460,9 @@ def test_confusion_matrix() -> None:
     prediction correctly, however recalll will be low.
 
     F1 considers both precision and recall for an overall better measure of
-    model performance than accuracy, precision, and recall.
+    model performance than accuracy, precision, and recall. By combining both
+    precision and recall, F1 is the most comprehensive and best way to evaluate
+    a binary classifier.
     """
 
     digits = datasets.load_digits()  # 8x8 image of a digit
@@ -487,3 +489,255 @@ def test_confusion_matrix() -> None:
     assert precision == metrics.precision_score(y_test, logreg_pred)
     assert recall == metrics.recall_score(y_test, logreg_pred)
     assert f1 == metrics.f1_score(y_test, logreg_pred)
+
+    #
+    # sklearn has a convenience function `classification_report` to calculate
+    # and print all confusion matrix based mertrics.
+    #
+    # * "support" is the number of samples in each class.
+    # * "accuracy"
+    # * "macro avg" is the simple average across all classes
+    # * "weighted avg" is the weighted average across all classes
+    #
+    print(
+        metrics.classification_report(
+            y_true=y_test, y_pred=logreg_pred, target_names=["not nine", "nine"]
+        )
+    )
+
+
+def test_decision_functions() -> None:
+    """Updating the decision_function will determine how aggressive the model is
+    when predicting classes. Lowering the decision function threshold will
+    increase the number of samples in the positive class (you're letting more
+    examples in), which increases your true positive rate (recall), but allows
+    more false positives as well, which decreases precision.
+    """
+
+    X, y = datasets.make_blobs(
+        n_samples=(400, 50), cluster_std=[7.0, 2], random_state=22
+    )
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+    svc: svm.SVC = svm.SVC(gamma=0.05).fit(X_train, y_train)
+
+    rpt1_dict = metrics.classification_report(
+        y_test, svc.predict(X_test), output_dict=True
+    )
+
+    # By lowering the threshold from 0.0 (the default) to -0.8, we are allowing
+    # more samples to be classified as positive. This increases recall, lowers
+    # precision.
+
+    y_pred_lower_threshold = svc.decision_function(X_test) > -0.8
+
+    rpt2_dict = metrics.classification_report(
+        y_test, y_pred_lower_threshold, output_dict=True
+    )
+
+    #
+    # Verify recall of the positive class increases, precision decreases
+    #
+    assert rpt1_dict["1"]["recall"] < rpt2_dict["1"]["recall"]
+    assert rpt1_dict["1"]["precision"] > rpt2_dict["1"]["precision"]
+
+
+def test_precision_recall_curve() -> None:
+    """By adjusting the decision threshold down, you increase recall. If you set
+    the threshold low enough, you can always achieve 100% recall. However, the
+    overall model will be useless.
+
+    How do you set the optimum threshold, or "operating point"?
+
+    You can determine the optimum threshold by testing all possible combinations
+    of decision thresholds and plotting it's precision / recall.
+
+    Note that different classifiers perform better in certain areas. Here we see
+    that RF performs better at both ends of the spectrum, for very high recall
+    or precision. SVC is better in the middle.
+
+    The f1 score only captures one point on the precision / recall curve: the
+    one given by the default threshold.
+
+    Average precision is a good summarization of the precision-recall curve.
+    """
+    X, y = datasets.make_blobs(
+        n_samples=(4000, 500), cluster_std=[7.0, 2], random_state=22
+    )
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+
+    #
+    # Support Vector Classifier
+    #
+    svc = svm.SVC(gamma=0.05).fit(X_train, y_train)
+    precision, recall, thresholds = metrics.precision_recall_curve(
+        y_test, svc.decision_function(X_test)
+    )
+    # find threshold closest to zero
+    close_zero = np.argmin(np.abs(thresholds))
+    plt.plot(
+        precision[close_zero],
+        recall[close_zero],
+        "o",
+        markersize=10,
+        label="threshold zero",
+        fillstyle="none",
+        c="k",
+        mew=2,
+    )
+    plt.plot(precision, recall, label="svc")
+
+    #
+    # Random Forest Classifier
+    #
+    rf = ensemble.RandomForestClassifier(
+        n_estimators=100, random_state=0, max_features=2
+    )
+    rf.fit(X_train, y_train)
+
+    # RandomForestClassifier has predict_proba, but not decision_function
+    precision_rf, recall_rf, thresholds_rf = metrics.precision_recall_curve(
+        y_test, rf.predict_proba(X_test)[:, 1]
+    )
+
+    close_default_rf = np.argmin(np.abs(thresholds_rf - 0.5))
+    plt.plot(
+        precision_rf[close_default_rf],
+        recall_rf[close_default_rf],
+        "^",
+        c="k",
+        markersize=10,
+        label="threshold 0.5 rf",
+        fillstyle="none",
+        mew=2,
+    )
+
+    plt.plot(precision_rf, recall_rf, label="rf")
+    plt.xlabel("Precision")
+    plt.ylabel("Recall")
+    plt.legend(loc="best")
+
+    # Uncomment to see the plot!
+    # plt.show()
+
+    rf_avg = metrics.average_precision_score(y_test, rf.predict_proba(X_test)[:, 1])
+    svc_avg = metrics.average_precision_score(y_test, svc.decision_function(X_test))
+
+    print(f"Average precision for rf: {rf_avg} svc: {svc_avg}")
+
+
+def test_roc_auc() -> None:
+    """Receiver Operator Characteristics (ROC) is another tool like the
+    precision-recall curve that analyzes classifier behavior at different
+    thresholds.
+
+    ROC shows the false positive rate (FPR) compared to the true positive rate
+    (TPR). TPR is another name for recall, while FPR is the false positive rate
+    out of all negative examples.
+
+    * TPR = TP / (TP + FN)
+    * FPR = FP / (FP + TN)
+
+    The optimal threshold is the point to the top left of the ROC curve. It
+    produces the highest recall with the lowest number of false positives.
+
+    The ROC curve is typically summarized by computing the "area under curve" or
+    AUC. Predicting randomly will produce a ROC of 0.5.
+
+    AUC is much better metric than accuracy for imbalanced classification
+    problems.
+    """
+
+    X, y = datasets.make_blobs(
+        n_samples=(4000, 500), cluster_std=[7.0, 2], random_state=22
+    )
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+
+    svc = svm.SVC(gamma=0.05).fit(X_train, y_train)
+    fpr, tpr, thresholds = metrics.roc_curve(y_test, svc.decision_function(X_test))
+    plt.plot(fpr, tpr, label="SVC ROC")
+
+    # find threshold closest to zero
+    close_zero = np.argmin(np.abs(thresholds))
+    plt.plot(
+        fpr[close_zero],
+        tpr[close_zero],
+        "o",
+        markersize=10,
+        label="svc threshold 0",
+        fillstyle="none",
+        c="k",
+        mew=2,
+    )
+
+    rf = ensemble.RandomForestClassifier(
+        n_estimators=100, random_state=0, max_features=2
+    )
+    rf.fit(X_train, y_train)
+
+    # RandomForestClassifier has predict_proba, but not decision_function
+    fpr_rf, tpr_rf, thresholds_rf = metrics.roc_curve(
+        y_test, rf.predict_proba(X_test)[:, 1]
+    )
+
+    plt.plot(fpr_rf, tpr_rf, label="RF ROC")
+    close_zero_rf = np.argmin(np.abs(thresholds_rf - 0.5))
+    plt.plot(
+        fpr_rf[close_zero_rf],
+        tpr_rf[close_zero_rf],
+        "^",
+        markersize=10,
+        label="rf threshold 0.5",
+        fillstyle="none",
+        c="k",
+        mew=2,
+    )
+    plt.xlabel("FPR")
+    plt.ylabel("TPR (recall)")
+    plt.legend(loc=4)
+
+    # Uncomment to show the plot!
+    # plt.show()
+
+    svc_auc = metrics.roc_auc_score(y_test, svc.decision_function(X_test))
+    rf_auc = metrics.roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1])
+
+    print(f"SVC AUC: {svc_auc} RF AUC: {rf_auc}")
+
+
+def test_accuracy_vs_roc() -> None:
+    """Accuracy is not the best metric to use for binary classification
+    problems - ROC AUC is. When classes are imbalanced, accuracy will be high.
+    However the AUC will not always be.
+
+    This test shows that for different values of gamma, we achieve the same
+    accuracy. However the AUCs are different.
+
+    Use AUC as a metric for binary classifier evaluation, particularily when
+    classes are imbalanced. It's a much better metric than accuracy.
+    """
+    digits = datasets.load_digits()  # 8x8 image of a digit
+    y = digits.target == 9
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        digits.data, y, random_state=0
+    )
+
+    accuracy = []
+    auc = []
+    for gamma in [1, 0.05, 0.01]:
+        svc = svm.SVC(gamma=gamma).fit(X_train, y_train)
+        accuracy.append(svc.score(X_test, y_test))
+        auc.append(metrics.roc_auc_score(y_test, svc.decision_function(X_test)))
+
+    # All
+    for acc in accuracy[1:]:
+        assert acc == accuracy[0]
+
+    for a in auc[1:]:
+        assert a != auc[0]
