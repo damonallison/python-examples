@@ -94,7 +94,39 @@ Confusion Matrix
 A confusion matrix gives you the true / false positive / negative counts.
 
 
+Precision-Recall curve
+----------------------
 
+Binary classification models have a precision / recall tradeoff. Precision is
+how accurate your positives are. Recall is how accurate you are at predicting
+positives (Recall == True Positive Rate).
+
+* Accuracy = (TP + TN) / (TP + TN + FP + FN)
+* Precision = TP / (TP + FP)
+* Recall = TP / (FP + FN)
+
+There is a tradeoff in precision vs. recall. You can have 100% precision by only
+predicting the sample you are most confident in as positive. However, you'll
+miss a lot of positives (high false negatives) and your recall will suffer.
+
+The goal is to determine how agressive you want to be when predicting positives.
+The optimal threshold is found by testing all thresholds and finding the best
+one.
+
+When evaluting a model, the more accurate overall model will have the highest
+area under the "receiver operator curve". The "receiver operator curve" is the
+graph of true positive rate over false positive rate. The higher the AUC, the
+higher the ability for a model to classify correctly across all thresholds.
+
+Define your goals
+-----------------
+
+Often, the goal is not to have the most accurate overall model. You may want to
+have high precision (confident in your positives) or high recall (low false
+negatives). If you are diagnosing people with cancer for example, you want high
+recall (low false negatives). Predicting someone as *not* having cancer when
+they indeed do is MUCH more expensive than predicting someone as having cancer
+who doesn't.
 """
 
 
@@ -557,10 +589,18 @@ def test_precision_recall_curve() -> None:
     that RF performs better at both ends of the spectrum, for very high recall
     or precision. SVC is better in the middle.
 
-    The f1 score only captures one point on the precision / recall curve: the
+    The F1 score only captures one point on the precision / recall curve: the
     one given by the default threshold.
 
+    Looking at the precision-recall curve doesn't quantifiably tell us which
+    model performs better. We need to quantifiably measure the performance of
+    each model to determine which is better.
+
     Average precision is a good summarization of the precision-recall curve.
+    Average precision is the integral (or area) under the precision-recall
+    curve. The model with the higher average precision is "better" than another
+    model on average. However another model may perform better than another in
+    areas of the curve.
     """
     X, y = datasets.make_blobs(
         n_samples=(4000, 500), cluster_std=[7.0, 2], random_state=22
@@ -576,7 +616,10 @@ def test_precision_recall_curve() -> None:
     precision, recall, thresholds = metrics.precision_recall_curve(
         y_test, svc.decision_function(X_test)
     )
-    # find threshold closest to zero
+
+    #
+    # Find threshold closest to zero (the default)
+    #
     close_zero = np.argmin(np.abs(thresholds))
     plt.plot(
         precision[close_zero],
@@ -603,6 +646,10 @@ def test_precision_recall_curve() -> None:
         y_test, rf.predict_proba(X_test)[:, 1]
     )
 
+    #
+    # Thresholds must be between 0 and 1. Here we take close to the default
+    # threshold.
+    #
     close_default_rf = np.argmin(np.abs(thresholds_rf - 0.5))
     plt.plot(
         precision_rf[close_default_rf],
@@ -623,6 +670,13 @@ def test_precision_recall_curve() -> None:
     # Uncomment to see the plot!
     # plt.show()
 
+    #
+    # Determine the "area under curve" for each model's precision-recall curve.
+    #
+    # Because we need to test at different thresholds, you need to send in
+    # predict_proba or decision_function, not the results of predict (i.e.,
+    # binary predictions)
+    #
     rf_avg = metrics.average_precision_score(y_test, rf.predict_proba(X_test)[:, 1])
     svc_avg = metrics.average_precision_score(y_test, svc.decision_function(X_test))
 
@@ -632,7 +686,9 @@ def test_precision_recall_curve() -> None:
 def test_roc_auc() -> None:
     """Receiver Operator Characteristics (ROC) is another tool like the
     precision-recall curve that analyzes classifier behavior at different
-    thresholds.
+    thresholds and uses an area based summary statistic to determine how the
+    models compare. Models with a higher area under curve (AUC) are, on average,
+    more accurate. (Although some models may be better at different areas).
 
     ROC shows the false positive rate (FPR) compared to the true positive rate
     (TPR). TPR is another name for recall, while FPR is the false positive rate
@@ -642,7 +698,7 @@ def test_roc_auc() -> None:
     * FPR = FP / (FP + TN)
 
     The optimal threshold is the point to the top left of the ROC curve. It
-    produces the highest recall with the lowest number of false positives.
+    produces the highest recall (TPR) with the lowest number of false positives.
 
     The ROC curve is typically summarized by computing the "area under curve" or
     AUC. Predicting randomly will produce a ROC of 0.5.
@@ -659,6 +715,11 @@ def test_roc_auc() -> None:
     )
 
     svc = svm.SVC(gamma=0.05).fit(X_train, y_train)
+
+    #
+    # The ROC curve evaluates the model usingi different thresholds (like
+    # precision-recall)
+    #
     fpr, tpr, thresholds = metrics.roc_curve(y_test, svc.decision_function(X_test))
     plt.plot(fpr, tpr, label="SVC ROC")
 
@@ -716,16 +777,21 @@ def test_accuracy_vs_roc() -> None:
     However the AUC will not always be.
 
     This test shows that for different values of gamma, we achieve the same
-    accuracy. However the AUCs are different.
+    accuracy. However the AUCs are different. The point closest to the top left
+    is the optimal threshold.
 
     Use AUC as a metric for binary classifier evaluation, particularily when
     classes are imbalanced. It's a much better metric than accuracy.
+
+    Once you have the optimal threshold, use it when making predictions on new
+    data.
     """
     digits = datasets.load_digits()  # 8x8 image of a digit
+    X = digits.data
     y = digits.target == 9
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
-        digits.data, y, random_state=0
+        X, y, random_state=0
     )
 
     accuracy = []
@@ -735,9 +801,112 @@ def test_accuracy_vs_roc() -> None:
         accuracy.append(svc.score(X_test, y_test))
         auc.append(metrics.roc_auc_score(y_test, svc.decision_function(X_test)))
 
-    # All
+    # All accuracies are the same
     for acc in accuracy[1:]:
         assert acc == accuracy[0]
 
+    # While all the AUC scores are different. This proves that accuracy is *not*
+    # the best indicator for binary classification models.
     for a in auc[1:]:
         assert a != auc[0]
+
+
+def test_grid_search_by_metric() -> None:
+    """When performing grid search, you can use any metric you want when
+    performing model selection by passing the metric to the `scoring` parameter.
+
+    The most important values for "scoring":
+
+    Classification:
+
+    * `accuracy`
+    * `roc_auc`
+    * `average_precision` - Area under the precision / recall curve
+    * `f1`, `f1_macro` and `f1_weighted` for the binary f1 score
+
+    Regression:
+
+    * `r2`
+    * `mean_squared_error`
+    * `mean_absolute_error`
+
+
+    """
+
+    digits = datasets.load_digits()  # 8x8 image of a digit
+    X = digits.data
+    y = digits.target == 9
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+    svc = svm.SVC()
+    #
+    # The default classification scoring method is "accuracy"
+    #
+    cv_score = model_selection.cross_val_score(svc, X, y, scoring="accuracy", cv=5)
+    print(f"Accuracy: {cv_score}")
+
+    #
+    # AUC
+    #
+    cv_score = model_selection.cross_val_score(
+        svc, X, y, scoring="average_precision", cv=5
+    )
+    print(f"Precision-recall AUC: {cv_score}")
+
+    #
+    # Using different metrics w/ GridSearchCV
+    #
+    # we provide a somewhat bad grid to illustrate the point:
+    param_grid = {"gamma": [0.0001, 0.01, 0.1, 1, 10]}
+    grid = model_selection.GridSearchCV(svc, param_grid=param_grid)
+    grid.fit(X_train, y_train)
+    print("Grid-Search with accuracy")
+    print("Best parameters:", grid.best_params_)
+    print("Best cross-validation score (accuracy)): {:.3f}".format(grid.best_score_))
+    print(
+        "Test set average precision (AUC): {:.3f}".format(
+            metrics.average_precision_score(y_test, grid.decision_function(X_test))
+        )
+    )
+    print(
+        "Test set accuracy: {:.3f}".format(
+            # identical to grid.score here
+            metrics.accuracy_score(y_test, grid.predict(X_test))
+        )
+    )
+
+    #
+    # Using AUC as a scoring metric. Notice best_params is different using AUC.
+    #
+    # As expected, the "accuracy" metric is higher when selecting by `accuracy``,
+    # "average precision" is higher when selecting based on `average_precision`.
+    #
+    grid = model_selection.GridSearchCV(
+        svc, param_grid=param_grid, scoring="average_precision"
+    )
+    grid.fit(X_train, y_train)
+    print("Grid-Search with average precision")
+    print("Best parameters:", grid.best_params_)
+    print(
+        "Best cross-validation score (average precision): {:.3f}".format(
+            grid.best_score_
+        )
+    )
+    print(
+        "Test set average precision: {:.3f}".format(
+            # identical to grid.score here
+            metrics.average_precision_score(y_test, grid.decision_function(X_test))
+        )
+    )
+    print(
+        "Test set accuracy: {:.3f}".format(
+            metrics.accuracy_score(y_test, grid.predict(X_test))
+        )
+    )
+
+
+def test_available_scorers() -> None:
+    """You can find a full list of available scorers by looking at the SCORERS dictionary"""
+
+    print(f"Available scorers: {sorted(metrics.SCORERS.keys())}")
