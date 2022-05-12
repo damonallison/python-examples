@@ -13,8 +13,9 @@ To download and unpack the training data for these examples (380MB total w/o
 wget -nc http://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz -P data
 tar xzf data/aclImdb_v1.tar.gz --skip-old-files -C data
 
-# Remove unlabeled data (not used in these examples) rm -r
-data/aclImdb/train/unsup
+# Remove unlabeled data (not used in these examples)
+
+rm -r data/aclImdb/train/unsup
 
 sklearn's `load_files` loads folders with the same folder structre as the test
 data
@@ -37,19 +38,25 @@ Terminology
 
 * "Natural Language Processing" (NLP): Programming computers to understand text.
 
-
 """
+from typing import List
 import os
+import re
 
+import nltk
 import numpy as np
 import pandas as pd
+import pytest
+
 from sklearn import (
     datasets,
+    decomposition,
     feature_extraction,
     linear_model,
     model_selection,
     pipeline,
 )
+import spacy
 
 
 def load_data(dir: str) -> tuple[list[str], list[str], list[str], list[str]]:
@@ -64,6 +71,7 @@ def load_data(dir: str) -> tuple[list[str], list[str], list[str], list[str]]:
     )
 
 
+@pytest.mark.skip(reason="Requires additional setup")
 def test_inspect_dataset() -> None:
     X_train, X_test, y_train, y_test = load_data("./data/aclImdb")
 
@@ -80,6 +88,7 @@ def test_inspect_dataset() -> None:
     X_test = [doc.replace(b"<br />", b" ") for doc in X_test]
 
 
+@pytest.mark.skip(reason="Requires additional setup")
 def test_bag_of_words() -> None:
     """Bag-of-words (BoW) counts how often each word appears in a document.
 
@@ -138,6 +147,7 @@ def test_bag_of_words() -> None:
     print(f"Vocab: {v}")
 
 
+@pytest.mark.skip(reason="Requires additional setup")
 def test_bow_movie_reviews() -> None:
     text_train, text_test, y_train, y_test = load_data("./data/aclImdb")
 
@@ -210,6 +220,7 @@ def test_bow_movie_reviews() -> None:
     #
 
 
+@pytest.mark.skip(reason="Requires additional setup")
 def test_feature_engineering_remove_stop_words() -> None:
     #
     # Stop words are too frequent to be informative. (`the`, `is`, `a`, `this`)
@@ -246,6 +257,7 @@ def test_feature_engineering_remove_stop_words() -> None:
     print(f"Tuned test score: {grid.score(X_test, y_test):.2f}")
 
 
+@pytest.mark.skip(reason="Requires additional setup")
 def test_feature_engineering_tfidf() -> None:
     #
     # tf-idf is a way to rank features by importance (or weight).
@@ -320,6 +332,7 @@ def test_feature_engineering_tfidf() -> None:
     print(f"Most negative features: {feature_names[negative_coefs]}")
 
 
+@pytest.mark.skip(reason="Requires additional setup")
 def test_bow_with_ngrams() -> None:
     #
     # n-grams add features for groups of words
@@ -356,3 +369,167 @@ def test_bow_with_ngrams() -> None:
     grid.fit(text_train, y_train)
     print(f"Best CV score: {grid.best_score_:.2f}")
     print(f"Best params {grid.best_params_}")
+
+    #
+    # Model coefficients: which features had the highest (most positive)
+    # influence and lowest (most negative) influence?
+    #
+    lr: linear_model.LinearRegression = grid.best_estimator_.named_steps["lr"]
+    vect: feature_extraction.text.TfidfVectorizer = grid.best_estimator_.named_steps[
+        "tfidf"
+    ]
+
+    coefs = np.array(lr.coef_)
+    # argsort returns indices that index the data in sorted order.
+    positive_coefs = np.argsort(coefs)[-20:]
+    negative_coefs = np.argsort(coefs)[:20]
+    feature_names = np.array(vect.get_feature_names())
+
+    print(f"Most positive features: {feature_names[positive_coefs]}")
+    print(f"Most negative features: {feature_names[negative_coefs]}")
+
+
+@pytest.mark.skip(reason="Requires additional setup")
+def test_advanced_tokenization() -> None:
+    #
+    # Stemming / Lemmatization: Transforms words into it's root. For example:
+    # replace, replaced, replaces have the same stem `replace`.
+    #
+    # If this is done with a simple rule based system (like dropping plurals),
+    # it's referred to as `stemming`. Stemming is always restrictued to trimming
+    # the word.
+    #
+    # If a dictionairy or grammar is used and the role of the word is taken into
+    # account, it's known as lemmatization. The standardized form of a word is
+    # it's `lemma`.
+    #
+    # Lemmatization is much more advanced
+    #
+    # To run this example, you need both `nltk` and `spacy` with english
+    # language support.
+    #
+    # python -m spacy download en
+    #
+
+    print(f"SpaCy version: {spacy.__version__}")
+    print(f"nltk version: {nltk.__version__}")
+
+    # load SpaCy's en language models
+    en_nlp = spacy.load("en_core_web_sm")
+    stemmer = nltk.stem.PorterStemmer()
+
+    def compare_normalization(doc: str) -> None:
+        doc_spacy = en_nlp(doc)
+        # Tokens found using stemming
+        stems = [stemmer.stem(token.norm_.lower()) for token in doc_spacy]
+        print(f"Stems: {stems}")
+        # Lemmas found using lemmatization
+        lemmas = [token.lemma_ for token in doc_spacy]
+        print(f"Lemmas: {lemmas}")
+
+    compare_normalization(
+        "Our meeting today was worse than yesterday, "
+        "I'm scared of meeting the clients tomorrow."
+    )
+
+
+@pytest.mark.skip(reason="Requires additional setup")
+def test_custom_tokenizer() -> None:
+    # scikit does not implement tokenization, however allows you to plug in a
+    # tokenizer. Here, we use scikit's CountVectorizer with spacy's
+    # lemmatization.
+
+    # We want to use CountVectorizer's tokenizer
+    regexp = re.compile("(?u)\\b\\w\\w+\\b")
+
+    en_nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+    original_tokenizer = en_nlp.tokenizer
+    print(f"type(tokenizer) == {type(original_tokenizer)}")
+
+    en_nlp.tokenizer = lambda doc: original_tokenizer(" ".join(regexp.findall(doc)))
+
+    def custom_tokenizer(doc: str) -> List[str]:
+        return [token.lemma_ for token in en_nlp(doc)]
+
+    text_train, text_test, y_train, y_test = load_data("./data/aclImdb")
+
+    count_vect = feature_extraction.text.CountVectorizer(min_df=5)
+    lemma_vect = feature_extraction.text.CountVectorizer(
+        tokenizer=custom_tokenizer, min_df=5
+    )
+    X_train = count_vect.fit(text_train)
+    X_train_lemma = lemma_vect.fit_transform(text_train)
+
+    # IMPORTANT: Notice how lemmatization reduced the number of features from
+    # 27.271 to 21,596.
+
+    print(f"X_train.shape: {X_train.shape}")
+    print(f"X_train_lemma.shape: {X_train_lemma.shape}")
+
+
+@pytest.mark.skip(reason="Requires additional setup")
+def test_topic_modeling_and_document_clustering() -> None:
+    # Topic modeling is identifying a document's topic.
+    #
+    # Document clustering is clusting documents by topics.
+    #
+    # Latent Dirichlet Allocation (LDA)
+    # ---------------------------------
+    # LDA identifies a document's "topics". A "topic" is similar to PCA in that
+    # it's a computed value. Topics LDA detects are patterns more than high
+    # level topics you'd associate with a news article.
+    #
+    # The fewer topics you have, the more broad they will be. The more topics
+    # you have, the more specialized they will be.
+
+    # Keep 10,000 after removing words that appear in >= 15% of documents
+
+    text_train, text_test, y_train, y_test = load_data("./data/aclImdb")
+    vect = feature_extraction.text.CountVectorizer(max_features=10000, max_df=0.15)
+    X = vect.fit_transform(text_train)
+
+    # Learn a topic model with 10 topics. Note that LDA is randomized, so use
+    # random_state for repeatable results.
+    lda = decomposition.LatentDirichletAllocation(
+        n_components=10, learning_method="batch", max_iter=25, random_state=0
+    )
+    topics = lda.fit_transform(X)
+    # LDA (like PCA) has a components_ attribute that stores how important each
+    # word is to each topic. shape = (10, 10000)
+    print(f"lda.components_.shape: {lda.components_.shape}")
+
+    #
+    # Print the most important words for each topic
+    #
+    def print_topics(topics, feature_names, sorting, topics_per_chunk=6, n_words=20):
+        for i in range(0, len(topics), topics_per_chunk):
+            # for each chunk:
+            these_topics = topics[i : i + topics_per_chunk]
+            # maybe we have less than topics_per_chunk left
+            len_this_chunk = len(these_topics)
+            # print topic headers
+            print(("topic {:<8}" * len_this_chunk).format(*these_topics))
+            print(("-------- {0:<5}" * len_this_chunk).format(""))
+            # print top n_words frequent words
+            for i in range(n_words):
+                try:
+                    print(
+                        ("{:<14}" * len_this_chunk).format(
+                            *feature_names[sorting[these_topics, i]]
+                        )
+                    )
+                except:
+                    pass
+            print("\n")
+
+    # For each topic (a row in components_), sort the features (ascending)
+    # Invert rows with [:, ::-1] to make sorting descending
+    sorting = np.argsort(lda.components_, axis=1)[:, ::-1]
+    feature_names = np.array(vect.get_feature_names())
+    print_topics(
+        topics=range(10),
+        feature_names=feature_names,
+        sorting=sorting,
+        topics_per_chunk=5,
+        n_words=10,
+    )
