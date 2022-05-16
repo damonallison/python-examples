@@ -18,7 +18,7 @@ readme = "README.md"
 #   If you specify a major, then minor and patch are allowed.
 #
 #   ~1.2.3   >=1.2.3 <1.3.0
-#   ~1.2     >=1.2.3 <1.3.0
+#   ~1.2     >=1.2.0 <1.3.0
 #   ~1       >=1.0.0 <2.0.0
 #
 # Wildcard:
@@ -28,7 +28,7 @@ readme = "README.md"
 #   1.*   >=1.0.0 <2.0.0
 #   1.2.* >= 1.2.0 <1.3.0
 [tool.poetry.dependencies]
-python = "~3.9"
+python = "~3.9" # >= 3.9.0 <3.10.1
 fastapi = "^0.63.0"
 uvicorn = "^0.13.4"
 Flask = "^2.0.1"
@@ -45,7 +45,11 @@ spacy = "^3.3.0"
 pytest = "^6.2.3"
 black = "^21.4b0"
 pytest-asyncio = "^0.15.1"
-mypy = "^0.812"
+#
+# mypy is not up to a 1.x release cycle yet. This wildcard will use the latest
+# (at least until they move to 1.0). Once they are on 1.0, use ^1
+#
+mypy = "~0"
 ipython = "^7.26.0"
 yappi = "^1.3.3"
 requests = "^2.26.0"
