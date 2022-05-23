@@ -21,6 +21,18 @@ def run_dt(dt: tree.DecisionTreeClassifier) -> None:
     X = pd.DataFrame(cancer.data, columns=cancer.feature_names)
     y = cancer.target
 
+    #
+    # train_test_split Unit vs. integration testing.
+    #   * Unit tests "train". Integration tests "test".
+    #
+    # Why not use all the data?
+    #   * The goal isn't to understand the data you already *know*. It's to
+    #     understand data you *don't* know.
+    #
+    # fit
+    #
+    # predict
+    #
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         X, y, stratify=y, random_state=SEED
     )
