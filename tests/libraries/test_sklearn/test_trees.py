@@ -2,10 +2,11 @@ import logging
 
 from matplotlib import pyplot as plt
 
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
-
 from sklearn import datasets, ensemble, model_selection, tree
+import xgboost as xgb
 
 logger = logging.getLogger(__name__)
 
@@ -344,6 +345,128 @@ def test_tuned_gradient_boosting() -> None:
     logger.info(f"Best cross-validation score: {grid_search.best_score_:.3f}")
     logger.info(f"Accuracy on training set: {grid_search.score(X_train, y_train):.3f}")
     logger.info(f"Accuracy on test set: {grid_search.score(X_test, y_test):.3f}")
+    plot_results = True
+    if plot_results:
+        n_features = len(cancer.feature_names)
+        plt.barh(
+            np.arange(n_features),
+            grid_search.best_estimator_.feature_importances_,
+            align="center",
+        )
+        plt.yticks(np.arange(n_features), cancer.feature_names)
+        plt.xlabel("feature importance")
+        plt.ylabel("feature")
+        plt.ylim(-1, n_features)
+        plt.show()
+
+
+def test_lightGBM() -> None:
+    #
+    # LightGBM uses a "Dataset" data structure, which can be populated from a
+    # numpy 2D array, a pandas DataFrame, SciPy sparse matrix, or CSV / TSV
+    # file.
+    #
+    # Dataset is memory efficient, only needing to save discrete bins
+
+    cancer = datasets.load_breast_cancer()
+    X = pd.DataFrame(cancer.data, columns=cancer.feature_names)
+    y: np.ndarray = cancer.target
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, stratify=y, test_size=0.25, random_state=SEED
+    )
+
+    param_grid = {
+        "boosting_type": [
+            "gbdt",
+            # "rf",
+        ],  # gbdt = "gradient boosing decision tree". rf = "random forest".
+        "n_estimators": [100, 500, 1000, 3000, 5000],
+        #
+        # Boosting learning rate. Has an inverse relationship with n_estimators
+        #
+        # "learning_rate": [0.001, 0.01, 0.1],
+        #
+        # Model complexity
+        #
+        # "max_depth": [1, 2, 3],
+        #
+        # Randomness
+        #
+        # "subsample": [0.6, 0.8],
+        # "colsample_bytree": [0.8, 1],
+    }
+    grid_search = model_selection.GridSearchCV(
+        lgb.LGBMClassifier(n_jobs=-1, random_state=SEED, objective="binary"),
+        param_grid=param_grid,
+        n_jobs=-1,
+        refit=True,
+        return_train_score=True,
+        verbose=0,
+    )
+    grid_search.fit(X_train, y_train)
+    logger.info(f"Best parameters: {(grid_search.best_params_)}")
+    logger.info(f"Best cross-validation score: {grid_search.best_score_:.3f}")
+    logger.info(f"Accuracy on training set: {grid_search.score(X_train, y_train):.3f}")
+    logger.info(f"Accuracy on test set: {grid_search.score(X_test, y_test):.3f}")
+
+    plot_results = True
+    if plot_results:
+        n_features = len(cancer.feature_names)
+        plt.barh(
+            np.arange(n_features),
+            grid_search.best_estimator_.feature_importances_,
+            align="center",
+        )
+        plt.yticks(np.arange(n_features), cancer.feature_names)
+        plt.xlabel("feature importance")
+        plt.ylabel("feature")
+        plt.ylim(-1, n_features)
+        plt.show()
+
+
+def test_XGBoost() -> None:
+    cancer = datasets.load_breast_cancer()
+    X = pd.DataFrame(cancer.data, columns=cancer.feature_names)
+    y: np.ndarray = cancer.target
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, stratify=y, test_size=0.25, random_state=SEED
+    )
+
+    param_grid = {
+        "n_estimators": [100, 500, 1000, 3000, 5000],
+        #
+        # Boosting learning rate. Has an inverse relationship with n_estimators
+        #
+        "learning_rate": [0.001, 0.01, 0.1],
+        #
+        # Model complexity
+        #
+        "max_depth": [1, 2, 3],
+        #
+        # Regularization
+        #
+        # reg_alpha = L1 regularization term on weights (xgb's "alpha")
+        # reg_lambda = L2 regularization term on weights (xgb's "lambda")
+        #
+        # Randomness
+        #
+        # "subsample": [0.6, 0.8],
+        # "colsample_bytree": [0.8, 1],
+    }
+    grid_search = model_selection.GridSearchCV(
+        xgb.XGBClassifier(n_jobs=-1, random_state=SEED),
+        param_grid=param_grid,
+        n_jobs=-1,
+        refit=True,
+        return_train_score=True,
+        verbose=0,
+    )
+    grid_search.fit(X_train, y_train)
+    logger.info(f"Best parameters: {(grid_search.best_params_)}")
+    logger.info(f"Best cross-validation score: {grid_search.best_score_:.3f}")
+    logger.info(f"Accuracy on training set: {grid_search.score(X_train, y_train):.3f}")
+    logger.info(f"Accuracy on test set: {grid_search.score(X_test, y_test):.3f}")
+
     plot_results = True
     if plot_results:
         n_features = len(cancer.feature_names)
