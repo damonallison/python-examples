@@ -58,6 +58,8 @@ from sklearn import (
 )
 import spacy
 
+pytestmark = pytest.mark.skip(reason="Requires addiitonal setup")
+
 
 def load_data(dir: str) -> tuple[list[str], list[str], list[str], list[str]]:
     reviews_train = datasets.load_files(os.path.join(dir, "train"))
@@ -71,7 +73,6 @@ def load_data(dir: str) -> tuple[list[str], list[str], list[str], list[str]]:
     )
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_inspect_dataset() -> None:
     X_train, X_test, y_train, y_test = load_data("./data/aclImdb")
 
@@ -88,7 +89,6 @@ def test_inspect_dataset() -> None:
     X_test = [doc.replace(b"<br />", b" ") for doc in X_test]
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_bag_of_words() -> None:
     """Bag-of-words (BoW) counts how often each word appears in a document.
 
@@ -147,7 +147,6 @@ def test_bag_of_words() -> None:
     print(f"Vocab: {v}")
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_bow_movie_reviews() -> None:
     text_train, text_test, y_train, y_test = load_data("./data/aclImdb")
 
@@ -220,7 +219,6 @@ def test_bow_movie_reviews() -> None:
     #
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_feature_engineering_remove_stop_words() -> None:
     #
     # Stop words are too frequent to be informative. (`the`, `is`, `a`, `this`)
@@ -257,7 +255,6 @@ def test_feature_engineering_remove_stop_words() -> None:
     print(f"Tuned test score: {grid.score(X_test, y_test):.2f}")
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_feature_engineering_tfidf() -> None:
     #
     # tf-idf is a way to rank features by importance (or weight).
@@ -332,7 +329,6 @@ def test_feature_engineering_tfidf() -> None:
     print(f"Most negative features: {feature_names[negative_coefs]}")
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_bow_with_ngrams() -> None:
     #
     # n-grams add features for groups of words
@@ -389,7 +385,6 @@ def test_bow_with_ngrams() -> None:
     print(f"Most negative features: {feature_names[negative_coefs]}")
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_advanced_tokenization() -> None:
     #
     # Stemming / Lemmatization: Transforms words into it's root. For example:
@@ -433,7 +428,6 @@ def test_advanced_tokenization() -> None:
     )
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_custom_tokenizer() -> None:
     # scikit does not implement tokenization, however allows you to plug in a
     # tokenizer. Here, we use scikit's CountVectorizer with spacy's
@@ -467,7 +461,6 @@ def test_custom_tokenizer() -> None:
     print(f"X_train_lemma.shape: {X_train_lemma.shape}")
 
 
-@pytest.mark.skip(reason="Requires additional setup")
 def test_topic_modeling_and_document_clustering() -> None:
     # Topic modeling is identifying a document's topic.
     #

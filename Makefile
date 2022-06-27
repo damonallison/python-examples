@@ -9,4 +9,5 @@ lint:
 	poetry run mypy --strict tests/**/*.py
 
 test:
-	poetry run pytest -s tests
+	# Skip ML tests for performance reasons
+	poetry run pytest -s tests -m "not ml"

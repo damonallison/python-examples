@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import lightgbm as lgb
 import numpy as np
 import pandas as pd
+import pytest
 from sklearn import datasets, ensemble, model_selection, tree
 import xgboost as xgb
 
@@ -12,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 SEED = 42
 
+# Mark all tests this module as 'ml'. These tests will be skipped with
+# `make test` since they are slow.
+pytestmark = pytest.mark.ml
 
 #
 # Demo 1:
@@ -142,7 +146,7 @@ def test_tuned_decision_tree() -> None:
         param_grid,
         cv=10,
         return_train_score=True,
-        verbose=2,
+        verbose=0,
         refit=True,
     )
     grid_search.fit(X_train, y_train)
@@ -165,7 +169,7 @@ def test_random_forest() -> None:
         X, y, stratify=y, test_size=0.25, random_state=SEED
     )
 
-    rf = ensemble.RandomForestClassifier(n_jobs=-1, verbose=2, random_state=SEED)
+    rf = ensemble.RandomForestClassifier(n_jobs=-1, verbose=0, random_state=SEED)
 
     rf.fit(X_train, y_train)
 
@@ -262,7 +266,7 @@ def test_gradient_boosting() -> None:
         X, y, stratify=y, test_size=0.25, random_state=SEED
     )
 
-    gb = ensemble.GradientBoostingClassifier(verbose=2, random_state=SEED)
+    gb = ensemble.GradientBoostingClassifier(verbose=0, random_state=SEED)
 
     gb.fit(X_train, y_train)
     logger.info(f"Accuracy on training set: {gb.score(X_train, y_train):.3f}")
@@ -271,7 +275,7 @@ def test_gradient_boosting() -> None:
     feature_imp = pd.DataFrame([gb.feature_importances_], columns=gb.feature_names_in_)
     logger.info(f"Tree feature_importances: {feature_imp}")
 
-    plot_results = True
+    plot_results = False
     if plot_results:
         #
         # Feature importances are aggregared over all trees in the forest. In a
@@ -338,14 +342,15 @@ def test_tuned_gradient_boosting() -> None:
         return_train_score=True,  # I
         refit=True,  # Refits an estimator using the best found parameters on the entire training set.
         n_jobs=-1,  # Parallelize over all CPUs. Random forest builds each tree independently and is parallelizable.
-        verbose=2,
+        verbose=0,
     )
     grid_search.fit(X_train, y_train)
     logger.info(f"Best parameters: {(grid_search.best_params_)}")
     logger.info(f"Best cross-validation score: {grid_search.best_score_:.3f}")
     logger.info(f"Accuracy on training set: {grid_search.score(X_train, y_train):.3f}")
     logger.info(f"Accuracy on test set: {grid_search.score(X_test, y_test):.3f}")
-    plot_results = True
+
+    plot_results = False
     if plot_results:
         n_features = len(cancer.feature_names)
         plt.barh(
@@ -409,7 +414,8 @@ def test_lightGBM() -> None:
     logger.info(f"Accuracy on training set: {grid_search.score(X_train, y_train):.3f}")
     logger.info(f"Accuracy on test set: {grid_search.score(X_test, y_test):.3f}")
 
-    plot_results = True
+    plot_results = False
+
     if plot_results:
         n_features = len(cancer.feature_names)
         plt.barh(
@@ -467,7 +473,8 @@ def test_XGBoost() -> None:
     logger.info(f"Accuracy on training set: {grid_search.score(X_train, y_train):.3f}")
     logger.info(f"Accuracy on test set: {grid_search.score(X_test, y_test):.3f}")
 
-    plot_results = True
+    plot_results = False
+
     if plot_results:
         n_features = len(cancer.feature_names)
         plt.barh(
