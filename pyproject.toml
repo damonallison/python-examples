@@ -69,6 +69,18 @@ requests-mock = "^1.9.3"
 log_cli = true
 log_cli_level = "INFO"
 
+#
+# Register a custom marker for ml. By default, `make test` will skip ML tests by
+# running:
+#
+# pytest -m "not slow"
+#
+# For more information on markers:
+# https://docs.pytest.org/en/7.1.x/how-to/mark.html
+markers = [
+    "ml: marks tests as ml (which take a long time to run) - deselect with '-m \"not slow\"'"
+]
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

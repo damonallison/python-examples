@@ -16,19 +16,20 @@ entire data set is used as the test set in one fold. There are multiple CV
 strategies available, however KFold, StratifiedKFold, and GroupKFold are the
 most common.
 
-Grid Search
------------
+Grid Search (Hyperparameter Tuning)
+-----------------------------------
 Grid search is the process of finding the best model hyperparameters by
 "searching" thru a grid of possible hyperparameter combinations.
 
 When performing grid search, we split the training set into "training" and
-"validatin" sets. The validation set is used to determine how well the model
+"validation" sets. The validation set is used to determine how well the model
 *should* perform on new data. We select the best model based on it's performance
 on the validation set. We then test the model with the test set.
 
 We do *not* want to include the test set in any grid search validation.
 Otherwise, we "leak" data - the model's hyperparameters will be learned in part
-on the test set, which we need to avoid.
+on the test set, which we need to avoid. This is why we split the training data
+into test / validation sets.
 
 The grid search process:
 ------------------------
@@ -59,7 +60,7 @@ chosen the correct ranges of hyperparameters.
   has been set correctly. Both ends of the parameter's range have been
   evaluated.
 
-* If the best stores are on the edges (w/ maximum or minimum values for 1 or
+* If the best scores are on the edges (w/ maximum or minimum values for 1 or
   more parameters), your search space is not wide enough for those parameters.
   The model may get more accurate if you increase or decrease those parameter
   values.
@@ -68,8 +69,7 @@ chosen the correct ranges of hyperparameters.
   either the parameter is not important to the results or you haven't chosen a
   wide enough search space for that parameter. Try increasing the range of the
   parameter. If the increased range still yields consistent accuracy, that
-  parameter is not important to tune.
-
+  parameter is not important to tune (or perhaps could be eliminated).
 
 
 Model metrics and scoring
@@ -83,9 +83,9 @@ Metrics for binary classification
 
 When evaluating a binary classifier, associate a cost to each error type.
 
-Watch for imbalanced data sets. If 99% of emails are spam, just predicting every
-email will be spam will be 99% accurate. With imbalanced data sets, accuracy is
-an inadequate measure for quantifying predictive performance.
+Watch for imbalanced data sets. If 99% of emails are spam, simply predicting
+every email will be spam will be 99% accurate. With imbalanced data sets,
+accuracy is an inadequate measure for quantifying predictive performance.
 
 We need alternative metrics to determine which models perform well.
 
@@ -133,21 +133,31 @@ who doesn't.
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pytest
 import seaborn as sns
 from sklearn import datasets, ensemble, linear_model, metrics, model_selection, svm
+
+
+# Mark all tests this module as 'ml'. These tests will be skipped with
+# `make test` since they are slow.
+pytestmark = pytest.mark.ml
+
+# Many tests will have options to show plots. Setting DEBUG to `True` will
+# display the plots.
+DEBUG = True
 
 
 def test_score() -> None:
     """For classification problems, score is the fraction of correctly
     classified examples.
     """
-    X, y = datasets.make_blobs(random_state=0)
 
     # make_blobs makes gaussian clusters
-    #
-    # Show a scatterplot
-    # plt.scatter(X[:, 0], X[:, 1])
-    # plt.show()
+    X, y = datasets.make_blobs(n_samples=1000, n_features=2, random_state=0)
+
+    if DEBUG:
+        plt.scatter(X[:, 0], X[:, 1])
+        plt.show()
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         X, y, random_state=0
@@ -182,14 +192,14 @@ def test_cross_validation() -> None:
     2. CV helps determine model sensitivity.
 
     When we see accuraces between, say, 80% and 90%, we can be reasonably
-    confident our overall model performance will be somewhere int he 80%s.
+    confident our overall model performance will be somewhere in the 80%s.
 
     A wider variance gives us less confidence in overall model performance.
 
     3. We use our data more effectively.
 
-    The more number of folds we use, the more data we can include in the
-    training set, which generally results in better model performance.
+    The more folds we use, the more data we can include in the training set,
+    which generally results in better model performance.
 
     --
 
@@ -209,7 +219,7 @@ def test_cross_validation() -> None:
     #
     # NOTE: Always use stratified k-fold CV for classification tasks.
     #
-    scores = model_selection.cross_val_score(lr, X, y, cv=5)
+    scores = model_selection.cross_val_score(lr, X, y, cv=10)
     print(f"CV scores: {np.round(scores, 2)}")
     print(f"Mean score: {scores.mean():.2f}")
 
@@ -225,7 +235,7 @@ def test_cross_validation() -> None:
         lr,
         X,
         y,
-        cv=3,
+        cv=10,
         n_jobs=-1,
         verbose=0,
         return_estimator=False,
@@ -262,6 +272,8 @@ def test_cross_validation_custom_splitter() -> None:
     #
     # Whenever we shuffle, we need to set a random_state if we want reproducable
     # results.
+    #
+    # You'll typically use StratifiedKFold for classification.
     kfold = model_selection.StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
     scores = model_selection.cross_val_score(lr, X, y, cv=kfold)
     assert scores.mean() > 0.50
@@ -328,6 +340,10 @@ def test_cv_with_groups() -> None:
 
 
 def test_grid_search() -> None:
+    """Grid search is used for hyperparameter tuning. Each combination of
+    parameters in the grid are evaluated and the best performing parameter
+    combination is kept as the "tuned hyperparameters" to use for final model
+    generation."""
     X, y = datasets.load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         X, y, random_state=0
@@ -364,16 +380,20 @@ def test_grid_search() -> None:
     # It shows you if you have selected the right parameters to tune and have
     # set appropriate ranges for each parameter.
     #
-    # scores = np.array(cv_results["mean_test_score"]).reshape(6, 6)
+    # You want the highest test score to be somewhat in the middle of the
+    # heatmap. This ensures you have found the best parameters for all parameters.
+    #
+    if DEBUG:
+        scores = np.array(cv_results["mean_test_score"]).reshape(6, 6)
 
-    # sns.heatmap(
-    #     scores,
-    #     xticklabels=param_grid["gamma"],
-    #     yticklabels=param_grid["C"],
-    #     annot=True,
-    #     fmt=".2f",
-    # )
-    # plt.show()
+        sns.heatmap(
+            scores,
+            xticklabels=param_grid["gamma"],
+            yticklabels=param_grid["C"],
+            annot=True,
+            fmt=".2f",
+        )
+        plt.show()
     #
     # The only place in the grid search process the test set is used is during
     # final model scoring. The test set is *NOT* used to find the best model.
@@ -449,8 +469,8 @@ def test_nested_cross_validation() -> None:
     # The result of nested CV can be summarized as "SVC can achieve a 97% mean
     # CV accuracy on the iris dataset". It will *not* produce a model.
     #
-    # print(f"CV scores: {scores}")
-    # print(f"Mean CV Score: {scores.mean()}")
+    print(f"Nested CV scores: {scores}")
+    print(f"Mean nested CV Score: {scores.mean()}")
     assert scores.mean() > 0.0
 
 
@@ -506,7 +526,8 @@ def test_confusion_matrix() -> None:
 
     logreg: linear_model.LogisticRegression = linear_model.LogisticRegression(
         C=0.1, max_iter=10000
-    ).fit(X_train, y_train)
+    )
+    logreg.fit(X_train, y_train)
     logreg_pred = logreg.predict(X_test)
 
     # Accuracy
@@ -514,10 +535,12 @@ def test_confusion_matrix() -> None:
 
     tn, fp, fn, tp = metrics.confusion_matrix(y_test, logreg_pred).ravel()
 
+    accuracy = (tp + tn) / (tn + fp + fn + tp)
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
     f1 = 2 * (precision * recall) / (precision + recall)
 
+    assert accuracy == metrics.accuracy_score(y_test, logreg_pred)
     assert precision == metrics.precision_score(y_test, logreg_pred)
     assert recall == metrics.recall_score(y_test, logreg_pred)
     assert f1 == metrics.f1_score(y_test, logreg_pred)
@@ -667,8 +690,8 @@ def test_precision_recall_curve() -> None:
     plt.ylabel("Recall")
     plt.legend(loc="best")
 
-    # Uncomment to see the plot!
-    # plt.show()
+    if DEBUG:
+        plt.show()
 
     #
     # Determine the "area under curve" for each model's precision-recall curve.
@@ -717,7 +740,7 @@ def test_roc_auc() -> None:
     svc = svm.SVC(gamma=0.05).fit(X_train, y_train)
 
     #
-    # The ROC curve evaluates the model usingi different thresholds (like
+    # The ROC curve evaluates the model using different thresholds (like
     # precision-recall)
     #
     fpr, tpr, thresholds = metrics.roc_curve(y_test, svc.decision_function(X_test))
@@ -762,8 +785,8 @@ def test_roc_auc() -> None:
     plt.ylabel("TPR (recall)")
     plt.legend(loc=4)
 
-    # Uncomment to show the plot!
-    # plt.show()
+    if DEBUG:
+        plt.show()
 
     svc_auc = metrics.roc_auc_score(y_test, svc.decision_function(X_test))
     rf_auc = metrics.roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1])
@@ -801,6 +824,8 @@ def test_accuracy_vs_roc() -> None:
         accuracy.append(svc.score(X_test, y_test))
         auc.append(metrics.roc_auc_score(y_test, svc.decision_function(X_test)))
 
+    print(f"Accuracies: {accuracy}")
+    print(f"auc: {auc}")
     # All accuracies are the same
     for acc in accuracy[1:]:
         assert acc == accuracy[0]
@@ -829,8 +854,6 @@ def test_grid_search_by_metric() -> None:
     * `r2`
     * `mean_squared_error`
     * `mean_absolute_error`
-
-
     """
 
     digits = datasets.load_digits()  # 8x8 image of a digit

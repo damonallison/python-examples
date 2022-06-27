@@ -20,6 +20,11 @@ from sklearn import (
     svm,
 )
 from matplotlib import pyplot as plt
+import pytest
+
+# Mark all tests this module as 'ml'. These tests will be skipped with
+# `make test` since they are slow.
+pytestmark = pytest.mark.ml
 
 
 def test_simple_pipeline() -> None:

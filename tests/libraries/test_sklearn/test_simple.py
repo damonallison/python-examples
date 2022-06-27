@@ -1,6 +1,10 @@
 import pandas as pd
-
+import pytest
 from sklearn import datasets, linear_model, model_selection, preprocessing
+
+# Mark all tests this module as 'ml'. These tests will be skipped with
+# `make test` since they are slow.
+pytestmark = pytest.mark.ml
 
 
 def test_linear_regresssion() -> None:
