@@ -36,10 +36,12 @@ def test_numpy_creation() -> None:
     a numpy array will return a new array.
     """
 
-    # You can create a numpy array from a python array
+    # You can create a numpy array from a python array, optionally specifying a
+    # type. If a type is not specified, it is inferred.
     a = np.array([1, 2, 3], dtype=np.int64)
     assert a.ndim == 1
-    assert a.shape == (3,)
+    assert a.shape == (3,)  # `shape` is always a tuple
+    assert a.size == 3  # Total elements of the array (all dimensions)
     assert a.dtype == np.int64
 
     # In numpy, dimensions are called axes. axis=0 are rows, axis=1 are columns
@@ -75,69 +77,46 @@ def test_numpy_creation() -> None:
     assert np.array_equal(a6, np.array([11, 22, 3]))
 
 
-def test_reshaping() -> None:
-    """Reshaping with -1 (unknown dimension) will find the appropriate dimension
-    that fitst the data being reshaped. Only one unknown dimension can be used
-    during reshaping.
+def test_numpy_indexing() -> None:
+    """indexing is the process of selecting a subset of an array.
 
-    reshape: returns it's argument with a modified shape.
-
-    resize: directly modifies it's argument (mutation)
-
-    ravel: flattens an n-dimentional array into a 1D vector, returning a view
-    into the original array
-
-    flatten: flattens an n-dimensional array into a 1D vector, returning a copy
-    of the original array
-
+    numpy arrays can be indexed by Python-like slicing or by using boolean
+    masks.
     """
-    a = np.arange(0, 6)
-    assert a.shape == (6,)
 
-    a2 = a.reshape([1, -1])
-    assert a2.shape == (1, 6)
+    a = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
 
-    a3 = a.reshape(-1, 1)
-    assert a3.shape == (6, 1)
+    # Each dimension contains a slice range. `:` is used for any dimension not specified in the slice.
+    assert np.array_equal(a[2], [3, 3, 3])
+    assert np.array_equal(a[2, :], [3, 3, 3])
 
-    # Note that reshape creates a *view* into the original array.
-    # You need to .copy() the array if you want a copy.
-    a3[0, 0] = 100
-    assert a[0] == 100
+    assert np.array_equal(a[0:2, 0], np.array([1, 2]))
+    assert np.array_equal(a[0:2, 0:-1], np.array([[1, 1], [2, 2]]))
 
-    # flatten and ravel will both flatten an ndarray into a 1D vector.
-    #
-    # flatten will create a copy, ravel will not.
+    # Boolean masking. Parens are optional for single conditions, but required for using and (&) or or (|).
+    low = a[(a < 3)]
+    # Notice how a 1D array is returned
+    assert np.array_equal(low, [1, 1, 1, 2, 2, 2])
 
-    a4 = a3.flatten()
-    a4[0] = 200
+    # A multi-statement predicate
+    low = a[(a == 1) | (a == 2)]
+    assert np.array_equal(low, [1, 1, 1, 2, 2, 2])
 
-    assert a4[0] == 200
-    assert a3[0, 0] == 100  # a3 is unchanged since flatten created a copy
-
-    a5 = a3.ravel()
-    a5[0] = 1000
-
-    assert a5[0] == 1000
-    assert a3[0, 0] == 1000  # a3 is changed since ravel did *not* create a copy.
-
-
-def test_stacking_splitting() -> None:
-    """
-    hstack and vstack allow you to append arrays horizontally or vertically
-
-    hsplit and vsplit allow you to split arrays horizontally or vertically
-    """
-    a1 = np.arange(0, 3)
-    a2 = np.arange(3, 6)
-
-    assert np.array_equal(np.hstack((a1, a2)), np.arange(0, 6))
-    assert np.array_equal(np.vstack((a1, a2)), np.arange(0, 6).reshape(2, 3))
-
-    assert np.array_equal(np.hsplit(np.arange(0, 6), 2), np.arange(0, 6).reshape(2, 3))
+    # Create a boolean mask (parens required)
+    mask = a < 3
+    assert np.array_equal(
+        mask,
+        [
+            [True, True, True],
+            [True, True, True],
+            [False, False, False],
+        ],
+    )
+    assert np.array_equal(a[mask], [1, 1, 1, 2, 2, 2])
 
 
 def test_numpy_slicing() -> None:
+
     a = np.arange(0, 6).reshape(2, 3)
     #
     # [
@@ -181,6 +160,100 @@ def test_numpy_slicing() -> None:
     assert np.array_equal(a[1, 1], np.array([110, 112, 113]))
 
 
+def test_numpy_stacking_splitting() -> None:
+
+    a1 = np.array([[1, 1], [2, 2]])
+    a2 = np.array([[3, 3], [4, 4]])
+
+    assert np.array_equal(np.hstack((a1, a2)), [[1, 1, 3, 3], [2, 2, 4, 4]])
+    assert np.array_equal(np.vstack((a1, a2)), [[1, 1], [2, 2], [3, 3], [4, 4]])
+
+    a3 = np.hstack((a1, a2))
+    # Split into equally shaped arrays
+    assert np.array_equal(np.hsplit(a3, 2), np.array([a1, a2]))
+
+
+def test_array_manipulation() -> None:
+    """arrays should be thought of as immutable.
+
+    `concatenate` will add to an array
+
+    `delete` will remove from an array
+    """
+    a = np.array([1, 2, 3])
+    a2 = np.concatenate((a, [1, 2, 3]))
+
+    assert np.array_equal(a2, [1, 2, 3, 1, 2, 3])
+
+    a3 = np.delete(a2, (0, 1))  # The index or list of indices to delete
+    assert np.array_equal(a3, [3, 1, 2, 3])
+
+
+def test_reshaping() -> None:
+    """Reshaping with -1 (unknown dimension) will find the appropriate dimension
+    that fitst the data being reshaped. Only one unknown dimension can be used
+    during reshaping.
+
+    reshape: returns it's argument with a modified shape.
+
+    resize: directly modifies it's argument (mutation)
+
+    ravel: flattens an n-dimentional array into a 1D vector, returning a view
+    into the original array
+
+    flatten: flattens an n-dimensional array into a 1D vector, returning a copy
+    of the original array
+
+    """
+    a = np.arange(0, 6)
+    assert a.shape == (6,)
+
+    # [[0 1 2 3 4 5]]
+    a2 = a.reshape([1, -1])
+    assert a2.shape == (1, 6)
+    assert a2[0, 5] == 5
+
+    # [[0], [1], [2], [3], [4], [5]]
+    a3 = a.reshape(-1, 1)
+    assert a3.shape == (6, 1)
+    assert a3[5, 0] == 5
+
+    # Note that reshape creates a *view* into the original array.
+    # You need to .copy() the array if you want a copy.
+    a3[0, 0] = 100
+    assert a[0] == 100
+
+    # flatten and ravel will both flatten an ndarray into a 1D vector.
+    #
+    # *warning* flatten will create a copy, ravel will not.
+    a4 = a3.flatten()
+    a4[0] = 200
+
+    assert a4[0] == 200
+    assert a3[0, 0] == 100  # a3 is unchanged since flatten created a copy
+
+    a5 = a3.ravel()
+    a5[0] = 1000
+
+    assert a5[0] == 1000
+    assert a3[0, 0] == 1000  # a3 is changed since ravel did *not* create a copy.
+
+
+def test_stacking_splitting() -> None:
+    """
+    hstack and vstack allow you to append arrays horizontally or vertically
+
+    hsplit and vsplit allow you to split arrays horizontally or vertically
+    """
+    a1 = np.arange(0, 3)
+    a2 = np.arange(3, 6)
+
+    assert np.array_equal(np.hstack((a1, a2)), np.arange(0, 6))
+    assert np.array_equal(np.vstack((a1, a2)), np.arange(0, 6).reshape(2, 3))
+
+    assert np.array_equal(np.hsplit(np.arange(0, 6), 2), np.arange(0, 6).reshape(2, 3))
+
+
 def test_numpy_adding_removing() -> None:
     a1 = np.array([1, 2, 3])
     a2 = np.array([4, 5])
@@ -204,7 +277,10 @@ def test_numpy_array_operations() -> None:
     assert np.array_equal(a1 - a2, np.array([0, 1]))
     assert np.array_equal(a1 * a2, np.array([1, 2]))
 
-    # Broadcasting - applying an operation to all elements in an array
+    # Broadcasting - applying an operation to all elements in an array.
+    #
+    # In this case, numpy will treat the scaler '2' as [2, 2] to conform to the
+    # length of `a1`.
     assert np.array_equal((a1 * 2), np.array([2, 4]))
 
     # Summary statistics
@@ -212,6 +288,21 @@ def test_numpy_array_operations() -> None:
     assert a1.min() == 1
     assert a1.max() == 2
     assert a1.mean() == 1.5
+
+    # Note that summary statistics happen for the entire array. To get column or
+    # row statistics, use `axis`.
+    a3 = np.array(
+        [
+            [1, 1, 1],
+            [2, 2, 2],
+            [3, 3, 3],
+        ]
+    )
+    assert a3.sum() == 18
+    assert np.array_equal(a3.sum(axis=0), [6, 6, 6])
+    assert np.array_equal(a3.sum(axis=1), [3, 6, 9])
+    assert np.array_equal(a3.max(axis=0), [3, 3, 3])
+    assert np.array_equal(a3.min(axis=1), [1, 2, 3])
 
 
 def test_numpy_matrices() -> None:
@@ -237,6 +328,8 @@ def test_numpy_matrices() -> None:
 
 def test_numpy_rng() -> None:
     """Random number generation"""
+    rng = np.random.default_rng()
+    #
     i = np.random.randint(1, 101)
     assert i >= 1 and i < 101
 
