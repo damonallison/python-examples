@@ -8,7 +8,8 @@ def test_concat() -> None:
     df2 = pd.DataFrame({"one": [7, 8, 9], "two": [10, 11, 12], "four": [1, 2, 3]})
 
     #
-    # Outer will "union" the other axis (columns). No information loss.
+    # Outer will "union" the other axis (columns). No information loss. This is
+    # the default.
     #
     # ignore_index=True will *not* use the index on the concatentation axis
     # (row). All rows will be appended. A new RangeIndex from [0-n) will be
