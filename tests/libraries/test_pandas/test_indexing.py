@@ -1,7 +1,7 @@
 """Examples of indexing and selecting data in pandas
 
 Axis labels (indices) provide a way to identify data elements in a DataFrame.
-Slicing uses axes to select rows / columns.
+Slicing uses indices to select rows / columns.
 
 Note that `[]` and `.` are intuitive, however does have some optimization
 limits. Using data access methods in production code (`.loc` and `.iloc`) is
@@ -16,7 +16,7 @@ IMPORTANT: Some indexing operations will return views
   * df.loc[a:f] (slice (both start and end are included!))
   * df.loc[func] (accepts a callable which accepts a DF and returns valid output for indexing - one of the above)
 
-* iloc`: selection by index
+* iloc`: selection by index (0 based)
 
 """
 import numpy as np
@@ -179,3 +179,50 @@ def test_indexing() -> None:
     assert isinstance(df.index, pd.Index)
     assert df.loc["first", "one_updated"] == 1
     assert np.array_equal(df.loc["first"].values, np.array([1, 4]))
+
+
+def test_multindex() -> None:
+    """Hierarchial indexing (MultiIndex) allows you to with with higher
+    dimensional data.
+    """
+
+    # You can create MultiIndex from tuples or from another DataFrame
+
+    dfKeys = pd.DataFrame(
+        {
+            "first": ["bar", "baz", "foo", "qux"],
+            "second": ["one", "two", "one", "two"],
+        }
+    )
+    mi = pd.MultiIndex.from_frame(dfKeys, names=dfKeys.columns)
+
+    # indices have levels whiich can be accessed by ordinal or name
+    assert np.array_equal(mi.get_level_values(0).values, dfKeys["first"].values)
+    assert np.array_equal(mi.get_level_values("second").values, dfKeys["second"].values)
+
+    df = pd.DataFrame(
+        np.arange(16).reshape(4, 4), index=mi, columns=["A", "B", "C", "D"]
+    )
+
+    # Use partial indexing to get all rows with bar as the first index level
+    assert len(df.loc["bar"]) == 1
+
+    # Retrieve all columns for a particular row by full index
+    assert len(df.loc[("bar", "one")]) == 4
+
+    # Select an individual cell
+    assert df.loc[("bar", "one"), "A"] == 0
+    assert df.loc[("bar", "one"), "B"] == 1
+
+    # Using xs (cross-section) simplifies selecting data at particular level
+    # Select all rows with "one" at the second level
+    assert len(df.xs("one", level="second")) == 2
+
+    # Ensure the index is sorted or range operations will not work
+    df.sort_index(axis=0, inplace=True)
+
+    # Using slices to select ranges on a partial multi-index.
+    #
+    # Here, we are selecting all rows between and including `bar` and `foo`
+    # at the first multi-index level
+    assert len(df.loc["bar":"foo"]) == 3
