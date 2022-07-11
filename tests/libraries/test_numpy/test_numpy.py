@@ -5,6 +5,7 @@ https://en.wikipedia.org/wiki/NumPy
 
 numpy (numerical python) is a numerical computing library. It provides an array
 data type (ndarray: n-dimensional array) and efficient computations on them.
+Numpy allows data types to be specified, which improves performance.
 
 Appending to an ndarray is not as simple as in python. ndarrays are immutable
 from a programmer's standpoint. Appending to an ndarray will return a new
@@ -160,19 +161,6 @@ def test_numpy_slicing() -> None:
     assert np.array_equal(a[1, 1], np.array([110, 112, 113]))
 
 
-def test_numpy_stacking_splitting() -> None:
-
-    a1 = np.array([[1, 1], [2, 2]])
-    a2 = np.array([[3, 3], [4, 4]])
-
-    assert np.array_equal(np.hstack((a1, a2)), [[1, 1, 3, 3], [2, 2, 4, 4]])
-    assert np.array_equal(np.vstack((a1, a2)), [[1, 1], [2, 2], [3, 3], [4, 4]])
-
-    a3 = np.hstack((a1, a2))
-    # Split into equally shaped arrays
-    assert np.array_equal(np.hsplit(a3, 2), np.array([a1, a2]))
-
-
 def test_array_manipulation() -> None:
     """arrays should be thought of as immutable.
 
@@ -199,10 +187,10 @@ def test_reshaping() -> None:
     resize: directly modifies it's argument (mutation)
 
     ravel: flattens an n-dimentional array into a 1D vector, returning a view
-    into the original array
+    into the original array. ravel is memory efficient.
 
     flatten: flattens an n-dimensional array into a 1D vector, returning a copy
-    of the original array
+    of the original array. flatten reduces potential reference errors.
 
     """
     a = np.arange(0, 6)
@@ -239,7 +227,7 @@ def test_reshaping() -> None:
     assert a3[0, 0] == 1000  # a3 is changed since ravel did *not* create a copy.
 
 
-def test_stacking_splitting() -> None:
+def test_numpy_stacking_splitting() -> None:
     """
     hstack and vstack allow you to append arrays horizontally or vertically
 
@@ -252,6 +240,17 @@ def test_stacking_splitting() -> None:
     assert np.array_equal(np.vstack((a1, a2)), np.arange(0, 6).reshape(2, 3))
 
     assert np.array_equal(np.hsplit(np.arange(0, 6), 2), np.arange(0, 6).reshape(2, 3))
+
+    # 2D example
+    a1 = np.array([[1, 1], [2, 2]])
+    a2 = np.array([[3, 3], [4, 4]])
+
+    assert np.array_equal(np.hstack((a1, a2)), [[1, 1, 3, 3], [2, 2, 4, 4]])
+    assert np.array_equal(np.vstack((a1, a2)), [[1, 1], [2, 2], [3, 3], [4, 4]])
+
+    a3 = np.hstack((a1, a2))
+    # Split into equally shaped arrays
+    assert np.array_equal(np.hsplit(a3, 2), np.array([a1, a2]))
 
 
 def test_numpy_adding_removing() -> None:
@@ -315,9 +314,9 @@ def test_numpy_matrices() -> None:
     #     ]
     #
 
-    # the axis parameter is the axis that gets *collapsed*
+    # Important: The axis parameter is the axis that gets *collapsed*
     #
-    # when we set axis=0, we are collapsing rows and calculating the sum
+    # When we set axis=0, we are collapsing rows and calculating the sum
     # (effectively summming columns, which is a bit confusing)
     #
     # when we set axis=1, we are collapsing *columns* and calculating the sum
@@ -329,9 +328,14 @@ def test_numpy_matrices() -> None:
 def test_numpy_rng() -> None:
     """Random number generation"""
     rng = np.random.default_rng()
-    #
+
+    # Generate a single random value from [low->high)
     i = np.random.randint(1, 101)
     assert i >= 1 and i < 101
+
+    # Creating a random matrix w/ size
+    a = rng.integers(0, 100, size=(2, 2))
+    assert a.shape == (2, 2)
 
 
 def test_numpy_statistics() -> None:
