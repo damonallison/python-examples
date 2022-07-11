@@ -100,20 +100,26 @@ def test_lambdas() -> None:
 
 def test_generator() -> None:
     def gen_up_to(val):
-        """Generators are preferable to lists in certain scenarios.
+        """Generator functions are functions which behave like (return)
+        iterators.
+
+        Generators are preferable to lists in certain scenarios:
 
         They are lazy, do not take up memory, could be infinite.
 
-        They can only be iterated over once.
+        Generators can only be iterated over once.
         """
         for x in range(val):
             yield x
 
+    # using list to exhaust the iterator
     assert [0, 1] == list(gen_up_to(2))
 
+    # using a list comprehension to exhaust the iterator
+    assert [0, 0] == [x for x in gen_up_to(2)]
+
     # You can create generator expressions like you would a list
-    # comprehension. Generator expressions tend to be more memory friendly
-    # than equivalent list comprehensions.
-    gen = (x ** 2 for x in range(3))
-    assert (0, 1, 4) == tuple(gen)
+    # comprehension. Generator expressions are wrapped in ()
+    square = (x ** 2 for x in range(3))
+    assert (0, 1, 4) == tuple(square)
     assert (0, 1, 4) == tuple(x ** 2 for x in range(3))
