@@ -116,7 +116,7 @@ def test_generator() -> None:
     assert [0, 1] == list(gen_up_to(2))
 
     # using a list comprehension to exhaust the iterator
-    assert [0, 0] == [x for x in gen_up_to(2)]
+    assert [0, 1] == [x for x in gen_up_to(2)]
 
     # You can create generator expressions like you would a list
     # comprehension. Generator expressions are wrapped in ()
