@@ -24,6 +24,37 @@ import pandas as pd
 import pytest
 
 
+def test_creation() -> None:
+    #
+    # Creating a DF from a list-like object
+    #
+    df = pd.DataFrame([1, 2, 3], columns=["test"])
+    assert df["test"].equals(pd.Series([1, 2, 3]))
+
+    assert isinstance(df.index, pd.RangeIndex)
+    assert isinstance(df.columns, pd.Index)
+
+    assert df.index.equals(pd.RangeIndex(start=0, stop=3, step=1))
+    assert df.columns.equals(pd.Index(["test"]))
+    assert df.dtypes.equals(pd.Series([int], index=["test"]))
+
+    #
+    # Creating a DF from a dict
+    #
+    df = pd.DataFrame({"test": [1, 2, 3]})
+
+    assert isinstance(df.index, pd.RangeIndex)
+    assert isinstance(df.columns, pd.Index)
+
+    assert df.index.equals(pd.RangeIndex(start=0, stop=3, step=1))
+    assert df.columns.equals(pd.Index(["test"]))
+    assert df.dtypes.equals(pd.Series([int], index=["test"]))
+
+    #
+    #
+    #
+
+
 def test_selection() -> None:
     """Pandas object selection based on index.
 
@@ -226,3 +257,37 @@ def test_multindex() -> None:
     # Here, we are selecting all rows between and including `bar` and `foo`
     # at the first multi-index level
     assert len(df.loc["bar":"foo"]) == 3
+
+
+def test_min_max_limiting() -> None:
+    """Shows how to enforce minimum and maximum values at the column or
+    dataframe level.
+
+    At the column level, use `.loc` with a boolean mask to select the correct
+    rows and assign the min value.
+
+    At the DataFrame level, use .clip() to enforce the upper and/or lower bound.
+    """
+    d = {
+        "one": [-1, 0, 1],
+        "two": [2, 3, -1],
+    }
+    # Update a single column
+    df = pd.DataFrame(d)
+    #
+    # .loc accepts a boolean mask and set of columns to return.
+    #
+    df.loc[df["one"] < 0, ["one"]] = 0
+    #
+    #   one   two
+    #   -1     2
+    #    0     3
+    #    1    -1
+    #
+    assert df.iloc[0, 0] == 0
+    assert df.iloc[2, 1] == -1
+
+    # You can use `clip` to enforce minimum and maximum values for an entire df.
+    df = df.clip(lower=0.0)
+    assert df.iloc[0, 0] == 0.0
+    assert df.iloc[2, 1] == 0.0

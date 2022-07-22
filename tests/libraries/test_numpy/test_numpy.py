@@ -76,11 +76,11 @@ def test_numpy_creation() -> None:
 
     # Copy to create an entirely new array
     a = np.array([1, 2, 3], dtype=np.int64)
-    a6 = a.copy()
-    a6[0] = 11
-    a6[1] = 22
+    a2 = a.copy()
+    a2[0] = 11
+    a2[1] = 22
     assert np.array_equal(a, np.array([1, 2, 3]))
-    assert np.array_equal(a6, np.array([11, 22, 3]))
+    assert np.array_equal(a2, np.array([11, 22, 3]))
 
 
 def test_numpy_indexing() -> None:
@@ -101,6 +101,8 @@ def test_numpy_indexing() -> None:
     # specified in the slice.
     assert np.array_equal(a[2], [3, 3, 3])
     assert np.array_equal(a[2, :], [3, 3, 3])
+    # The ... notation fills in ":" for all remaining axes
+    assert np.array_equal(a[2, ...], [3, 3, 3])
 
     assert np.array_equal(a[0:2, 0], np.array([1, 2]))
     assert np.array_equal(a[0:2, 0:-1], np.array([[1, 1], [2, 2]]))
@@ -110,10 +112,12 @@ def test_numpy_indexing() -> None:
     assert np.array_equal(a[:, 0], np.array((1, 2, 3)))
     assert np.array_equal(a[..., 0], np.array((1, 2, 3)))
 
+    #
     # Boolean masking. Parens are optional for single conditions, but required
     # for using and (&) or or (|).
     #
-    # IMPORTANT: Boolean masking will always return a *COPY*
+    # IMPORTANT: Boolean masking is considered "advanced indexing" and will
+    # always return a *COPY*.
     #
     low = a[(a < 3)]
 
@@ -407,6 +411,12 @@ def test_numpy_statistics() -> None:
 
 
 def test_numpy_broadcasting_rules() -> None:
+    """Broadcasting "extends", or "broadcasts" a smaller array or scalar to the
+    dimension of a larger array.
+
+    Broadcasting
+    """
+    #
     # Arrays with the size of 1 along a particular dimension act as if they had
     # the size of the array with the largest shape along that dimension.
     #
@@ -414,4 +424,4 @@ def test_numpy_broadcasting_rules() -> None:
 
     a1 = np.array([[1, 2], [3, 4]])
     a2 = np.array([2, 2])
-    print(a1 + a2)
+    assert np.array_equal([[3, 4], [5, 6]], a1 + a2)
