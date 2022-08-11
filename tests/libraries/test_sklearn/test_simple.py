@@ -46,6 +46,18 @@ def test_linear_regresssion() -> None:
     Feature Selection
     -----------------
 
+    Feature selection is the process of selecting the most important features.
+    The best features are those which predict the target the best.
+
+    Always use domain experts if possible. They have intuition on the data to
+    use.
+
+    Practical advice
+        * Linear models: The higher the correlation between Xi and Y, the better
+          Xi is.
+        * Tree models: The higher the feature_importance, the better.
+        * Use LASSO or Ridge. The higher the coefficients, the better.
+
     """
     X, y = datasets.make_regression(
         n_samples=10000,
