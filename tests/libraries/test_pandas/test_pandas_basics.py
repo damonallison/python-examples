@@ -50,10 +50,6 @@ def test_creation() -> None:
     assert df.columns.equals(pd.Index(["test"]))
     assert df.dtypes.equals(pd.Series([int], index=["test"]))
 
-    #
-    #
-    #
-
 
 def test_selection() -> None:
     """Pandas object selection based on index.
