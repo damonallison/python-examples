@@ -45,6 +45,7 @@ lightgbm = "^3.3.2"
 xgboost = "^1.6.1"
 dask = {version = "^2022.6.1", extras = ["distributed"]}
 pyarrow = "^8.0.0"
+jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
