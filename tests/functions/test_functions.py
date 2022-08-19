@@ -1,20 +1,27 @@
-from typing import Any, List, Dict, Tuple
+from typing import Any, Dict, Tuple
+
+from copy import copy, deepcopy
 
 
 def test_nested_functions() -> None:
     """Functions can be nested within functions."""
 
-    def add(x: int, y: int) -> int:
+    def inc_and_add(x: int, y: int) -> int:
+        x += 1
+        y += 1
         return x + y
 
-    assert 4 == add(2, 2)
-    assert 4 == add(x=2, y=2)
+    one = 1
+    two = 2
+    assert inc_and_add(one, two) == 5
+    assert one == 1
+    assert two == 2
 
 
 def test_defaults() -> None:
     """Tests functions with default parameters."""
 
-    def fun_defaults(name: str, num: int = 5) -> List[str]:
+    def fun_defaults(name: str, num: int = 5) -> list[str]:
         """Function arguments can have default values."""
         ret = []
         for i in range(num):

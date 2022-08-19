@@ -114,26 +114,21 @@ def test_iteration() -> None:
     lst = ["damon", "kari", "grace", "lily", "cole"]
     expected = []
 
-    # Remember to always iterate over a *copy* of the list if you are deleting from the list
+    # Remember to always iterate over a *copy* of the list if you are mutating the list
     for name in lst.copy():
         expected.append(name)
 
     assert lst == expected
 
     # To iterate over just the indices of a sequence, use range(len(lst)).
-    # or enumerate()
-    #
-    # for i, _ in enumerate(lst):
     expected = []
     for i in range(len(lst)):
         expected.append(lst[i])
 
     assert lst == expected
 
-    #
     # To iterate over indices and values simultaneously, use enumerate()
     # enumerate() returns tuples of the indicies and values of a list.
-    #
     pos = []
     val = []
     for i, v in enumerate(["tic", "tac", "toe"]):

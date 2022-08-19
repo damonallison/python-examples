@@ -34,10 +34,11 @@ Namespaces
 * `global` is used to declare varaibles in the module's namespace.
 * `nonlocal` is used to reference variables in a parent (not module) namespace.
 
-Classes add another
+Classes add another namespace.
 """
 
 import builtins
+from copy import copy, deepcopy
 
 from tests.classes.logger import Logger
 from tests.classes.person import Person
@@ -187,3 +188,56 @@ class TestClasses:
         python's `with` statement."""
         with Person("damon", "allison") as p:
             assert "damon", p.first_name
+
+
+def test_object_copy() -> None:
+    logs: list[str] = []
+
+    # All func arguments are "pass by value"
+    class C:
+        #
+        # Custom objects can implement __copy__ and __deepcopy__ to control the copying behavior.
+        # See
+        #
+        def __init__(self, name: str = "default", children: list[str] = None):
+            self.name = name
+            self.children = children or []
+
+        def __copy__(self) -> "C":
+            return C(self.name, self.children)
+
+        def __deepcopy__(self, memo: dict) -> "C":
+            return C(self.name, deepcopy(self.children))
+
+    def mutate_c(c: C):
+        c.name += " mutated"
+        c.children.append("mutated")
+
+    c = C(children=["test"])
+    assert hasattr(c, "name")
+    assert hasattr(c, "children")
+
+    assert c.name == "default"
+    assert c.children == ["test"]
+
+    mutate_c(c)
+    assert c.name == "default mutated"
+    assert c.children == ["test", "mutated"]
+
+    c2 = copy(c)
+    mutate_c(c2)
+    assert c.name == "default mutated"
+    assert c.children == ["test", "mutated", "mutated"]  # updated - copy is shallow
+
+    assert c2.name == "default mutated mutated"
+    assert c2.children == ["test", "mutated", "mutated"]
+
+    d = C(name="test", children=["test"])
+    d2 = deepcopy(d)
+
+    mutate_c(d)
+    assert d.name == "test mutated"
+    assert d.children == ["test", "mutated"]
+
+    assert d2.name == "test"
+    assert d2.children == ["test"]  # not mutated - copy is deep (recursive)
