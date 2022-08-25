@@ -51,10 +51,14 @@ import time
 
 from fastapi import Body, Path, Query
 
-from starlette_context import context, middleware, plugins
+from starlette_context import middleware, plugins
 
-from models import echo, estimate, submod
+from models import echo, estimate
+from models.context import RequestContext
+
 import bundle_plugin
+
+
 logger: logging.Logger
 
 app = fastapi.FastAPI()
@@ -101,8 +105,15 @@ async def time_request(request: fastapi.applications.Request, call_next):
 
 @app.post("/debug")
 async def get_debug() -> dict:
-    submod.add("hello", "world")
-    return submod.bundle_context()
+    with RequestContext.new() as cc:
+        RequestContext.add("inside", "true")
+        print(RequestContext.all())
+        with RequestContext.new() as cc2:
+            RequestContext.add("deep inside", "true")
+            print(RequestContext.all())
+        print(RequestContext.all())
+    print(RequestContext.all())
+    return RequestContext.all()
 
 
 # Note that path operations are evaluated in the order they are declared.
