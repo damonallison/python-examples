@@ -6,7 +6,9 @@ authors = ["Damon Allison <damon@shipt.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "^0.78.0"
+fastapi = "^0"
+starlette-context = "^0.3.4"
+uvicorn = {version = "^0.18.3", extras = ["standard"]}
 
 [tool.poetry.dev-dependencies]
 

@@ -56,7 +56,7 @@ def test_numpy_creation() -> None:
     assert a.ndim == 1
     assert a.shape == (3,)  # `shape` is always a tuple
     assert a.size == 3  # Total elements of the array (all dimensions)
-    assert a.dtype == np.int8
+    assert a.dtype == np.int
 
     # In numpy, dimensions are called axes. axis=0 are rows, axis=1 are columns
     a2 = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=np.int8)
@@ -122,6 +122,9 @@ def test_numpy_datatypes() -> None:
     # not change.
     no = no.astype(np.float16)
     assert math.isclose(1.1, no[0], abs_tol=0.01)
+    print(f"type == {type(no.dtype)}")
+    np.issubdtype(np.dtype, np.floating)
+    assert isinstance(no.dtype, np.floating)
 
 
 def test_numpy_indexing() -> None:
