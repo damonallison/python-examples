@@ -41,21 +41,36 @@ FastAPI is based on AnyIO, which makes it compatible with `asyncio` (python's
 standard libarry) and `trio`.
 """
 
+from typing import List, Optional
+
+from datetime import datetime
 import logging
 import uuid
 import fastapi
 import time
 
-from fastapi import requests, responses, Body, Path, Query
+from fastapi import Body, Path, Query
 
-from typing import List, Optional
-from datetime import datetime
+from starlette_context import context, middleware, plugins
 
-from python_examples.fastapi.models import echo, estimate
-
+from models import echo, estimate, submod
+import bundle_plugin
 logger: logging.Logger
 
 app = fastapi.FastAPI()
+
+# Add context middleware
+# app.add_middleware(middleware.RawContextMiddleware,
+#     plugins=[
+#     ],
+# )
+
+app.add_middleware(middleware.ContextMiddleware,
+    plugins=[
+        plugins.request_id.RequestIdPlugin(force_new_uuid=True),
+        bundle_plugin.BundleIDPlugin(),
+    ]
+)
 
 # Application events - startup / shutdown
 @app.on_event("startup")
@@ -74,7 +89,7 @@ async def shutdown():
 
 # Middleware
 @app.middleware("http")
-async def time_request(request: requests.Request, call_next):
+async def time_request(request: fastapi.applications.Request, call_next):
     """An example middleware."""
     start = time.time()
     response = await call_next(request)
@@ -82,6 +97,12 @@ async def time_request(request: requests.Request, call_next):
     response.headers["X-Process-Time"] = str(duration)
     logger.info(f"X-Process-Time {duration} {request.url}")
     return response
+
+
+@app.post("/debug")
+async def get_debug() -> dict:
+    submod.add("hello", "world")
+    return submod.bundle_context()
 
 
 # Note that path operations are evaluated in the order they are declared.
