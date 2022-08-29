@@ -109,7 +109,7 @@ def test_sorting() -> None:
 
 
 def test_iteration() -> None:
-    """`for` iterates over the elements in a sequence."""
+    """`for` iterates over the elements in any iterable."""
 
     lst = ["damon", "kari", "grace", "lily", "cole"]
     expected = []
@@ -121,6 +121,7 @@ def test_iteration() -> None:
     assert lst == expected
 
     # To iterate over just the indices of a sequence, use range(len(lst)).
+    # Range is an iterable, not a list.
     expected = []
     for i in range(len(lst)):
         expected.append(lst[i])

@@ -1,3 +1,6 @@
+"""The dictionary is the most important data structure in python. Python's
+internal data structures (i.e., class internals) are stored as dict()."""
+
 from collections import defaultdict
 
 import pytest
@@ -30,7 +33,14 @@ def test_dictionary_membership() -> None:
     assert "first" in d
     assert "middle" not in d
 
-    # Test for membership and retrieving a value using .get()
+    # keys() and values() return iterators of keys / values respectively in the
+    # order they were inserted into the dictionary. However, don't rely on this
+    # behavior. You'll typically want to treat keys as a set.
+    assert list(d.keys()) == ["first", "last"]
+    assert list(d.values()) == ["damon", "allison"]
+
+    # Test for membership and retrieving a value using .get(), which returns
+    # null if the key doesn't exist.
     assert d.get("first") == "damon"
     assert d.get("middle") is None
     assert d.get("middle", "default") == "default"
@@ -51,7 +61,7 @@ def test_dictionary_membership() -> None:
 
 
 def test_dictionary_iteration() -> None:
-    """Iterate dictionaries using key, value"""
+    """Iterate dictionaries using items()"""
 
     d = {"first": "damon", "last": "allison"}
 

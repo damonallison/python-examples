@@ -287,3 +287,26 @@ def test_min_max_limiting() -> None:
     df = df.clip(lower=0.0)
     assert df.iloc[0, 0] == 0.0
     assert df.iloc[2, 1] == 0.0
+
+
+def test_pandas_itertuples() -> None:
+    """itertuples return each row as a tuple. Providing a `name` will
+    return a namedtuple.
+    """
+    d = {
+        "driver_id": [1, 2],
+        "first": ["damon", "cole"],
+        "last": ["allison", "allison"],
+    }
+    df = pd.DataFrame(d)
+
+    for i in range(5):
+        print(df.shape)
+        df = df.append(df, ignore_index=True)
+
+    cache = {}
+    for t in df.itertuples(index=False, name="Driver"):
+        cache[t.driver_id] = t
+
+    print(df.shape)
+    print(df.head())

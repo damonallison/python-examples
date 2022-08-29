@@ -53,10 +53,9 @@ from fastapi import Body, Path, Query
 
 from starlette_context import middleware, plugins
 
-from models import echo, estimate
-from models.context import RequestContext
-
-import bundle_plugin
+from .models import echo, estimate
+from .models.context import RequestContext
+from . import bundle_plugin
 
 
 logger: logging.Logger
@@ -69,11 +68,12 @@ app = fastapi.FastAPI()
 #     ],
 # )
 
-app.add_middleware(middleware.ContextMiddleware,
+app.add_middleware(
+    middleware.ContextMiddleware,
     plugins=[
         plugins.request_id.RequestIdPlugin(force_new_uuid=True),
         bundle_plugin.BundleIDPlugin(),
-    ]
+    ],
 )
 
 # Application events - startup / shutdown
