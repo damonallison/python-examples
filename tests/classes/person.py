@@ -150,6 +150,8 @@ class Person:
         return GenericIterator(self.children.copy())
 
     # A generator function ("generator") is a cleaner way to write iterators.
+    # Generators maintain internal state and implement the iterator protocol
+    # (i.e., __iter__, __next__) for you.
     #
     # A generator is simply a function which uses the yield keyword, returning
     # the "next" object to the caller.

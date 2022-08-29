@@ -80,6 +80,7 @@ def test_pandas_types() -> None:
     assert df["type_time"].dtype == np.object_
     assert df["type_time"].dtype == object
 
+    # TODO(@damon): What is the actual datetime64 DType object?
     assert df["type_datetime"].dtype == "datetime64[ns]"
     assert df["type_datetime_tz"].dtype == "datetime64[ns, UTC]"
 
