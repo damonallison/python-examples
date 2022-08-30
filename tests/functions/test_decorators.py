@@ -1,6 +1,8 @@
 import logging
 import functools
-from typing import Any
+from typing import Any, Callable, TypeVar, cast
+
+import pytest
 
 """Decorators allow you to wrap function invocation, extending it's behavior. Or
 wrap a class, changing the way __init__ is handled (i.e., singleton).
@@ -26,8 +28,58 @@ the method invocation.
 
 Decorators can also be applied to classes. Class decorators receive classes as
 their argument and wrap the way __init__ works.
-
 """
+
+DecoratedFunc = TypeVar("DecoratedFunc", bound=Callable[..., Any])
+
+
+def test_simple_decorator(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.DEBUG)
+
+    def logging_decorator(func: DecoratedFunc) -> DecoratedFunc:
+        @functools.wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            args_repr = [repr(a) for a in args]
+            kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]
+            logging.info(
+                "calling %s. args = %s, kwargs = %s",
+                func.__name__,
+                args_repr,
+                kwargs_repr,
+            )
+            return func(*args, **kwargs)
+
+        return cast(DecoratedFunc, wrapper)
+
+    @logging_decorator
+    def say_hello(name: str) -> str:
+        return f"Hello, {name}"
+
+    class Person:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def __str__(self) -> str:
+            return f"Person: {self.name}"
+
+        @logging_decorator
+        def echo_name(self) -> str:
+            return f"Hello, {self.name}"
+
+    assert say_hello("cole") == "Hello, cole"
+
+    assert len(caplog.records) == 1
+    assert (
+        caplog.records[0].message
+        == "calling say_hello. args = [\"'cole'\"], kwargs = []"
+    )
+    caplog.clear()
+
+    p = Person("cole")
+    p.echo_name()
+    assert len(caplog.records) == 1
+    assert caplog.records[0].message.index("calling echo_name") == 0
+
 
 # logtimes calls a function a repeated number of times, wrapping each invocation
 # with log statements.
@@ -35,7 +87,7 @@ their argument and wrap the way __init__ works.
 # logtimes is a function that *returns* a decorator.
 #
 # When decorators are used *without* parentheses, the decorator is returned
-# directly. See @logtwice
+# directly. See @runtwice
 #
 # When decorators are used *with* parentheses, a decorator must be returned from
 # the function invocation. See @logtimes(num_times = 2)

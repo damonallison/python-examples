@@ -1,4 +1,18 @@
-"""Examples of indexing and selecting data in pandas
+"""Pandas provides data manipulation tools for working with 2D data.
+
+Pandas has two main data structures:
+
+1. Series: A list of values with an index.
+2. DataFrame: A 2D data set with row and column indices.
+
+Series
+------
+
+
+* The line between numpy / pandas
+
+
+Examples of indexing and selecting data in pandas
 
 Axis labels (indices) provide a way to identify data elements in a DataFrame.
 Slicing uses indices to select rows / columns.
@@ -24,7 +38,55 @@ import pandas as pd
 import pytest
 
 
-def test_creation() -> None:
+def test_series() -> None:
+    "Series is a single array of values, each with an index value."
+    s = pd.Series([10, 20, 30], index=["A", "B", "C"])
+
+    assert isinstance(s.index, pd.Index)
+
+    # Data is selected by index (label)
+    assert "A" in s
+    assert "D" not in s
+
+    # Mathematical operations operate on data by index value. This is called
+    # "data alignment". This is similar to how relational SQL does joins based
+    # on join column values.
+    s2 = pd.Series([100, 200, 300], index=["B", "C", "D"])
+    s3 = s + s2
+
+    # "A" and "D" do not exist in both series, therefore N/A
+    assert pd.isna(s3["A"]) and pd.isna(s3["D"])
+    assert (s3["B"], s3["C"]) == (120, 230)
+
+    # An entire index can be updated, but an index value cannot be mutated
+    s2.index = ["A", "B", "C"]
+    assert (s + s2).values.tolist() == [110, 220, 330]
+
+    with pytest.raises(TypeError):
+        s2.index[0] = "0"
+
+
+def test_series_from_dict() -> None:
+    """You can think of a series as a labeled set of values, like an ordered
+    dictionary."""
+
+    states = {"Minnesota": 3500, "Texas": 11222}
+    s = pd.Series(states)
+
+    assert isinstance(s.index, pd.Index)
+    assert s.index.values.tolist() == ["Minnesota", "Texas"]
+    assert s.size == 2
+    assert s["Minnesota"] == 3500
+
+    s = pd.Series(states, index=["Minnesota", "Texas", "New York"])
+    assert pd.isna(s["New York"])
+
+    assert "Not there" not in s.index
+    assert "Not there" not in s
+    assert "Minnesota" in s
+
+
+def test_dataframe_creation() -> None:
     #
     # Creating a DF from a list-like object
     #
@@ -39,20 +101,25 @@ def test_creation() -> None:
     assert df.dtypes.equals(pd.Series([int], index=["test"]))
 
     #
-    # Creating a DF from a dict
+    # Creating a DF from a dict. Each list must be equal length.
     #
-    df = pd.DataFrame({"test": [1, 2, 3]})
+    df = pd.DataFrame(
+        {
+            "test": [1, 2, 3],
+            "test2": [2, 3, 4],
+        }
+    )
 
     assert isinstance(df.index, pd.RangeIndex)
     assert isinstance(df.columns, pd.Index)
 
     assert df.index.equals(pd.RangeIndex(start=0, stop=3, step=1))
-    assert df.columns.equals(pd.Index(["test"]))
-    assert df.dtypes.equals(pd.Series([int], index=["test"]))
+    assert df.columns.equals(pd.Index(["test", "test2"]))
+    assert df.dtypes.equals(pd.Series([int, int], index=["test", "test2"]))
 
 
-def test_selection() -> None:
-    """Pandas object selection based on index.
+def test_dataframe_indexing() -> None:
+    """Indexing is the process of selecting data based off index values.
 
     Pandas generally supports three types of multi-axis indexing:
 
@@ -81,8 +148,10 @@ def test_selection() -> None:
     s = df["experience"].sort_index(axis=0)
 
     assert isinstance(s, pd.Series)
-    assert s.loc[15] == 11860
+    assert s.loc[15] == 11860  # Index based (driver_id), not ordinal.
 
+    # A form of "Advanced indexing" - selecting multiple series values based off
+    # a list. (i.e., [15, 131])
     assert np.array_equal(s.loc[[15, 131]].values, np.array([11860, 896]))
 
     # Selecting a column using Python attributes
@@ -101,13 +170,24 @@ def test_selection() -> None:
     assert s[914189] == 26
 
     #
-    # Selecting a row by label location (loc).
+    # While you *could* use python indexing to select values from a series, the
+    # behavior changes based on the index type. With integer indexes, s[0] will
+    # select the row with the index value 0. With string indexes, s[0] will
+    # always select the first value (by ordinal).
+    #
+    # In order to ensure you're using the index value or ordinal to select
+    # values, always use `loc` and `iloc`, which uses index values and ordinal
+    # values, respectively.
+    #
+
+    #
+    # Selecting a row by label value (loc).
     #
     s = df.loc[914189]
     assert s["experience"] == 26
 
     #
-    # Selecting a row by index location (iloc)
+    # Selecting a row by index ordinal (iloc)
     #
     s = df.iloc[0]
     assert s["experience"] == 26
@@ -178,19 +258,20 @@ def test_selection() -> None:
     assert rows.iloc[0]["experience"] == 26
 
 
-def test_indexing() -> None:
+def test_dadtaframe_indexes() -> None:
     """Indexes provide metadata about axes.
 
-    An index allows us to select data using non-ordinal values (i.e.,
-    strings).
-
+    An index allows us to select data using non-ordinal values (i.e., strings).
+    Indexes can have duplicate values and may or may not be monotonically
+    increasing.
     """
-
     # By default, an int64-like RangeIndex (0-n) is applied.
     df = pd.DataFrame(data={"one": [1, 2, 3], "two": [4, 5, 6]})
 
+    # By default, a 0 based RangeIndex is created for each DF
     assert isinstance(df.index, pd.RangeIndex)
     assert np.array_equal(df.index.values, [0, 1, 2])
+    assert df.index.is_monotonic_increasing
 
     # Set axis 0's (row) index to a custom index using `.index``
     df.index = ["first", "second", "third"]
@@ -206,6 +287,18 @@ def test_indexing() -> None:
     assert isinstance(df.index, pd.Index)
     assert df.loc["first", "one_updated"] == 1
     assert np.array_equal(df.loc["first"].values, np.array([1, 4]))
+
+
+def test_reindexing() -> None:
+    """Reindexing: rearranging the values to align with a new index"""
+    df = pd.DataFrame(["cole", "lily", "grace"], index=[3, 2, 1], columns=["kids"])
+
+    # Calling reindex arranges the data acccording to the new index, introducing
+    # pd.na values if any index values are not present
+    df = df.reindex([1, 2, 3, 4])
+
+    assert df.loc[[1, 2, 3], "kids"].tolist() == ["grace", "lily", "cole"]
+    assert pd.isna(df.loc[4, "kids"])
 
 
 def test_multindex() -> None:
