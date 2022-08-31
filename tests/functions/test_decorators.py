@@ -1,6 +1,6 @@
 import logging
 import functools
-from typing import Any, Callable, TypeVar, cast
+from typing import Any, Callable, TypeVar, Union, cast
 
 import pytest
 
@@ -33,10 +33,89 @@ their argument and wrap the way __init__ works.
 DecoratedFunc = TypeVar("DecoratedFunc", bound=Callable[..., Any])
 
 
+class ClassDecorator:
+    """Decorators can be classes. When decorated with a class, the function
+    becomes an instance of the class. Thus, we can add functionality to the
+    function by defining methods on the decorating class."""
+
+    def __init__(self, arg: Union[Callable, int]):
+        """When decorating a function with a class, __init__ is called with
+        potentially two different sets of arguments.
+
+        When called without parameters, (i.e., @ClassDecorator), the function
+        being decorated is passed as the argument.
+
+        When called *with* parameters, (i.e., @ClassDecorator(3)), the
+        parameters are passed are passed as arguments to __init__.
+
+        __call__ is only called once in the decorator process with a single
+        argument, the function being decorated. Therefore, __call__ needs to
+        return a wrapped function that will be invoked when the function is
+        invoked.
+        """
+        self._fn = None
+        self._count = 1
+        if isinstance(arg, Callable):
+            self._fn = arg
+        else:
+            self._count = arg
+
+    def _execute(self, *args: Any, **kwargs: Any) -> Any:
+        logging.info("calling %s with args = %s kwargs = %s", self._fn, args, kwargs)
+        return self._fn(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self._fn is None:
+            # The decorater was created with an argument.
+            self._fn = args[0]
+
+            @functools.wraps(self._fn)
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
+                return self._execute(*args, **kwargs)
+
+            return wrapper
+
+        # The decorator was created without an argument. Therefore, the function
+        # being decorated is already set.
+        return self._execute(*args, **kwargs)
+
+    def __get__(self, instance: object, owner: type) -> Any:
+        """Makes ClassDecorator a "descriptor" class.
+
+        A descriptor class is used here to capture the object instance to which
+        this decorator is applied. When adding the decorator on a class instance
+        method, the object instance (i.e., self) is passed to __get__. We use
+        this to capture self and add the variable to a partial func which is
+        passed to __call__.
+
+        This allows us to capture the object instance to which the decorator is applied.
+        """
+        return functools.partial(self.__call__, instance)
+
+
+def test_class_decorator(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.DEBUG)
+
+    @ClassDecorator
+    def add(x, y):
+        return x + y
+
+    assert add(2, 2) == 4
+
+    print(caplog.records)
+    assert caplog.records[0].message.index("calling") == 0
+
+
 def test_simple_decorator(caplog: pytest.LogCaptureFixture) -> None:
     caplog.set_level(logging.DEBUG)
 
     def logging_decorator(func: DecoratedFunc) -> DecoratedFunc:
+        # functools.wraps "wraps" the inner function (in this case "wrapper") to
+        # appear like the wrapped function (in this case "func") when performing
+        # introspection on the decorator.
+        #
+        # For example, doing help(logging_decorator) will return help for
+        # logging_decorator, not "wrapper"
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             args_repr = [repr(a) for a in args]
