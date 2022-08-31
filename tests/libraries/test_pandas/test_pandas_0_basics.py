@@ -12,23 +12,36 @@ Series
 * The line between numpy / pandas
 
 
-Examples of indexing and selecting data in pandas
+Examples of indexing and selecting data in pandas:
+-------------------------------------------------
 
-Axis labels (indices) provide a way to identify data elements in a DataFrame.
-Slicing uses indices to select rows / columns.
+** IMPORTANT **
 
-Note that `[]` and `.` are intuitive, however does have some optimization
-limits. Using data access methods in production code (`.loc` and `.iloc`) is
-recommended.
+Always use `.loc` and `.iloc` to perform selection. Using df[] will use index
+based selection (loc) if the index is numeric, otherwise it will use ordinal
+based selection (iloc). To ensure you're always obtaining the values you intend
+to, use `.loc` and `.iloc`.
 
-IMPORTANT: Some indexing operations will return views
+** IMPORTANT **
 
-* `loc`: selection by label
-  * df.loc["label"] (single label)
-  * df.loc[["a", "b", "c"]] (array)
-  * df.loc[[True, False, True]] (boolean mask)
-  * df.loc[a:f] (slice (both start and end are included!))
-  * df.loc[func] (accepts a callable which accepts a DF and returns valid output for indexing - one of the above)
+When slicing based on labels (loc), both endpoints are included. This is
+different than python!
+
+IMPORTANT: Some indexing operations (non-"advanced") will return views. Advanced
+indexing operations will return copies. "Advanced" indexing includes:
+
+* Boolean masking:
+    df.loc[df["col"] > 2]
+
+* Selection with lists:
+    > df.loc[[0, 1, 2]]
+
+
+* `loc`: selection by label * df.loc["label"] (single label) * df.loc[["a", "b",
+  "c"]] (array) ("advanced" indexing - returns a copy) * df.loc[[True, False,
+  True]] (boolean mask) ("advanced" indexing - returns a copy) * df.loc[a:f]
+  (slice (both start and end are included!)) * df.loc[func] (accepts a callable
+  which accepts a DF and returns valid output for indexing - one of the above)
 
 * iloc`: selection by index (0 based)
 
@@ -256,6 +269,16 @@ def test_dataframe_indexing() -> None:
     rows = df.filter(items=[914189], axis=0)
     assert len(rows)
     assert rows.iloc[0]["experience"] == 26
+
+
+def test_dataframe_slicing() -> None:
+    """IMPORTANT: Slicing by indexes will return *BOTH ENDS* of the range.
+    Slicing by ordinal will not."""
+
+    df = pd.DataFrame(["this", "is", "a", "test"], columns=["one"])
+
+    assert df.loc[0:1, "one"].to_list() == ["this", "is"]
+    assert df.iloc[0:1, 0].to_list() == ["this"]
 
 
 def test_dadtaframe_indexes() -> None:
