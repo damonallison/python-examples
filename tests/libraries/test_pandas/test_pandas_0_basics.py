@@ -295,6 +295,7 @@ def test_dadtaframe_indexes() -> None:
     assert isinstance(df.index, pd.RangeIndex)
     assert np.array_equal(df.index.values, [0, 1, 2])
     assert df.index.is_monotonic_increasing
+    assert df.index.is_unique
 
     # Set axis 0's (row) index to a custom index using `.index``
     df.index = ["first", "second", "third"]
@@ -317,11 +318,23 @@ def test_reindexing() -> None:
     df = pd.DataFrame(["cole", "lily", "grace"], index=[3, 2, 1], columns=["kids"])
 
     # Calling reindex arranges the data acccording to the new index, introducing
-    # pd.na values if any index values are not present
+    # pd.na values if any index values are not present.
     df = df.reindex([1, 2, 3, 4])
 
     assert df.loc[[1, 2, 3], "kids"].tolist() == ["grace", "lily", "cole"]
     assert pd.isna(df.loc[4, "kids"])
+
+    # Indexes do not have to be unique. `reset_index` will reset the index. By
+    # default, the old index is added to the frame as a column called "index".
+    # To prevent this, use drop=True.
+
+    df = pd.DataFrame(
+        ["damon", "kari", "grace", "lily", "cole"],
+        index=["p", "p", "c", "c", "c"],
+        columns=["name"],
+    )
+    df = df.reset_index(drop=True)
+    assert df.columns == pd.Index(["name"])
 
 
 def test_multindex() -> None:
@@ -360,6 +373,7 @@ def test_multindex() -> None:
     # Using xs (cross-section) simplifies selecting data at particular level
     # Select all rows with "one" at the second level
     assert len(df.xs("one", level="second")) == 2
+    # print(df.xs("one", level="second"))
 
     # Ensure the index is sorted or range operations will not work
     df.sort_index(axis=0, inplace=True)
@@ -369,6 +383,94 @@ def test_multindex() -> None:
     # Here, we are selecting all rows between and including `bar` and `foo`
     # at the first multi-index level
     assert len(df.loc["bar":"foo"]) == 3
+
+
+def test_arithmetic_operations() -> None:
+    """Shows how arithmetic operations work between series and frames, and two
+    frames.
+
+    When performing arithmetic operations, the "axis" value used is the "axis to
+    match on".
+    """
+
+    #   one     two
+    #   0       1
+    #   2       3
+    #   4       5
+    df = pd.DataFrame(np.arange(6).reshape((3, 2)), columns=["one", "two"])
+
+    series = df.iloc[0]  # first row == (0, 1)
+
+    assert series.index.values.tolist() == ["one", "two"]
+    assert series.values.tolist() == [0, 1]
+
+    # Arithmetic operations between frames and series match the index of the
+    # series (column names) on the columns of the frame, broadcasting over the
+    # rows by default.
+
+    df2 = df.sub(series)  # axis=1
+
+    #   one     two
+    #   0       0
+    #   2       2
+    #   4       4
+    assert df2.values.flatten().tolist() == [0, 0, 2, 2, 4, 4]
+
+    # If you want to match on rows, use axis=0. This will match the index of the
+    # series (row indices) on the rows of the frame, broadcasting over the
+    # columns by default.
+    series = df.loc[:, "one"]
+
+    df2 = df.sub(series, axis=0)
+    #   one     two
+    #   0       1
+    #   0       1
+    #   0       1
+    assert df2.values.flatten().tolist() == [0, 1, 0, 1, 0, 1]
+
+
+def test_descriptive_statistics() -> None:
+
+    df = pd.DataFrame([[1.0, 2.0, np.nan], [3.0, np.nan, 4.0]])
+
+    assert df.sum(axis=0).tolist() == [4.0, 2.0, 4.0]  # row totals across all columns
+    assert df.sum(axis=1).tolist() == [3.0, 7.0]  # column totals across all rows
+
+
+def test_function_application() -> None:
+
+    df = pd.DataFrame(np.arange(6).reshape((3, 2)), columns=["one", "two"])
+
+    # numpy ufuncs work with dataframes
+    df: pd.DataFrame = np.add(df, 1)
+    assert np.array_equal(df.values.flatten(), np.arange(start=1, stop=7))
+
+    # Apply a function to each column or row
+
+    def add_one(x: pd.Series) -> pd.Series:
+        # print(f"add_one applying to:\n{x}")
+        return np.add(x, 1)
+
+    #
+    # The "axis" parameter determines which axis to use when applying the
+    # function. This is confusing, so pay attention!
+    #
+    # axis=0 means "apply to all rows". Each column is sent to apply.
+    #
+    # axis=1 means "apply to all columns". Each row is sent to apply.
+    #
+    df = df.apply(add_one)  # by default, apply to each column
+    assert np.array_equal(df.values.flatten(), np.arange(start=2, stop=8))
+
+    df = df.apply(add_one, axis=1)  # apply to each row
+    assert np.array_equal(df.values.flatten(), np.arange(start=3, stop=9))
+
+    # Apply a function to each element with `applymap`
+    def add_one_to_scalar(x: int) -> int:
+        return x + 1
+
+    df = df.applymap(add_one_to_scalar)
+    assert np.array_equal(df.values.flatten(), np.arange(start=4, stop=10))
 
 
 def test_min_max_limiting() -> None:
