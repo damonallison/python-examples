@@ -1,7 +1,9 @@
 import datetime
+import math
 
 import numpy as np
 import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype, is_string_dtype
 import pytz
 
 
@@ -59,54 +61,26 @@ def test_pandas_types() -> None:
     # * float => np.float_
     # * complex => np.complex_
 
-    assert df["type_bool"].dtype == np.bool_
-    assert df["type_bool"].dtype == bool
+    assert np.issubdtype(df["type_bool"].dtype, np.bool_)
+    assert np.issubdtype(df["type_int8"].dtype, np.integer)
+    assert np.issubdtype(df["type_int32"].dtype, np.integer)
+    assert np.issubdtype(df["type_int64"].dtype, np.integer)
+    assert np.issubdtype(df["type_float"].dtype, np.floating)
+    assert np.issubdtype(df["type_date"].dtype, np.object_)
+    assert np.issubdtype(df["type_time"].dtype, np.object_)
 
-    assert df["type_int8"].dtype == np.int_
-    assert df["type_int8"].dtype == int
+    assert is_datetime64_any_dtype(df["type_datetime"])
+    assert is_datetime64_any_dtype(df["type_datetime_tz"])
 
-    assert df["type_int32"].dtype == np.int_
-    assert df["type_int32"].dtype == int
-
-    assert df["type_int64"].dtype == np.int_
-    assert df["type_int64"].dtype == int
-
-    assert df["type_float"].dtype == np.float_
-    assert df["type_float"].dtype == float
-
-    assert df["type_date"].dtype == np.object_
-    assert df["type_date"].dtype == object
-
-    assert df["type_time"].dtype == np.object_
-    assert df["type_time"].dtype == object
-
-    # TODO(@damon): What is the actual datetime64 DType object?
-    assert df["type_datetime"].dtype == "datetime64[ns]"
-    assert df["type_datetime_tz"].dtype == "datetime64[ns, UTC]"
-
-    assert df["type_str"].dtype == np.object_
-    assert df["type_str"].dtype == object
-
-    print(df.head())
+    assert np.issubdtype(df["type_str"].dtype, np.object_)
 
     df["type_date_datetime64"] = pd.to_datetime(df["type_date"])
     df["type_datetime_datetime64"] = pd.to_datetime(df["type_datetime"])
     df["type_datetime_tz_datetime64"] = pd.to_datetime(df["type_datetime_tz"])
 
-    # Is there an actual type object for datetime64[ns]
-    # assert df["type_date_datetime64"].dtype == pd.DatetimeTZDtype
-    # assert df["type_date_datetime64"].dtype == np.datetime64
-    assert df["type_date_datetime64"].dtype == "datetime64[ns]"
-
-    #
-    # Time
-    #
-    # df["type_time_datetime64"] = pd.to_datetime(df["type_time"])
-    # df["type_date_datetime64"] = df["type_date"].astype("datetime64[ns]")
-    # df["type_time_datetime64"] = df["type_time"].astype("datetime64[ns]")
-
-    print("printing info")
-    print(df.info())
+    assert is_datetime64_any_dtype(df["type_date_datetime64"])
+    assert is_datetime64_any_dtype(df["type_datetime_datetime64"])
+    assert is_datetime64_any_dtype(df["type_datetime_tz_datetime64"])
 
 
 def test_datetime() -> None:
@@ -114,3 +88,34 @@ def test_datetime() -> None:
     information. For backwards compatibility, datetime64 still parses timezone
     offsets, which it handles by converting to UTC±00:00 (Zulu time). This
     behaviour is deprecated and will raise an error in the future."""
+
+
+def test_na() -> None:
+    #
+    # Pandas adopted R's convention by referring to missing data as "NA".
+    #
+    # pd.NA, np.nan, and None are treated as NA.
+    #
+    assert pd.isna(pd.NA)
+    assert pd.isna(np.nan)
+    assert pd.isna(None)
+
+    data = pd.Series(["test", pd.NA, np.nan, None])
+    assert np.issubdtype(data.dtype, np.object_)
+
+    # When working with string columns that potentially have NA values, use the
+    # `.str` method, which skips over N/A values
+    assert data.str.upper().to_list() == ["TEST", pd.NA, np.nan, None]
+
+    data = data.astype("string")
+    assert is_string_dtype(data)
+
+    assert data.isna().to_list() == [False, True, True, True]
+    assert len(data.dropna()) == 1
+
+    # Data imputation
+    data = pd.Series([1.0, 2.0, 3.0, 4.0, pd.NA, None, np.nan])
+    assert math.isclose(data.mean(), 2.5, abs_tol=0.01)
+
+    data_imputed = data.fillna(data.mean())
+    assert data_imputed[data.isna()].to_list() == [2.5, 2.5, 2.5]
