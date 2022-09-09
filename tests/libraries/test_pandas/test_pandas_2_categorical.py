@@ -1,8 +1,21 @@
+"""Pandas introduces a 'Categorical' type for dealing with repeated instances of
+distinct values.
+
+Categorical columns require (much) less memory and improve performance with
+operations like "groupby".
+
+By default, categorical columns are unordered. They can be made ordered, which
+will allow you to do equality and mathematical comparisons on the columns.
+
+
+"""
+
 import pandas as pd
 
 
 def test_pandas_categoricals() -> None:
-    """Pandas get_dummies() will create dummy coliumns for all object columns.
+    """Pandas get_dummies() will create dummy columns for all object and
+    categorical columns.
 
     You can also get_dummies for specific column(s).
 
@@ -26,11 +39,44 @@ def test_pandas_categoricals() -> None:
     assert df["employment_type"].dtype == object
     assert df["income"].dtype == int
 
-    # print out all categorical columns. By default, pandas will get_dummies`
-    # for all "object" and "category" columns.
-    for col in df.select_dtypes(include=["object", "category"]):
+    # By default nothing is categorical
+    assert len(df.select_dtypes(include=["category"]).columns) == 0
+
+    # Inspecting the data to determine which columns are potential categoricals.
+    #
+    # A low number of values with high value counts make ideal categorical
+    # variables.
+    #
+    # print out all categorical columns. By default, pandas will get_dummies for
+    # all "object" and "category" columns.
+    for col in df.select_dtypes(include=["object"]):
         print(f"value counts for: {col}")
         print(df[col].value_counts())
+
+    # Even with just a few rows, you can see the memory savings by using
+    # categorical columns
+    gender_mem_before = df.memory_usage(deep=True)["gender"]
+    employment_type_mem_before = df.memory_usage(deep=True)["employment_type"]
+
+    df[["gender", "employment_type"]] = df[["gender", "employment_type"]].astype(
+        "category"
+    )
+    gender_mem_after = df.memory_usage(deep=True)["gender"]
+    employment_type_mem_after = df.memory_usage(deep=True)["employment_type"]
+
+    assert gender_mem_after < gender_mem_before
+    assert employment_type_mem_after < employment_type_mem_before
+
+    #
+    # Categorical columns have "codes" and "categories". They are accessed with
+    # the 'cat' special accessor.
+    #
+    assert set(df["gender"].cat.categories.values.tolist()) == {"male", "female"}
+    assert set(df["employment_type"].cat.categories.values.tolist()) == {
+        "full_time",
+        "part_time",
+        "contract",
+    }
 
     df2 = pd.get_dummies(df, dtype=float)
     #
