@@ -339,7 +339,7 @@ def test_reindexing() -> None:
 
 def test_multindex() -> None:
     """Hierarchial indexing (MultiIndex) allows you to with with higher
-    dimensional data.
+    dimensional data in a low dimensional form.
     """
 
     # You can create MultiIndex from tuples or from another DataFrame
@@ -351,6 +351,8 @@ def test_multindex() -> None:
         }
     )
     mi = pd.MultiIndex.from_frame(dfKeys, names=dfKeys.columns)
+    assert mi.nlevels == 2
+    assert set(mi.names) == {"first", "second"}
 
     # indices have levels whiich can be accessed by ordinal or name
     assert np.array_equal(mi.get_level_values(0).values, dfKeys["first"].values)
