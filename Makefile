@@ -10,4 +10,4 @@ lint:
 
 test:
 	# Skip ML tests for performance reasons
-	poetry run pytest -s tests -m "not ml"
+	poetry run pytest -s tests -m "not ml and not plot"
