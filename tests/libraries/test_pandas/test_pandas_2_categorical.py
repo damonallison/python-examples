@@ -6,15 +6,21 @@ operations like "groupby".
 
 By default, categorical columns are unordered. They can be made ordered, which
 will allow you to do equality and mathematical comparisons on the columns.
-
-
 """
 
 import pandas as pd
 
 
 def test_pandas_categoricals() -> None:
-    """Pandas get_dummies() will create dummy columns for all object and
+    """Shows that, by default, categorical columns are read into DataFrame's as
+    object and must be converted to "category" using .astype().
+
+    This test also shows that category columns reduce DataFrame memory
+    footprint.
+
+    Finally, this test shows the use of get_dummies().
+
+    Pandas get_dummies() will create dummy columns for all object and
     categorical columns.
 
     You can also get_dummies for specific column(s).
@@ -24,9 +30,10 @@ def test_pandas_categoricals() -> None:
     sets individually, you can't be certain you'll end up with the correct
     columns (as some categorical values may only be in one of the two sets.)
 
-    Ensure numeric variables are truly continuous. Categorical columns could be
-    encoded as integers (i.e., survey answers). pd.get_dummies will *not* create
-    dummies for these columns by default.
+    When working with real world data, some categorical columns could be encoded
+    into numerical values. For example, an "age_group" column could be "0", "1",
+    "2", "3". You'll need to manually convert these columns to "category" as
+    pd.get_dummies() will not create dummies for numeric columns by default.
     """
 
     df = pd.read_csv("./tests/libraries/test_pandas/data/test_categorical.csv")
@@ -48,10 +55,11 @@ def test_pandas_categoricals() -> None:
     # variables.
     #
     # print out all categorical columns. By default, pandas will get_dummies for
-    # all "object" and "category" columns.
-    for col in df.select_dtypes(include=["object"]):
-        print(f"value counts for: {col}")
-        print(df[col].value_counts())
+    # all "object" and "category" columns (we currently have no categorical
+    # columns).
+    for col in df.select_dtypes(include=["object", "category"]):
+        assert (df[col].value_counts() > 0).all()
+        # print(f"value counts for: {col}: df[col].value_counts()")
 
     # Even with just a few rows, you can see the memory savings by using
     # categorical columns
@@ -88,8 +96,9 @@ def test_pandas_categoricals() -> None:
     # * (1) income
     #
     assert df2.shape == (5, 7)
-    print(df2.describe())
-    print(df2.head())
+    assert "gender_male" in df2.columns
+    assert "employment_type_full_time" in df2.columns
+    assert "income" in df2.columns
 
     #
     # get_dummies for specific columns
