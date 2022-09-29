@@ -45,6 +45,42 @@ from tests.classes.person import Person
 from tests.classes.manager import Manager
 
 
+def test_super() -> None:
+    """When defining class hierarches, ensure you call super().__init__() if you
+    want to run the superclass's constructor (which you probably always want."""
+    logs: list[str] = []
+
+    class A:
+        def __init__(self):
+            logs.append(f"A.__init__")
+            super().__init__()
+
+        def a(self) -> None:
+            print("a")
+
+    class B:
+        def __init__(self):
+            logs.append(f"B.__init__")
+            super().__init__()
+
+        def b(self) -> None:
+            print("b")
+
+    class C(B, A):
+        def c(self) -> None:
+            print("c")
+
+        def __init__(self):
+            logs.append("C.__init__")
+            super().__init__()
+
+    c = C()
+    c.a()
+    c.b()
+    c.c()
+    assert logs == ["C.__init__", "B.__init__", "A.__init__"]
+
+
 class TestClasses:
     def test_class_namespaces(self) -> None:
         # An example class variable. Class variables are shared by all
