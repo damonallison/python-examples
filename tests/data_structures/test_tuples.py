@@ -8,10 +8,17 @@ import pandas as pd
 
 
 def test_namedtuple() -> None:
+    """namedtuple(s) are tuples with named atribute access.
+
+    Fields are access ible by attribute lookup as well as being indexable and
+    iterable.
+    """
+
+    # namedtuple(typename, [field_names])
     Person = namedtuple("Person", ["first", "last"])
-    """namedtuple(s) are tuples with named atribute access."""
 
     t1 = Person("damon", last="allison")
+    assert isinstance(t1, tuple)
     assert t1.first == "damon" and t1.last == "allison"
 
     d = {"first": "cole", "last": "allison"}
@@ -63,17 +70,17 @@ def test_tuple_list_conversion() -> None:
     tup = 1, 2
     lst = [3, 4]
 
-    assert type(tup) == tuple
-    assert type(lst) == list
+    assert isinstance(tup, tuple)
+    assert isinstance(lst, list)
 
     # Convert a list to a tuple
     tup2 = tuple(lst)
 
-    assert type(tup2) == tuple
+    assert isinstance(tup2, tuple)
     assert tup2 == (3, 4)
 
     # Convert a tuple to a list
     lst2 = list(tup)
 
-    assert type(lst2) == list
+    assert isinstance(lst2, list)
     assert lst2 == [1, 2]
