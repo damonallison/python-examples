@@ -50,8 +50,10 @@ def test_delayed() -> None:
     y = inc(2)
     z = add(x, y)
     assert all(type(elt) == Delayed for elt in [x, y, z])
+
     # creates a png of the delayed graph at /tmp/mydask.png
-    z.visualize(filename="/tmp/mydask.png")
+    # requires graphviz to be installed
+    # z.visualize(filename="/tmp/mydask.png")
 
     # run computations on the cluster
     assert x.compute() == 2
