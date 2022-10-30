@@ -66,6 +66,9 @@ requests-mock = "^1.9.3"
 johnnydep = "^1.13"
 
 [tool.pytest.ini_options]
+# NOTE: The pytest team is reserving [tool.pytest] for future use, when they are
+# ready to fully support pyproject.toml. [tool.pytest.ini_options] is used in
+# the interim.
 #
 # "auto" makes all `async` tests asyncio driven, avoiding the need to mark each
 # `async def test_` function with @pytest.mark.asyncio
