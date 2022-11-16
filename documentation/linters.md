@@ -1,4 +1,21 @@
+# flake8
+
+```python
+x = 1  # noqa: E371
+```
+
+# pylint
+
+```python
+x = 1 . # pylint: disable=one,two
+```
+
+
 # mypy
+
+```python
+x = 1 . # type: ignore
+```
 
 Typshed contains type stubs from the
 [typeshed](https://github.com/python/typeshed) project for builtins, the
