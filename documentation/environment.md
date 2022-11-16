@@ -3,81 +3,45 @@
 Setting up a clean python environment isn't as simple as it should be. There are
 multiple environment managers (`pyenv`, `virtualenv`, `conda`, others).
 
-I use [pyenv](https://github.com/pyenv/pyenv) to manage python versions and
-[pyenv-virtualenv](https://github.com/pyenv/pyenv-virtualenv) to create virtual
-environments. `pyenv` simplifies installing and managing multiple python
-versions, and `virtualenv` allows for creating multiple environments, each which
-uses a different python version.
-
+I use [asdf](https://asdf-vm.com/) to manage python and other dev tool versions
+and [poetry](https://python-poetry.org/) to manage python virtual environments.
 All python development should be done within a `virtualenv` to prevent polluting
 the global environment.
 
-[Poetry](https://python-poetry.org) is a packaging and dependency management
-system that many projects use. Poetry creates it's own virtual environments
-*outside* of pyenv. (run `poetry env info` to determine what virtual environment
-is in use.)
-
-
 ## Installation
 
+If you are running both x86_64 (intel) and Apple Silicon (arm64), ensure you set
+your `$ASDF_DATA_DIR` env variable according to the architecture.
+
 ```shell
+# NOTE: fish shell
+if [ $ARCH = "i386" ]
+    set -gx ASDF_DATA_DIR $HOME/.asdfx86
+else
+    set -gx ASDF_DATA_DIR $HOME/.asdf
+end
 
-# Install pyenv
-brew install pyenv pyenv-virtualenv
-
-# Install the pyenv plugin for fish command line completion
-omf update
-omf install pyenv
-
-# Install poetry via the poetry installation instructions (not via homebrew)
-# https://python-poetry.org/docs/
-
+# Install asdf
+brew install asdf
 ```
 
-## Configuration
-
-Enable auto-activation of `pyenv` and `pyenv-virtualenv` by adding this to your
-`config.fish`.
+## Installing plugins and versions
 
 ```shell
-#
-# python
-#
-# Enables auto-activation of pyenv and virtual environments.
-# https://github.com/pyenv/pyenv-virtualenv
-#
-status --is-interactive; and pyenv init - | source
-status --is-interactive; and pyenv virtualenv-init - | source
-```
+# search for a plugin
+asdf plugin list all | grep dasel
 
-## pyenv
+# add plugins
+asdf plugin add python
 
-```shell
+# update plugins
+asdf plugin update --all
 
-# List / install available python versions
-pyenv install --list
-pyenv install 3.9.0
+# find a plugin version
+asdf list all python | grep 3.8
 
-# List the installed python versions
-pyenv versions
-
-# Specify a python version to use in the current directory (creates .python-version)
-pyenv local 3.9.0
-
-# Set the global version of python to use
-pyenv global 3.9.0
-
-# Create a virtual environment
-pyenv virtualenv test
-
-# Activate / deactivate a virtual environment
-pyenv activate test
-pyenv deactivate
-
-# Delete a virtualenv (both commands are identical)
-pyenv virtualenv-delete `env`
-pyenv uninstall `env`
-
+# installing a plugin version
+asdf install python 3.8.15
 ```
 
 ## Poetry
