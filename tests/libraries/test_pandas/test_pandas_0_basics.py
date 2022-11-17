@@ -46,6 +46,11 @@ indexing operations will return copies. "Advanced" indexing includes:
 * iloc`: selection by index (0 based)
 
 """
+
+from datetime import datetime
+import json
+import pathlib
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -530,3 +535,29 @@ def test_pandas_itertuples() -> None:
 
     print(df.shape)
     print(df.head())
+
+
+def test_json_serialization(tmp_path: pathlib.Path) -> None:
+    d = {
+        "col1": [1, 2],
+        "col2": ["test", None],
+    }
+
+    # "columns" is the default
+    df = pd.DataFrame.from_dict(d, orient="columns")
+
+    file = tmp_path / "test_json_serialization.json"
+    df.to_json(file, orient="split")
+    print(file.read_text(encoding="UTF-8"))
+
+    df2 = pd.read_json(file.read_text(encoding="UTF-8"), orient="split")
+    assert df2.equals(df)
+
+    j = """
+    {
+        "columns": ["col1", "col2"],
+        "data": [[1, "test"], [2, null]]
+    }
+    """
+    df2 = pd.read_json(j, orient="split")
+    assert df2.equals(df)
