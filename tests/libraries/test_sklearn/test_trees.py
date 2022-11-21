@@ -408,6 +408,9 @@ def test_lightGBM() -> None:
         return_train_score=True,
         verbose=0,
     )
+
+    cl: lgb.LGBMClassifier = grid_search.best_estimator_
+    cl.feature_name_
     grid_search.fit(X_train, y_train)
     logger.info(f"Best parameters: {(grid_search.best_params_)}")
     logger.info(f"Best cross-validation score: {grid_search.best_score_:.3f}")
@@ -467,6 +470,7 @@ def test_XGBoost() -> None:
         return_train_score=True,
         verbose=0,
     )
+
     grid_search.fit(X_train, y_train)
     logger.info(f"Best parameters: {(grid_search.best_params_)}")
     logger.info(f"Best cross-validation score: {grid_search.best_score_:.3f}")
