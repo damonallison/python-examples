@@ -128,7 +128,7 @@ recall (low false negatives). Predicting someone as *not* having cancer when
 they indeed do is MUCH more expensive than predicting someone as having cancer
 who doesn't.
 """
-
+from typing import Any, Optional, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -136,6 +136,9 @@ import pandas as pd
 import pytest
 import seaborn as sns
 from sklearn import datasets, ensemble, linear_model, metrics, model_selection, svm
+
+import lightgbm as lgb
+import xgboost as xgb
 
 
 # Mark all tests this module as 'ml'. These tests will be skipped with
@@ -145,6 +148,78 @@ pytestmark = pytest.mark.ml
 # Many tests will have options to show plots. Setting DEBUG to `True` will
 # display the plots.
 DEBUG = True
+
+
+def test_feature_order() -> None:
+    """Features sent to predict must be in the same order as when the model was
+    `fit`.
+
+    This example shows updating a dataframe to match the feature names expected
+    by the model.
+    """
+
+    def get_feature_names(model: Any) -> Optional[list[str]]:
+        """Attempts to retrieve feature names from a given model.
+
+        Args:
+            model: The model to retrieve features for
+
+        Returns:
+            A list of feature names if they can be found, otherwise None
+        """
+        if hasattr(model, "feature_names_in_"):  # scikit-learn, xgb
+            return cast(list[str], getattr(model, "feature_names_in_"))
+        if hasattr(model, "feature_name_"):
+            # lgb - note that lgb replaces spaces in feature names with `_`
+            return cast(list[str], getattr(model, "feature_name_"))
+        return None
+
+    X, y = datasets.load_iris(return_X_y=True, as_frame=True)
+
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+
+    lr = xgb.XGBClassifier()
+    lr.fit(X_train, y_train)
+
+    lr = lgb.LGBMClassifier()
+    lr.fit(X_train, y_train)
+
+    # lr = linear_model.LogisticRegression()
+    # lr.fit(X_train, y_train)
+
+    print(f"get_feature_names: {get_feature_names(lr)}")
+
+    df1 = pd.DataFrame(
+        {
+            "sepal length (cm)": [1],
+            "sepal width (cm)": [2],
+            "petal length (cm)": [3],
+            "petal width (cm)": [4],
+        }
+    )
+    pred1 = lr.predict(df1)
+
+    # Switch the feature order. Predicting with a different feature order than
+    # used when calling 'fit' raises a FutureWarning in sklearn and will soon
+    # raise.
+    df1 = pd.DataFrame(
+        {
+            "petal length (cm)": [3],
+            "petal width (cm)": [4],
+            "sepal length (cm)": [1],
+            "sepal width (cm)": [2],
+        }
+    )
+
+    feature_names = get_feature_names(lr)
+    print(type(feature_names))
+    if feature_names is not None:
+        df1 = df1[feature_names]
+
+    pred2 = lr.predict(df1)
+    assert pred1 == pred2
 
 
 def test_score() -> None:
