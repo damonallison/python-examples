@@ -4,8 +4,11 @@ distinct values.
 Categorical columns require (much) less memory and improve performance with
 operations like "groupby".
 
-By default, categorical columns are unordered. They can be made ordered, which
-will allow you to do equality and mathematical comparisons on the columns.
+By default, categorical columns are unordered. They can be made ordered, but
+numerical operations are not possible.
+
+Order is assigned manually, not lexically (alphabetically). Each value is
+internally given a unique integer value
 """
 
 import pandas as pd
@@ -63,14 +66,14 @@ def test_pandas_categoricals() -> None:
 
     # Even with just a few rows, you can see the memory savings by using
     # categorical columns
-    gender_mem_before = df.memory_usage(deep=True)["gender"]
-    employment_type_mem_before = df.memory_usage(deep=True)["employment_type"]
+    gender_mem_before = df["gender"].nbytes
+    employment_type_mem_before = df["employment_type"].nbytes
 
     df[["gender", "employment_type"]] = df[["gender", "employment_type"]].astype(
         "category"
     )
-    gender_mem_after = df.memory_usage(deep=True)["gender"]
-    employment_type_mem_after = df.memory_usage(deep=True)["employment_type"]
+    gender_mem_after = df["gender"].nbytes
+    employment_type_mem_after = df["employment_type"].nbytes
 
     assert gender_mem_after < gender_mem_before
     assert employment_type_mem_after < employment_type_mem_before
@@ -85,6 +88,7 @@ def test_pandas_categoricals() -> None:
         "part_time",
         "contract",
     }
+    df["gender"].cat.codes
 
     df2 = pd.get_dummies(df, dtype=float)
     #
