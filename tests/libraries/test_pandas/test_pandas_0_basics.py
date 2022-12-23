@@ -37,9 +37,6 @@ indexing operations will return copies. "Advanced" indexing includes:
 * iloc`: selection by index (0 based)
 
 """
-
-from datetime import datetime
-import json
 import pathlib
 
 import numpy as np
@@ -265,6 +262,47 @@ def test_dataframe_indexing() -> None:
     rows = df.filter(items=[914189], axis=0)
     assert len(rows)
     assert rows.iloc[0]["experience"] == 26
+
+
+def test_boolean_indexing() -> None:
+    def remove_military_pobox(df: pd.DataFrame) -> pd.DataFrame:
+        return df[~(df["military"]) & ~(df["po_box"])]
+
+    coverage_df = pd.DataFrame(
+        [
+            ("1", "123", "123", True, False, False),
+            ("1", "123", "345", True, False, False),
+            ("1", "123", "567", True, True, False),
+            ("1", "123", "789", True, False, False),
+            ("2", "345", "123", False, False, True),
+            ("2", "345", "345", True, False, False),
+            ("2", "345", "567", True, True, False),
+            ("2", "345", "789", True, False, False),
+        ],
+        columns=[
+            "store_location_id",
+            "store_id",
+            "coverage_zip",
+            "is_active",
+            "military",
+            "po_box",
+        ],
+    )
+
+    coverage_df = remove_military_pobox(coverage_df)
+    assert coverage_df.index.equals(pd.Int64Index([0, 1, 3, 5, 7]))
+
+    # assert len(coverage_df) == 5
+    # assert (
+    #     coverage_df.loc[0, "store_id"] == "123"
+    #     and coverage_df.loc[0, "coverage_zip"] == "123"
+    # )
+    # assert (
+    #     coverage_df.loc[4, "store_id"] == "123"
+    #     and coverage_df.loc[0, "coverage_zip"] == "123"
+    # )
+
+    # print(coverage_df.head())
 
 
 def test_dataframe_slicing() -> None:

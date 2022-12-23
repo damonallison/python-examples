@@ -1,6 +1,13 @@
+"""Creates simple models."""
+
+from typing import Any
+
+import joblib
+import os
 import pandas as pd
 import pytest
 from sklearn import datasets, linear_model, model_selection, preprocessing
+import tempfile
 
 # Mark all tests this module as 'ml'. These tests will be skipped with
 # `make test` since they are slow.
@@ -91,9 +98,56 @@ def test_linear_regresssion() -> None:
     # TODO(@damon): Examime features. Add sin / cos / log if the features are
     # skewed at all.
 
-    # TODO(@damon): Automated feaature selection
     lr = linear_model.LinearRegression()
     lr.fit(X_train, y_train)
 
     r2 = lr.score(X_test, y_test)
+
+    print(f"n_reatures_in_: {lr.n_features_in_}")
+    print(f"feature_names_in_: {lr.feature_names_in_}")
+
     print(f"r2 == {r2}")
+
+
+def save_model(m: Any) -> str:
+    model_name = "model.joblib"
+    tmpdir = tempfile.gettempdir()
+    model_path = os.path.join(tmpdir, model_name)
+    print(tmpdir)
+
+    if os.path.exists(model_path):
+        os.remove(model_path)
+    joblib.dump(m, model_path)
+    return model_path
+
+
+def test_linear_regression_simple() -> None:
+    """Creates and persists a simple linear model with 2 features.
+
+    This simple model can be used for testing (i.e., testing model hosting)
+    """
+    X, y = datasets.make_regression(
+        n_samples=100000,
+        n_features=2,
+        n_informative=8,
+        noise=0.2,
+    )
+    X = pd.DataFrame(X, columns=["x1", "x2"])
+    y = pd.DataFrame(y)
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=0,
+    )
+    lr = linear_model.LinearRegression(n_jobs=-1)
+    lr.fit(X_train, y_train)
+
+    assert len(lr.feature_names_in_) == lr.n_features_in_ == 2
+
+    # Evaluate
+    r2 = lr.score(X_test, y_test)
+    print(f"r2 == {r2}")
+
+    model_path = save_model(lr)
+    print(f"model saved to: {model_path}")
