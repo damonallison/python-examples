@@ -97,7 +97,15 @@ def test_dataframe_creation() -> None:
     # Creating a DF from a list-like object
     #
     df = pd.DataFrame([1, 2, 3], columns=["test"])
-    assert df["test"].equals(pd.Series([1, 2, 3]))
+    expected = pd.Series([1, 2, 3])
+    assert df["test"].equals(expected)
+    assert df.iloc[:, 0].equals(expected)
+
+    df["test"] = expected
+    df.iloc[:, 0] = expected
+
+    assert df["test"].equals(expected)
+    assert df.iloc[:, 0].equals(expected)
 
     assert isinstance(df.index, pd.RangeIndex)
     assert isinstance(df.columns, pd.Index)
@@ -290,19 +298,26 @@ def test_boolean_indexing() -> None:
     )
 
     coverage_df = remove_military_pobox(coverage_df)
-    assert coverage_df.index.equals(pd.Int64Index([0, 1, 3, 5, 7]))
 
-    # assert len(coverage_df) == 5
-    # assert (
-    #     coverage_df.loc[0, "store_id"] == "123"
-    #     and coverage_df.loc[0, "coverage_zip"] == "123"
-    # )
-    # assert (
-    #     coverage_df.loc[4, "store_id"] == "123"
-    #     and coverage_df.loc[0, "coverage_zip"] == "123"
-    # )
+    expected_index = pd.Index([0, 1, 3, 5, 7], dtype=pd.Int64Dtype)
+    assert coverage_df.index.equals(expected_index)
 
-    # print(coverage_df.head())
+    expected_values = ["1", "1", "1", "2", "2"]
+    assert coverage_df["store_location_id"].to_list() == expected_values
+
+
+def test_dataframe_copying() -> None:
+
+    df = pd.DataFrame(
+        [
+            ("one", "two"),
+            ("three", "four"),
+        ],
+        columns=["odd", "even"],
+    )
+    df.iloc[:, 0] == pd.Series(["five", "seven"])
+
+    print(df.head())
 
 
 def test_dataframe_slicing() -> None:
