@@ -37,8 +37,15 @@ def test_one_hot_encoding() -> None:
     ohe = preprocessing.OneHotEncoder(sparse=False)
     ohe.fit_transform(df)
 
-    assert set(ohe.get_feature_names()) == set(
-        ["x0_0", "x0_1", "x0_2", "x1_yellow", "x1_green", "x1_red"]
+    assert set(ohe.get_feature_names_out()) == set(
+        [
+            "int_feature_0",
+            "int_feature_1",
+            "int_feature_2",
+            "categorical_feature_yellow",
+            "categorical_feature_green",
+            "categorical_feature_red",
+        ]
     )
 
     #
