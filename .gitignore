@@ -1,6 +1,8 @@
 # git conflict files
 *.orig
 
+mlruns/
+
 # datasets
 data/
 
