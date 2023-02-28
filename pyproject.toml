@@ -50,6 +50,8 @@ starlette-context = "^0.3.4"
 SQLAlchemy = "^1.4.40"
 joblib = "^1.2.0"
 py = "^1.11.0"
+skl2onnx = "^1.0.0"
+onnxruntime = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
