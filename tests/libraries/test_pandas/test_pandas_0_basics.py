@@ -107,6 +107,13 @@ def test_dataframe_creation() -> None:
     assert df["test"].equals(expected)
     assert df.iloc[:, 0].equals(expected)
 
+    assert df.loc[0, "test"] == 1
+    assert df.iloc[1, 0] == 2
+
+    # Retrieve a single value with .at and .iat
+    assert df.at[0, "test"] == 1
+    assert df.iat[1, 0] == 2
+
     assert isinstance(df.index, pd.RangeIndex)
     assert isinstance(df.columns, pd.Index)
 
@@ -304,6 +311,8 @@ def test_boolean_indexing() -> None:
 
     expected_values = ["1", "1", "1", "2", "2"]
     assert coverage_df["store_location_id"].to_list() == expected_values
+
+    print(coverage_df["store_id"].str.lower().unique())
 
 
 def test_dataframe_copying() -> None:
