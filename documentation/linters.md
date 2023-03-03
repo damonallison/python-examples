@@ -14,7 +14,8 @@ x = 1 . # pylint: disable=one,two
 # mypy
 
 ```python
-x = 1 . # type: ignore
+x = 1  # type: ignore
+x = 1  # type: ignore[attr-defined]
 ```
 
 Typshed contains type stubs from the
