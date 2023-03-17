@@ -7,51 +7,40 @@ https://docs.python.org/3/library/enum.html
 """
 
 import enum
-import pydantic
 
 
-_GENIUS_MAP = {
-    0: "unknown",
-    1: "low",
-    2: "mid",
-    3: "high",
-}
-
-
-@enum.unique
+# @enum.unique ensures only one name is bound to one value. If this is omitted,
+# you could have the same value associated to multiple names.
+# @enum.unique
 class GeniusLevel(str, enum.Enum):
     UNKNOWN = "unknown"
     LOW = "low"
     MID = "mid"
     HIGH = "high"
+    HIGH2 = "high"
 
     def __str__(self) -> str:
         return self.value
 
-    @classmethod
-    def from_int(cls, value: int) -> "GeniusLevel":
-        return GeniusLevel(_GENIUS_MAP[value])
-
-
-class Payload(pydantic.BaseModel):
-    genius: GeniusLevel
 
 
 def test_enum_basics() -> None:
     g = GeniusLevel.MID
-    print(f"g.name == {g.name}, g.value == {g.value}")
-    p = Payload(genius=g)
-    print(g)
-    print(str(g))
-    print(p.json())
 
-    # From value
-    p2 = Payload(genius=GeniusLevel("high"))
-    print(p2.json())
+    assert GeniusLevel.HIGH == GeniusLevel.HIGH2
 
-    print(GeniusLevel.MID == "mid")
 
-    for v in GeniusLevel:
-        print(v)
+    # print(f"g.name == {g.name}, g.value == {g.value}")
+    # p = Payload(genius=g)
+    # print(g)
+    # print(str(g))
+    # print(p.json())
 
-    print(f"here we are: {GeniusLevel.from_int(2)}")
+    # # From value
+    # p2 = Payload(genius=GeniusLevel("high"))
+    # print(p2.json())
+
+    # print(GeniusLevel.MID == "mid")
+
+    # for v in GeniusLevel:
+    #     print(v)
