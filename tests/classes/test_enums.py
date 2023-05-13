@@ -8,39 +8,51 @@ https://docs.python.org/3/library/enum.html
 
 import enum
 
+import pydantic
+import pytest
 
 # @enum.unique ensures only one name is bound to one value. If this is omitted,
 # you could have the same value associated to multiple names.
-# @enum.unique
-class GeniusLevel(str, enum.Enum):
+#
+# IntEnum and StrEnum (3.10) are Enum subclasses where it's members can be used
+# in the place of an int and str respectively
+@enum.unique
+class GeniusLevel(enum.Enum):
     UNKNOWN = "unknown"
     LOW = "low"
     MID = "mid"
     HIGH = "high"
-    HIGH2 = "high"
 
-    def __str__(self) -> str:
-        return self.value
+    @classmethod
+    def create(cls, value: str) -> "GeniusLevel":
+        try:
+            return cls(value)
+        except ValueError:
+            return cls("unknown")
 
+
+class Payload(pydantic.BaseModel):
+    genius: GeniusLevel
 
 
 def test_enum_basics() -> None:
-    g = GeniusLevel.MID
+    # accessing an enum's name and value
+    assert GeniusLevel.LOW.name == "LOW"
+    assert GeniusLevel.LOW.value == "low"
+    print(str(GeniusLevel.HIGH))
 
-    assert GeniusLevel.HIGH == GeniusLevel.HIGH2
+    # creating an instance from a value
+    assert GeniusLevel("mid") == GeniusLevel.MID
+
+    # trying to create an instance with an invalid value raises ValueError
+    with pytest.raises(ValueError):
+        GeniusLevel("not there")
+
+    # using a custom factory method to create an instance safely
+    assert GeniusLevel.create("not there") == GeniusLevel.UNKNOWN
 
 
-    # print(f"g.name == {g.name}, g.value == {g.value}")
-    # p = Payload(genius=g)
-    # print(g)
-    # print(str(g))
-    # print(p.json())
-
-    # # From value
-    # p2 = Payload(genius=GeniusLevel("high"))
-    # print(p2.json())
-
-    # print(GeniusLevel.MID == "mid")
-
-    # for v in GeniusLevel:
-    #     print(v)
+def test_pydantic() -> None:
+    p = Payload(genius=GeniusLevel.HIGH)
+    p.genius == GeniusLevel.HIGH
+    print(p.json())

@@ -2,8 +2,13 @@
 
 [Google's Python Style Guide](https://google.github.io/styleguide/pyguide.html)
 
+* Use `pylint`
 * Import packages and modules only, not individual classes and/or functions.
 * Don't use relative imports. Use full package names.
+* Exceptions
+  * Use `ValueError` to validate argument preconditions, do not use `assert` for
+    public API.
+* Avoid `staticmethod` and use limit use of `classmethod`
 
 ## Comments
 
@@ -20,11 +25,8 @@ Every module should have license boilerplate and contain an overall description
 in the module's docstring.
 
     Example:
-
-    foo = ClassFoo()
-    x = foo.some_func()
-
-
+      foo = ClassFoo()
+      x = foo.some_func()
 """
 def add(x: float, y: float) -> float:
     """Adds two numbers.

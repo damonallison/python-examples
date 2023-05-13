@@ -5,6 +5,7 @@ x = 1  # noqa: E371
 ```
 
 # pylint
+`pylint` is a static code analysis tool
 
 ```python
 x = 1 . # pylint: disable=one,two
