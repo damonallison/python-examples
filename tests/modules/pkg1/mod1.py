@@ -1,22 +1,15 @@
-#
-# A "global" variable.
-#
-# Note that python does not have truly *global* variables, only module level
-# variables.
-#
-# Anyone wanting to access the variable must import a reference to the *module*.
-# Importing the symbol (from mod1 import call_count) will create a *new*
-# variable with the initial value of `call_count`. They will be different,
-# independent variables!
-#
-# import mod1
-# mod1.call_count += 1
-#
-call_count = 0
+from tests.modules.core import config
+from tests.modules.core.appconfig import CALL_COUNT
 
 
 class Mod1Calculator:
     def add(self, x: int, y: int) -> int:
-        global call_count
-        call_count += 1
+        global CALL_COUNT
+        CALL_COUNT += 1
         return x + y
+
+    def get_environment(self) -> str:
+        return config.environment
+
+    def get_call_count(self) -> int:
+        return CALL_COUNT
