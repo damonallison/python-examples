@@ -1,7 +1,15 @@
-from ..pkg1.mod1 import Mod1Calculator
+from tests.modules.core import config
+from tests.modules.core.appconfig import CALL_COUNT
 
 
 class Mod2Calculator:
-    """Shows using the relative package import."""
-    def add(self, x, y):
-        return Mod1Calculator().add(x, y)
+    def add(self, x: int, y: int) -> int:
+        global CALL_COUNT
+        CALL_COUNT += 1
+        return x + y
+
+    def get_environment(self) -> str:
+        return config.environment
+
+    def get_call_count(self) -> int:
+        return CALL_COUNT

@@ -61,6 +61,9 @@ Module search path:
 * PIP installs to the 'site-packages' folder, which is located at:
   /usr/local/lib/python3.6/site-packages
 """
+
+import pytest
+
 #
 # Import a module
 #
@@ -103,13 +106,20 @@ from ..exceptions.custom_derived_error import CustomDerivedError
 #
 # Note that when importing module level variables,
 # you must import the module and reference the variable the module reference
-# (i.e, pm.name_call_count).
+#
+# YES:
+# from pkg import mod
+# mod.GLOBAL_VAR += 1
+#
+# NO:
+# from pkg.mod import GLOBAL_VAR
 #
 # Using `from .classes.person import name_call_count` will create a new local
 # `name_call_count` variable setting it's value to the current value of the
 # person module's value - not what you want!
 #
-from .pkg1 import mod1
+from tests.modules.pkg1 import mod1
+from tests.modules.pkg2 import mod2
 
 #
 # Here, a local `call_count` variable is created. Because `call_count` is a
@@ -117,7 +127,7 @@ from .pkg1 import mod1
 # Therefore, `call_count` does *not* reference `.pkg1.mod1.call_count` as you
 # would expect.
 #
-from .pkg1.mod1 import call_count
+from tests.modules.core.appconfig import CALL_COUNT
 
 
 def test_module_imports() -> None:
@@ -133,21 +143,30 @@ def test_module_alias() -> None:
     assert 4 == calc.add(2, 2)
 
 
-def test_global_variable_import() -> None:
+def test_global_variable_import(monkeypatch: pytest.MonkeyPatch) -> None:
     """Because call_count is imported directly into this module,
     call_count actually points to a *new* variable in this module's
     namespace. It is *not* the same as the call_count variable in mod1"""
 
-    assert call_count == 0
-    mod1.call_count = 1
+    CALL_COUNT = 0
+    mod1.CALL_COUNT = 0
+    mod2.CALL_COUNT = 0
 
-    assert call_count == 0
-    assert mod1.call_count == 1
+    assert CALL_COUNT == 0
+    assert mod1.CALL_COUNT == 0
+    assert mod2.CALL_COUNT == 0
+
+    mod1.CALL_COUNT = 1
+
+    assert CALL_COUNT == 0
+    assert mod1.CALL_COUNT == 1
+    assert mod2.CALL_COUNT == 0
 
     Mod1Calculator().add(2, 2)
 
-    assert call_count == 0
-    assert mod1.call_count == 2
+    assert CALL_COUNT == 0
+    assert mod1.CALL_COUNT == 2
+    assert mod2.CALL_COUNT == 0
 
 
 def test_function_import() -> None:
