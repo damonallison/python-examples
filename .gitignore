@@ -1,6 +1,7 @@
 # git conflict files
 *.orig
 
+# mlflow
 mlruns/
 
 # datasets
