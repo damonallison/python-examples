@@ -1,10 +1,19 @@
 """Tests exception handling.
 
-    There are two classes of errors in Python:
+There are two classes of errors in Python:
 
-    * SyntaxError : the code couldn't be parsed
-    * Exception   : runtime errors
+* SyntaxError : the code couldn't be parsed
+* Exception   : runtime errors
 
+* BaseException is the common base class for all exceptions.
+
+* Exception is the common base class for all non-fatal exceptions. Exceptions
+  which are not subclasses of Exception are not typically handled.
+
+Custom exceptions:
+
+Custom exceptions should be derived from the Exception class and have names that
+end in "Error", similar to the naming of the standard exceptions.
 """
 
 import pytest

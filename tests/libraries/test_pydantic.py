@@ -30,10 +30,22 @@ import pydantic
 import pytest
 
 
-class Person(pydantic.BaseModel):
-    # Example recursive model
-    name: str
-    children: list[Person]
+def test_frozen() -> None:
+    class Person(pydantic.BaseModel):
+        # Example recursive model
+        name: str
+        children: list[Person] = []
+
+        class Config:
+            frozen = True
+
+    p = Person(name="damon")
+    p.children.append(Person(name="kari"))
+
+    with pytest.raises(TypeError):
+        p.name = "no"
+
+
 
 
 def test_pydantic() -> None:

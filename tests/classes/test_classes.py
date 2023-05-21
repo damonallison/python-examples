@@ -55,30 +55,30 @@ def test_super() -> None:
             logs.append(f"A.__init__")
             super().__init__()
 
-        def a(self) -> None:
-            print("a")
+        def f(self) -> str:
+            return "a"
 
     class B:
         def __init__(self):
             logs.append(f"B.__init__")
             super().__init__()
 
-        def b(self) -> None:
-            print("b")
+        def f(self) -> str:
+            return "b"
+
+        def f2(self) -> str:
+            return super().f
 
     class C(B, A):
-        def c(self) -> None:
-            print("c")
-
         def __init__(self):
             logs.append("C.__init__")
             super().__init__()
 
     c = C()
-    c.a()
-    c.b()
-    c.c()
     assert logs == ["C.__init__", "B.__init__", "A.__init__"]
+    # Python's method resolution algorithm is depth first, left to right.
+    # Therefore, it finds `B` before `A`.
+    assert c.f() == "b"
 
 
 class TestClasses:
