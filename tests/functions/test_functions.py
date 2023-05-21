@@ -1,3 +1,19 @@
+"""
+Functions
+
+Python has the concept of immutable (str, int) and mutable types (list, dict)
+
+Variables are lexically scoped. Each function has a symbol table. Variables are
+looked for in the local symbol table, then the symbol table of enclosing
+functions, the global symbol table (module), then built-ins.
+
+Global and nonlocal variables cannot be updated within a function without using
+a `global` or `nonlocal` statement.
+
+Parameters are always passed by value.
+
+"""
+
 from typing import Any, Dict, Tuple
 
 from copy import copy, deepcopy
@@ -6,7 +22,11 @@ from copy import copy, deepcopy
 def test_nested_functions() -> None:
     """Functions can be nested within functions."""
 
+
     def inc_and_add(x: int, y: int) -> int:
+        nonlocal one
+        one += 1
+
         x += 1
         y += 1
         return x + y
@@ -14,7 +34,12 @@ def test_nested_functions() -> None:
     one = 1
     two = 2
     assert inc_and_add(one, two) == 5
-    assert one == 1
+
+    # One was mutated from within inc_and_add
+    #
+    # If you are using the nonlocal and global statements, you are looking for
+    # trouble.
+    assert one == 2
     assert two == 2
 
 
@@ -90,6 +115,22 @@ def test_variable_arguments() -> None:
     # This will unpack the (0, 2) tuple and send the values as arguments
     # to range()
     assert [0, 1] == list(range(*(0, 2)))
+
+def test_argument_packing() -> None:
+    def f(*args: tuple[Any], **kwargs: dict[Any, Any]) -> tuple[tuple[Any], dict[Any, Any]]:
+        """args and kwargs "pack" all variables into a tuple (args) or dict
+        (kwargs).
+
+        When calling the function, the tuple is "unpacked" with * and a
+        dictionary is "unpacked" with **.
+        """
+        return args, kwargs
+
+    # unpacks a tuple (or list) into multiple positional parameters and a dict
+    # into multiple keyword parameters.
+    (pos, kw) = f(*("one", "two"), **{"one": 1, "two": 2})
+    assert pos == ("one", "two")
+    assert kw == {"two": 2, "one": 1}
 
 
 def test_lambdas() -> None:
