@@ -49,6 +49,7 @@ xgboost = "^1.6.1"
 pydantic = {version = "^1.10.7", extras = ["dotenv"]}
 pyarrow = "^12.0.0"
 onnxruntime = "^1.15.1"
+polars = "^0.18.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
