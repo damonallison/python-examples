@@ -28,11 +28,16 @@ indexing operations will return copies. "Advanced" indexing includes:
     > df.loc[[0, 1, 2]]
 
 
-* `loc`: selection by label * df.loc["label"] (single label) * df.loc[["a", "b",
-  "c"]] (array) ("advanced" indexing - returns a copy) * df.loc[[True, False,
-  True]] (boolean mask) ("advanced" indexing - returns a copy) * df.loc[a:f]
-  (slice (both start and end are included!)) * df.loc[func] (accepts a callable
-  which accepts a DF and returns valid output for indexing - one of the above)
+* `loc`: selection by label
+    * df.loc["label"] (single label)
+    * df.loc[["a", "b","c"]] (array) ("advanced" indexing - returns a copy)
+* df.loc[[True, False, True]] (boolean mask) ("advanced" indexing - returns a
+  copy)
+
+* df.loc[a:f] (slice (both start and end are included!))
+
+* df.loc[func] (accepts a callable which accepts a DF and returns valid output
+  for indexing - one of the above)
 
 * iloc`: selection by index (0 based)
 
@@ -68,8 +73,9 @@ def test_series() -> None:
     s2.index = ["A", "B", "C"]
     assert (s + s2).values.tolist() == [110, 220, 330]
 
-    with pytest.raises(TypeError):
-        s2.index[0] = "0"
+    assert s2.index[0] == "A"
+    assert s2.loc["A"] == 100
+
 
 
 def test_series_from_dict() -> None:
@@ -166,7 +172,7 @@ def test_dataframe_indexing() -> None:
     # [] is typically used for selecting columns.
     #
     # Note the index will be included in the scalar and/or new DF as well.
-    s = df["experience"].sort_index(axis=0)
+    s = df.loc[:, "experience"].sort_index(axis=0)
 
     assert isinstance(s, pd.Series)
     assert s.loc[15] == 11860  # Index based (driver_id), not ordinal.
@@ -188,7 +194,7 @@ def test_dataframe_indexing() -> None:
     # In general, don't use attribute based accessors!
     s = df.experience
     assert isinstance(s, pd.Series)
-    assert s[914189] == 26
+    assert s.loc[914189] == 26
 
     #
     # While you *could* use python indexing to select values from a series, the
@@ -316,7 +322,12 @@ def test_boolean_indexing() -> None:
 
 
 def test_dataframe_copying() -> None:
+    """.copy() will copy a df
 
+    While some indexing operations will make a copy of the underlying data
+    (i.e., boolean indexing), do not rely on it. Always make an explicit copy.
+
+    """
     df = pd.DataFrame(
         [
             ("one", "two"),
@@ -324,9 +335,16 @@ def test_dataframe_copying() -> None:
         ],
         columns=["odd", "even"],
     )
-    df.iloc[:, 0] == pd.Series(["five", "seven"])
+    # assignment does *not* copy the underlying df
+    df2 = df
+    df3 = df.copy(deep=True)
+    df.loc[:, "odd"] = pd.Series(["five", "seven"])
 
-    print(df.head())
+    assert df2.loc[:, "odd"].to_list() == ["five", "seven"]
+    assert df2.loc[:, "even"].to_list() == ["two", "four"]
+    assert df3.loc[:, "odd"].to_list() == ["one", "three"]
+    assert df3.loc[:, "even"].to_list() == ["two", "four"]
+
 
 
 def test_dataframe_slicing() -> None:
@@ -335,11 +353,12 @@ def test_dataframe_slicing() -> None:
 
     df = pd.DataFrame(["this", "is", "a", "test"], columns=["one"])
 
+    # includes both sides of the 0:1 range
     assert df.loc[0:1, "one"].to_list() == ["this", "is"]
     assert df.iloc[0:1, 0].to_list() == ["this"]
 
 
-def test_dadtaframe_indexes() -> None:
+def test_dataframe_indexes() -> None:
     """Indexes provide metadata about axes.
 
     An index allows us to select data using non-ordinal values (i.e., strings).
@@ -554,7 +573,7 @@ def test_min_max_limiting() -> None:
     df.loc[df["one"] < 0, ["one"]] = 0
     #
     #   one   two
-    #   -1     2
+    #    0     2
     #    0     3
     #    1    -1
     #
@@ -578,16 +597,18 @@ def test_pandas_itertuples() -> None:
     }
     df = pd.DataFrame(d)
 
-    for i in range(5):
-        print(df.shape)
-        df = df.append(df, ignore_index=True)
+    # Returns a namedtuple for each row
+    for idx, row in df.iterrows():
+        assert type(idx) == int
+        assert type(row) == pd.Series
+        assert row.index.equals(pd.Index(["driver_id", "first", "last"]))
 
-    cache = {}
+
     for t in df.itertuples(index=False, name="Driver"):
-        cache[t.driver_id] = t
+        assert t.driver_id is not None
+        assert t.first is not None
+        assert t.last is not None
 
-    print(df.shape)
-    print(df.head())
 
 
 def test_json_serialization(tmp_path: pathlib.Path) -> None:
@@ -614,4 +635,4 @@ def test_json_serialization(tmp_path: pathlib.Path) -> None:
     """
     df2 = pd.read_json(j, orient="split")
     print(df2.head())
-    # assert df2.equals(df)
+    assert df2.equals(df)
