@@ -46,8 +46,11 @@ from tests.classes.manager import Manager
 
 
 def test_super() -> None:
-    """When defining class hierarches, ensure you call super().__init__() if you
-    want to run the superclass's constructor (which you probably always want."""
+    """Constructor "chaining".
+
+    When defining class hierarches, ensure you call super().__init__() if you
+    want to run the superclass's constructor (which you probably always want.
+    """
     logs: list[str] = []
 
     class A:
@@ -67,7 +70,7 @@ def test_super() -> None:
             return "b"
 
         def f2(self) -> str:
-            return super().f
+            return super().f()
 
     class C(B, A):
         def __init__(self):
@@ -76,38 +79,61 @@ def test_super() -> None:
 
     c = C()
     assert logs == ["C.__init__", "B.__init__", "A.__init__"]
+
     # Python's method resolution algorithm is depth first, left to right.
     # Therefore, it finds `B` before `A`.
     assert c.f() == "b"
+    assert c.f2() == "a"
+
+    assert hasattr(c, "f") and hasattr(c, "f2")
+    # Here, we see that B.f resolves before A.f
+    assert C.f2 == B.f2 and C.f == B.f
+
+    class D(A, B):
+        ...
+
+    d = D()
+    assert hasattr(d, "f") and hasattr(d, "f2")
+    # Here, we see that A.f resolves before B.f
+    assert D.f == A.f and D.f2 == B.f2
+
+
+
+def test_class_variables() -> None:
+    # `iq` is an example class variable.
+    #
+    # Class variables are shared by all instances. Instance variables of the
+    # same name take priority over class variables.
+    Person.iq = 100
+    assert Person.iq == 100
+
+    p = Person("damon", "allison")
+    assert p.full_name() == "damon allison"
+
+    assert p.iq == 100
+    assert Person("kari", "allison").iq == 100
+
+    Person.iq = 101
+    assert Person.iq == 101 and p.iq == 101
+
+def test_namespace_overwrite() -> None:
+    """You can modify any namespace, including builtins, at any time.
+
+    Here, we modify the "builtins" namespace. 🤦🏻‍♂️
+    """
+    def echo(s: str) -> str:
+        return s
+
+    # add / remove a builtin
+    assert "echo" not in dir(builtins)
+    builtins.echo = echo
+    assert "echo" in dir(builtins)
+    assert builtins.echo("hello world") == "hello world"
+    del builtins.echo
+    assert "echo" not in dir(builtins)
 
 
 class TestClasses:
-    def test_class_namespaces(self) -> None:
-        # An example class variable. Class variables are shared by all
-        # instances.
-        Person.iq = 100
-        assert Person.iq == 100
-
-        p = Person("damon", "allison")
-        assert p.full_name() == "damon allison"
-
-        assert p.iq == 100
-        assert Person("kari", "allison").iq == 100
-
-        Person.iq = 101
-        assert Person.iq == 101 and p.iq == 101
-
-        def echo(s: str) -> str:
-            return s
-
-        # You can modify any namespace at any time. Here, we modify the
-        # "builtins" namespace. Facepalm.
-        assert "echo" not in dir(builtins)
-        builtins.echo = echo
-        assert "echo" in dir(builtins)
-        assert builtins.echo("hello world") == "hello world"
-        del builtins.echo
-        assert "echo" not in dir(builtins)
 
     def test_inheritance(self) -> None:
         """Example showing how to check for type instances using type(), isinstance() and issubclass()"""
@@ -151,13 +177,19 @@ class TestClasses:
         x = A()
         assert x is x, "reference equality"
         # == will use the class's implementation of `__eq__` if it exists.
+        #
+        # TODO(@damon): What if __eq__ doesn't exist? Does it fall back to
+        # reference equality?
         assert x != x, "value equality"
 
         x = None
         assert x is None, "always use `is None` to check for None (pythonic)"
 
     def test_formatting(self) -> None:
-        """__repr__ defines a string representation for a class"""
+        """__repr__ defines a string representation for a class.
+
+        TODO(@damon): What is the difference between __str__ and __repr__ in terms of priority for print(),
+        """
 
         assert "Person('damon', 'allison')" == str(Person("damon", "allison"))
         assert "Manager('damon', 'allison')" == str(Manager("damon", "allison"))
