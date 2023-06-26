@@ -36,8 +36,8 @@ Namespaces
 
 Classes add another namespace.
 """
+from typing import Self
 
-import builtins
 from copy import copy, deepcopy
 
 from tests.classes.logger import Logger
@@ -116,74 +116,75 @@ def test_class_variables() -> None:
     Person.iq = 101
     assert Person.iq == 101 and p.iq == 101
 
-def test_namespace_overwrite() -> None:
-    """You can modify any namespace, including builtins, at any time.
 
-    Here, we modify the "builtins" namespace. 🤦🏻‍♂️
+def test_inheritance() -> None:
+    """Example showing how to check an object's type..
+
+    Uses type(), isinstance() and issubclass().
     """
-    def echo(s: str) -> str:
-        return s
+    m = Manager("damon", "allison")
 
-    # add / remove a builtin
-    assert "echo" not in dir(builtins)
-    builtins.echo = echo
-    assert "echo" in dir(builtins)
-    assert builtins.echo("hello world") == "hello world"
-    del builtins.echo
-    assert "echo" not in dir(builtins)
+    # The manager is a logger.
+    m.log("hello world")
+    m.log("hello again")
+    assert m.history() == ["hello again", "hello world"]
 
+    # Note that while Python has name mangling, the mangled names can still
+    # be directly accessed.
+    m._Logger__original_log("a test")
+    assert "a test" in m.history()
+
+    assert type(m) == Manager
+
+    assert isinstance(m, Logger)
+    assert isinstance(m, Manager)
+    assert isinstance(m, Person)
+    assert isinstance(m, object)
+
+    assert issubclass(type(m), Manager)
+    assert issubclass(type(m), Logger)
+    assert issubclass(type(m), Person)
+    assert issubclass(type(m), object)
+
+def test_equality() -> None:
+    """Object equality
+
+    Python has two similar comparison operators: `==` and `is`.
+
+    * `==` is for object equality (calls __eq__)
+    * `is` is for object identity (two objects are the *same* object)
+    """
+    class A:
+        def __init__(self, value: str) -> None:
+            self.value = value
+
+    #
+    # TODO(@damon): What if __eq__ doesn't exist? Does it fall back to
+    # reference equality?
+    a1 = A("test")
+    a2 = A("test")
+    assert a1 is a1 # reference equality
+    assert a1 != a2 # value equality (falls back to reference equality)
+
+
+    class B(A):
+        def __eq__(self, rhs: Self):
+            return self.value == rhs.value
+
+    b1 = B("test")
+    b2 = B("test")
+
+    assert b1 is b1
+    assert b1 is not b2
+
+    assert b1 == b2
+
+
+    x = None
+    assert x is None, "always use `is None` to check for None (pythonic)"
 
 class TestClasses:
 
-    def test_inheritance(self) -> None:
-        """Example showing how to check for type instances using type(), isinstance() and issubclass()"""
-        m = Manager("damon", "allison")
-
-        # The manager is a logger.
-        m.log("hello world")
-        m.log("hello again")
-        assert m.history() == ["hello again", "hello world"]
-
-        # Note that while Python has name mangling, the mangled names can still
-        # be directly accessed.
-        m._Logger__original_log("a test")
-        assert "a test" in m.history()
-
-        assert type(m) == Manager
-
-        assert isinstance(m, Logger)
-        assert isinstance(m, Manager)
-        assert isinstance(m, Person)
-        assert isinstance(m, object)
-
-        assert issubclass(type(m), Manager)
-        assert issubclass(type(m), Logger)
-        assert issubclass(type(m), Person)
-        assert issubclass(type(m), object)
-
-    def test_equality(self) -> None:
-        """Object equality
-
-        Python has two similar comparison operators: `==` and `is`.
-
-        * `==` is for object equality (calls __eq__)
-        * `is` is for object identity (two objects are the *same* object)
-        """
-
-        class A:
-            def __eq__(self, rhs):
-                return False
-
-        x = A()
-        assert x is x, "reference equality"
-        # == will use the class's implementation of `__eq__` if it exists.
-        #
-        # TODO(@damon): What if __eq__ doesn't exist? Does it fall back to
-        # reference equality?
-        assert x != x, "value equality"
-
-        x = None
-        assert x is None, "always use `is None` to check for None (pythonic)"
 
     def test_formatting(self) -> None:
         """__repr__ defines a string representation for a class.
