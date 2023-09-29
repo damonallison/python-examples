@@ -1,4 +1,4 @@
-"""Pydantic attempts to provide "strongly typed" data structures to Python.
+"""Pydantic is a validation and serialization library.
 
 Features include:
 
@@ -13,8 +13,12 @@ type validation.
 
 Differences between BaseModel and dataclasses include:
 
-* Mutable field initializers. dataclass requires a default_factory
+* Mutable field initializers. Pydantic will automatically deepcopy a field's
+  default value. dataclass requires a default_factory
+
 * BaseModel handles extra fields
+
+Unless you have a specific reason *not* to use BaseModel, always use BaseModel.
 """
 
 #
@@ -32,37 +36,36 @@ import pytest
 
 def test_frozen() -> None:
     class Person(pydantic.BaseModel):
+        model_config = pydantic.ConfigDict(frozen=True)
         # Example recursive model
         name: str
-        children: list[Person] = []
-
-        class Config:
-            frozen = True
+        children: list[Person] = []  # Pydantic will deepcopy() the default argument.
 
     p = Person(name="damon")
+    # Immutability only impacts the model object itself. Mutable values stored
+    # on the model are still capable of being edited.
     p.children.append(Person(name="kari"))
 
-    with pytest.raises(TypeError):
+    p2 = p.model_copy(deep=True)
+    assert p == p2
+
+    with pytest.raises(pydantic.ValidationError):
         p.name = "no"
-
-
 
 
 def test_pydantic() -> None:
     class A(pydantic.BaseModel):
-        # By default, Pydantic does not reuse field initializers across
-        # instances
-        lst: list[int] = pydantic.Field(
-            default_factory=list, description="A list", max_items=1
+        model_config = pydantic.ConfigDict(
+            frozen=True,
+            extra="allow",
+            validate_default=True,
         )
-
-        class Config:
-            """Config allows you to customize Pydantic's behavior"""
-
-            # whether to `ignore`, `allow`, or `forbid` extra attributes during
-            # model initialization. default: pydantic.Extra.ignore
-            extra = pydantic.Extra.allow
-            validate_all = True  # whether to validate field defaults
+        # Using default=[] here would work as well - as Pydantic deepcopy(s) the
+        # default argument for each new instance, preventing the common python
+        # bug caused by mutable default values.
+        lst: list[int] = pydantic.Field(
+            default_factory=list, description="A list", max_length=1
+        )
 
     @pydantic.dataclasses.dataclass
     class B:
@@ -91,8 +94,13 @@ def test_pydantic() -> None:
     #
     a.lst.append(2)
     assert len(a.lst) == 2
-    a.lst = [1, 2]
 
-    with pytest.raises(ValueError) as ve:
+    with pytest.raises(pydantic.ValidationError) as ve:
         A(lst=[1, 2])
-    assert ve.match("max_items")
+    from typing import cast
+
+    ve = cast(pydantic.ValidationError, ve.value)
+    # We should have a single validation error given len(lst) exceeded it's
+    # max_length configuration value.
+    assert ve.error_count() == 1
+    assert ve.errors()[0]["type"] == "too_long"
