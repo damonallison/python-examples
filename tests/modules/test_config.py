@@ -41,16 +41,27 @@ def test_global_variable_import() -> None:
 
 
 def test_config(monkeypatch: MonkeyPatch) -> None:
-    print(f"tests.modules.core.config = {id(config)}")
-    config.environment == "localhost"
     assert mod1.Mod1Calculator().get_environment() == "localhost"
     assert mod2.Mod2Calculator().get_environment() == "localhost"
 
     with monkeypatch.context() as mp:
-        print("setting new config")
-        ac = AppConfig(environment="development")
-        mp.setattr("tests.modules.pkg1.mod1.config", ac)
-        assert mod1.Mod1Calculator().get_environment() == "development"
-        mp.undo()
+        # APP_ENV takes priority over ENVIRONMENT
+        monkeypatch.setenv("APP_ENV", "development")
+        monkeypatch.setenv("ENVIRONMENT", "staging")
+        ac = AppConfig()
+        assert ac.environment == "development"
 
+        # monkeypatch the new config into the global environment
+        mp.setattr("tests.modules.core.config", ac)
+
+        # Because mod1 imported the config object into its module space, it will
+        # *not* see the global change.
+        assert mod1.Mod1Calculator().get_environment() == "localhost"
+
+        # Because mod2 imported the core module, it *will* see the global
+        # change.
+        assert mod2.Mod2Calculator().get_environment() == "development"
+
+    # Verify monkeypatch rolled back the global config change properly
     assert mod1.Mod1Calculator().get_environment() == "localhost"
+    assert mod2.Mod2Calculator().get_environment() == "localhost"
