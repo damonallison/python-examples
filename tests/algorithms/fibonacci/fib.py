@@ -1,14 +1,9 @@
-import logging
-
-from typing import List
-
 """Finonacci"""
 
 
-def fib_to(num: int) -> List[int]:
+def fib_to(num: int) -> list[int]:
     """Returns fibonacci numbers up to num"""
-    logging.debug(f"fib_to({num})")
-    result: List[int] = []
+    result: list[int] = []
     a, b = 0, 1
     while b < num:
         result.append(b)
@@ -19,7 +14,7 @@ def fib_to(num: int) -> List[int]:
 
 
 def fibrec(pos: int) -> int:
-    """Returns the `num` position in the fibonacci sequence using recursion.
+    """Returns the `pos` position in the fibonacci sequence using recursion.
 
     Warning: This is crazy expensive. Do not call with num > 30
     """
