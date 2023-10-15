@@ -2,10 +2,10 @@
 
 
 def fib_to(num: int) -> list[int]:
-    """Returns fibonacci numbers up to num"""
+    """Returns the list of fibonacci numbers up to but not exceeding num"""
     result: list[int] = []
     a, b = 0, 1
-    while b < num:
+    while b <= num:
         result.append(b)
         # Python will evaluate all expressions first, before doing the
         # assignment.
@@ -21,3 +21,4 @@ def fibrec(pos: int) -> int:
     if pos <= 1:
         return 1
     return fibrec(pos - 2) + fibrec(pos - 1)
+
