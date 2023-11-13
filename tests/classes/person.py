@@ -1,19 +1,19 @@
 """A simple person class."""
 import logging
-from typing import Any, ClassVar, List, Sequence
+from typing import Any, ClassVar, List, Sequence, Self
 
 
 class GenericIterator:
     """An iterator object which conforms to the "iterator protocol"."""
 
-    def __init__(self, seq: Sequence):
+    def __init__(self, seq: Sequence[Any]) -> None:
         self._index = 0
         self._seq = seq
 
-    def __iter__(self):
+    def __iter__(self) -> Self:
         return self
 
-    def __next__(self):
+    def __next__(self) -> Any:
         if self._index >= len(self._seq):
             raise StopIteration
 
