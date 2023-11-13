@@ -6,8 +6,8 @@ from typing import List
 
 
 class Logger:
-    def __init__(self):
-        self.logs = []
+    def __init__(self) -> None:
+        self.logs: list[str] = []
 
     def log(self, val: str) -> None:
         self.logs.insert(0, val)

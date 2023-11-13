@@ -18,7 +18,6 @@ class Manager(Person, Logger):
 
     def full_name(self) -> str:
         """Overrides Person.full_name."""
-
         return "Manager " + super().full_name()
 
     def __repr__(self) -> str:
