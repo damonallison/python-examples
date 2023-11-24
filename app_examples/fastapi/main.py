@@ -13,7 +13,7 @@ Pydantic
 --------
 
 FastAPI is based around Pydantic and strongly favors using type hints. The
-bebefits of pydantic and strong typing include:
+benefits of pydantic and strong typing include:
 
 * Requirements definition / documentation
   * Request path parmeters, headers, bodies, etc.
@@ -75,6 +75,7 @@ app.add_middleware(
         bundle_plugin.BundleIDPlugin(),
     ],
 )
+
 
 # Application events - startup / shutdown
 @app.on_event("startup")

@@ -11,17 +11,86 @@ Global and nonlocal variables cannot be updated within a function without using
 a `global` or `nonlocal` statement.
 
 Parameters are always passed by value.
-
 """
 
-from typing import Any, Dict, Tuple
+from typing import Any, Callable, Dict, Iterator, Self, Tuple, TypeVar
 
-from copy import copy, deepcopy
+T = TypeVar("T")
+
+
+class SideEffectIterator(Iterator[T]):
+    """An iterator object which conforms to the "iterator protocol".
+
+    The iterator protocol:
+
+    __iter__ = returns the iterator object (usually self)
+
+    __next__ = the next value in the iteration, raising StopIteration when the
+    iterator is exhausted
+
+    This iterator is not necessary as all Iterator[T] objects already support
+    iteration.
+
+
+    """
+
+    def __init__(self, seq: Iterator[T], side_effect: Callable[[T], None]) -> None:
+        self._index = 0
+        self._seq = seq
+        self._side_effect = side_effect
+
+    def __iter__(self) -> Self:
+        return self
+
+    def __next__(self) -> T:
+        if self._index >= len(self._seq):
+            raise StopIteration
+
+        curr = self._seq[self._index]
+        self._side_effect(curr)
+        self._index += 1
+        return curr
+
+
+def test_iterators() -> None:
+    logs: list[str] = []
+
+    def log(i: int) -> None:
+        logs.append(str(i))
+
+    i = SideEffectIterator[int](range(5), log)
+    assert tuple(i) == (0, 1, 2, 3, 4)
+    assert logs == [str(i) for i in range(5)]
+
+    logs = []
+
+    # Once exhausted, create a new iterator. Trying to use the existing iterator
+    # will raise a StopError immediately and return no elements.
+    i = SideEffectIterator[str]("damon", lambda x: logs.append(x))
+    assert "".join([x for x in i]) == "damon"
+    # the iterator of a string will return each character
+    assert logs == list(iter("damon"))
+
+
+def test_list_comprehension() -> None:
+    line_list = [" line 1", "", "line 3\n", "\n"]
+    assert ["line 1", "line 3"] == [
+        y for y in [x.strip() for x in line_list] if len(y) > 0
+    ]
+
+
+def test_genrator_expressions() -> None:
+    """A generator expressions return an iterator"""
+    line_list = [" line 1", "", "line 3\n", "\n"]
+
+    gen = (y for y in [x.strip() for x in line_list] if len(y) > 0)
+    assert isinstance(gen, Iterator)
+
+    assert list(gen) == ["line 1", "line 3"]
 
 
 def test_nested_functions() -> None:
     """Functions can be nested within functions."""
-
 
     def inc_and_add(x: int, y: int) -> int:
         nonlocal one
@@ -116,8 +185,11 @@ def test_variable_arguments() -> None:
     # to range()
     assert [0, 1] == list(range(*(0, 2)))
 
+
 def test_argument_packing() -> None:
-    def f(*args: tuple[Any], **kwargs: dict[Any, Any]) -> tuple[tuple[Any], dict[Any, Any]]:
+    def f(
+        *args: tuple[Any], **kwargs: dict[Any, Any]
+    ) -> tuple[tuple[Any], dict[Any, Any]]:
         """args and kwargs "pack" all variables into a tuple (args) or dict
         (kwargs).
 
@@ -147,7 +219,7 @@ def test_lambdas() -> None:
 
 
 def test_generator() -> None:
-    def gen_up_to(val):
+    def gen_up_to(val: int):
         """Generator functions are functions which behave like (return)
         iterators.
 
@@ -160,14 +232,26 @@ def test_generator() -> None:
         for x in range(val):
             yield x
 
-    # using list to exhaust the iterator
+    # use list or tuple to exhaust the iterator
     assert [0, 1] == list(gen_up_to(2))
+    assert (0, 1) == tuple(gen_up_to(2))
 
     # using a list comprehension to exhaust the iterator
     assert [0, 1] == [x for x in gen_up_to(2)]
 
     # You can create generator expressions like you would a list
     # comprehension. Generator expressions are wrapped in ()
-    square = (x ** 2 for x in range(3))
+    square = (x**2 for x in range(3))
     assert (0, 1, 4) == tuple(square)
-    assert (0, 1, 4) == tuple(x ** 2 for x in range(3))
+    assert (0, 1, 4) == tuple(x**2 for x in range(3))
+
+
+def test_map() -> None:
+    def add(x: int, y: int) -> int:
+        return x + y
+
+    def is_odd(x: int) -> bool:
+        return x % 2 != 0
+
+    assert list(map(add, [1, 2, 3], [2, 2, 2])) == [3, 4, 5]
+    assert list(filter(is_odd, map(add, [1, 2, 3], [1, 1, 1]))) == [3]
