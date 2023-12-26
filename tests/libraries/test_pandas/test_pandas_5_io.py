@@ -158,7 +158,7 @@ def test_csv() -> None:
         #
         df = pd.read_csv(
             filepath_or_buffer=f,
-            parse_dates=["d", "dt"],
+            parse_dates=["d"],
             converters={
                 # Custom column convertes for handling time and array
                 "t": lambda x: pd.to_datetime(x, format="%H:%M:%S").time(),
@@ -167,6 +167,13 @@ def test_csv() -> None:
             },
         )
         # df["t"] = pd.to_datetime(df["t"], format="%H:%M:%S").dt.time
+
+    # If a column or index cannot be represented as an array of datetime, say
+    # because of an unparsable value or a mixture of timezones, the column or
+    # index will be returned as an unaltered `object` data type. For
+    # non-standard datetime parsing, use pd.to_datetime() after read_csv()
+
+    df["dt"] = pd.to_datetime(df["dt"], format="ISO8601")
 
     row0 = df.loc[0]
     assert isinstance(row0["s"], str)

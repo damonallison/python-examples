@@ -70,8 +70,8 @@ def test_timezone_handling() -> None:
     ts = pd.date_range("2022-09-01", periods=10)
     assert ts.tz is None
 
-    ts = ts.tz_localize("UTC")
-    assert ts.tz == pytz.UTC
+    ts = ts.tz_localize(datetime.timezone.utc)
+    assert ts.tz == datetime.timezone.utc
 
     ts = ts.tz_convert("America/New_York")
     assert ts.tz == pytz.timezone("America/New_York")
@@ -82,7 +82,7 @@ def test_timezone_handling() -> None:
     # UTC. Pandas stores Timestamp values as UTC under the hood.
     s1 = s[:5].tz_convert("America/Chicago")
     s2 = s[5:]
-    assert (s1 + s2).index.tz == pytz.UTC
+    assert (s1 + s2).index.tz == datetime.timezone.utc
 
 
 def test_periods() -> None:
@@ -117,7 +117,6 @@ def test_periods() -> None:
 
 
 def test_window_functions() -> None:
-
     # 3 hours
     s = pd.Series(
         np.random.standard_normal(10800),

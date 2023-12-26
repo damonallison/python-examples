@@ -77,7 +77,6 @@ def test_series() -> None:
     assert s2.loc["A"] == 100
 
 
-
 def test_series_from_dict() -> None:
     """You can think of a series as a labeled set of values, like an ordered
     dictionary."""
@@ -312,7 +311,7 @@ def test_boolean_indexing() -> None:
 
     coverage_df = remove_military_pobox(coverage_df)
 
-    expected_index = pd.Index([0, 1, 3, 5, 7], dtype=pd.Int64Dtype)
+    expected_index = pd.Index([0, 1, 3, 5, 7])
     assert coverage_df.index.equals(expected_index)
 
     expected_values = ["1", "1", "1", "2", "2"]
@@ -344,7 +343,6 @@ def test_dataframe_copying() -> None:
     assert df2.loc[:, "even"].to_list() == ["two", "four"]
     assert df3.loc[:, "odd"].to_list() == ["one", "three"]
     assert df3.loc[:, "even"].to_list() == ["two", "four"]
-
 
 
 def test_dataframe_slicing() -> None:
@@ -509,7 +507,6 @@ def test_arithmetic_operations() -> None:
 
 
 def test_descriptive_statistics() -> None:
-
     df = pd.DataFrame([[1.0, 2.0, np.nan], [3.0, np.nan, 4.0]])
 
     assert df.sum(axis=0).tolist() == [4.0, 2.0, 4.0]  # row totals across all columns
@@ -517,7 +514,6 @@ def test_descriptive_statistics() -> None:
 
 
 def test_function_application() -> None:
-
     df = pd.DataFrame(np.arange(6).reshape((3, 2)), columns=["one", "two"])
 
     # numpy ufuncs work with dataframes
@@ -603,12 +599,10 @@ def test_pandas_itertuples() -> None:
         assert type(row) == pd.Series
         assert row.index.equals(pd.Index(["driver_id", "first", "last"]))
 
-
     for t in df.itertuples(index=False, name="Driver"):
         assert t.driver_id is not None
         assert t.first is not None
         assert t.last is not None
-
 
 
 def test_json_serialization(tmp_path: pathlib.Path) -> None:
