@@ -18,27 +18,29 @@ def test_groupby() -> None:
             "three": [100, 100, 100, 200, 200, 200],
         }
     )
+    #
+    # No apply operation has been done on the GroupBy object, so a
+    # `DataFrameGropuBy` object is returned.
+    #
+    grouped = df.groupby(["one"])
+    for name, group in grouped:
+        assert type(name[0]) == int
+        assert type(group) == pd.DataFrame
 
-    # No apply operation has been done on the GroupBy object, so the GroupBy
-    # is returned.
-    groups = df.groupby(["one"])
-    keys = [elt[0] for elt in groups]
-    dfs = [elt[1] for elt in groups]
-
-    assert all([type(key) == int for key in keys])
-    assert all([type(df) == pd.DataFrame for df in dfs])
-
-    assert keys == [1, 2, 3]
+    assert list(grouped.groups.keys()) == [1, 2, 3]
 
     # A df is created for each group.
-    assert np.array_equal(dfs[0]["one"].values, np.array([1, 1]))
-    assert np.array_equal(dfs[0]["two"].values, np.array([1, 2]))
+    print(type(grouped.get_group(1)))
+    print(type(grouped.get_group(1)["one"].values))
 
-    assert np.array_equal(dfs[1]["one"].values, np.array([2, 2]))
-    assert np.array_equal(dfs[1]["two"].values, np.array([3, 4]))
+    assert np.array_equal(grouped.get_group(1)["one"].values, np.array([1, 1]))
+    assert np.array_equal(grouped.get_group(1)["two"].values, np.array([1, 2]))
 
-    assert np.array_equal(dfs[2]["one"].values, np.array([3, 3]))
-    assert np.array_equal(dfs[2]["two"].values, np.array([5, 6]))
+    assert np.array_equal(grouped.get_group(2)["one"].values, np.array([2, 2]))
+    assert np.array_equal(grouped.get_group(2)["two"].values, np.array([3, 4]))
+
+    assert np.array_equal(grouped.get_group(3)["one"].values, np.array([3, 3]))
+    assert np.array_equal(grouped.get_group(3)["two"].values, np.array([5, 6]))
 
     # Aggregate functions can be applied to each group's columns.
     #
@@ -54,14 +56,6 @@ def test_groupby() -> None:
     assert sums_df.loc[3, "two"] == 11
 
     assert np.array_equal(sums_df["two"].values, np.array([3, 7, 11]))
-
-    #               two
-    # one   three
-    # 1     100     3
-    # 2     100     3
-    # 2     200     4
-    # 3     200     11
-    #
 
     # Returns a dataframe
     gb_mc = df.groupby(["one", "three"]).sum()
@@ -179,7 +173,6 @@ def test_transform() -> None:
     )
     g = df.groupby("key")["value"]
     print(g.transform(get_group_mean))
-
 
 
 def test_stacking() -> None:
