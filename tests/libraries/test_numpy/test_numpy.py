@@ -16,8 +16,8 @@ from a programmer's standpoint. Appending to an ndarray will return a new
 ndarray.
 
 numpy computation is CPU based and arrays are loaded into memory. Computations
-cannot run on GPUs (Tensorflow, JAX) or can be distributed across clusters of
-CPUs. Use dask for distributed (multiprocess) operations.
+cannot run on GPUs (use JAX) or can be distributed across clusters of CPUs. Use
+dask for distributed (multiprocess) operations.
 
 Views
 -----
@@ -28,7 +28,6 @@ allows the large array to be GC'd.
 
 Performance
 -----------
-
 Internally, numpy stores data in contiguous blocks of memory. Computation is
 done in C, making numpy more memory efficient and performant than Python.
 """
@@ -204,7 +203,6 @@ def test_numpy_indexing() -> None:
 
 
 def test_numpy_indexing_multiple_dimensions() -> None:
-
     a = np.arange(0, 6).reshape(2, 3)
 
     #
@@ -539,7 +537,6 @@ def test_nan() -> None:
 
 
 def test_descriptive_statistics() -> None:
-
     a = np.arange(10)
 
     assert np.min(a) == 0
