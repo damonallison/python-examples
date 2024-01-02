@@ -228,11 +228,14 @@ async def test_simple() -> None:
 
 
 @pytest.mark.asyncio
-async def test_tasks(event_loop: asyncio.AbstractEventLoop) -> None:
-    """Tasks are coroutine instances running on the event loop.
+async def test_tasks() -> None:
+    """
+    Tasks are coroutine instances running on the event loop.
 
     Tasks can be used to start multiple coroutines concurrently.
     """
+
+    event_loop = asyncio.get_running_loop()
 
     async def sleep(seconds: float):
         await asyncio.sleep(seconds)
@@ -254,10 +257,11 @@ async def test_tasks(event_loop: asyncio.AbstractEventLoop) -> None:
 
 
 @pytest.mark.asyncio
-async def test_executor(event_loop: asyncio.AbstractEventLoop) -> None:
-    """Functions which are not async must be wrapped in an executor
-    to use with asyncio. For example, an I/O based function that doesn't have an
-    async version would need to be ran in an executor.
+async def test_executor() -> None:
+    """
+    Functions which are not async must be wrapped in an executor to use with
+    asyncio. For example, an I/O based function that doesn't have an async
+    version would need to be ran in an executor.
 
     The default executor is a ThreadPoolExecutor, which runs in a background
     thread.
@@ -271,7 +275,7 @@ async def test_executor(event_loop: asyncio.AbstractEventLoop) -> None:
         return value
 
     val = "damon"
-    f: asyncio.Future = event_loop.run_in_executor(None, echo, val)
+    f: asyncio.Future = asyncio.get_running_loop().run_in_executor(None, echo, val)
     await asyncio.wait_for(f, timeout=1.0)
 
     assert f.done()
@@ -356,7 +360,7 @@ def test_asyncio_lifecycle() -> None:
             loop.create_task(run_for(delay))
 
     # You need a loop instance before you can run any coroutines. Anywhere you
-    # call `get_event_loop`, you'll get he same loop instance (assuming you're
+    # call `get_event_loop`, you'll get the same loop instance (assuming you're
     # using a single thread). If you're inside an async function, you should
     # call `asyncio.get_running_loop()` instead.
     loop = asyncio.get_event_loop()
@@ -414,6 +418,9 @@ def test_asyncio_lifecycle() -> None:
     group = asyncio.gather(*pending, return_exceptions=True)
     loop.run_until_complete(group)
     assert non_blocking_completed
+
+    pending = asyncio.all_tasks(loop=loop)
+    assert len(pending) == 0
 
     #
     # Now close the executor.

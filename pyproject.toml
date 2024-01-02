@@ -83,9 +83,10 @@ log_cli_level = "INFO"
 # pytest -m "not slow"
 #
 # For more information on markers:
-# https://docs.pytest.org/en/7.1.x/how-to/mark.html
+# https://docs.pytest.org/en/stable/how-to/mark.html
 markers = [
     "ml: marks tests as ml (which take a long time to run) - deselect with '-m \"not slow\"'",
+    "plot: marks test has showing a plot (UI) - deselect with '-m \"not mark\"",
 ]
 
 [build-system]
