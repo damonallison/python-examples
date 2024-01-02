@@ -80,7 +80,6 @@ def test_series() -> None:
 def test_series_from_dict() -> None:
     """You can think of a series as a labeled set of values, like an ordered
     dictionary."""
-
     states = {"Minnesota": 3500, "Texas": 11222}
     s = pd.Series(states)
 
