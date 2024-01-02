@@ -1,12 +1,62 @@
 """Model evaluation includes the following:
 
-* Determining how a model performs on unseen (test) data
-* Hyperparameter tuning to build an optimal model * GridSearchCV
+* Determining how a model performs on unseen (test) data.
+* Hyperparameter tuning to build an optimal model (GridSearchCV).
+
 
 Model Evaluation
 ----------------
 Simple model evaluation is done with the `score` method (classification) or
-accuracy metrics (MAE, RMSE for regression).
+accuracy metrics (MAE, RMSE for regression). `score` is different for every
+model type. The metrics used for scoring vary based on the model type.
+
+Classification scoring:
+
+* Accuracy
+* Precision / Recall / F1
+* ROC-AUC
+* Confusion matrix
+
+Regression scoring:
+
+* MAE / MSE / RMSE
+* R^2
+
+
+For classification models, `accuracy` is returned. For regression models, R^2 is
+returned which represents the proportion of variance in the dependent variable
+that is predicted from the independent variables (features).
+
+R^2 = 1 - (sum of squared residuals / total sum of squares)
+
+* Sum of squared residuals = sum of squared differences between the actual and
+  predicted values.
+
+* Total sum of squares: Sum of squared differences between the actual values and
+  the mean of the dependent variable.
+
+
+R^2 provides a measure of how well the model captures variability in the data.
+It does *not* indicate whether the model is appropriate for making predictions
+on new data. Therefore, it is often used in conjunction with other methods (like
+RMSE).
+
+Regression model metrics:
+
+* Mean Absolute Error (MAE): The average absolute differences between predicted
+  and actual values.
+
+* Mean Squared Error (MSE): Average of the squared differences between predicted
+  and actual values.
+
+* Root Mean Squared Error (RMSE): The root of MSE. RMSE is interpretable since
+  it shares the same unit as the dependent variable.
+
+Note that RMSE is sensitive to outliers. Typically both RMSE and R^2 are used
+together to score a regression model.
+
+
+----
 
 Cross Validation
 ----------------
@@ -15,6 +65,13 @@ different slices of data. Cross validation is more robust since it ensures the
 entire data set is used as the test set in one fold. There are multiple CV
 strategies available, however KFold, StratifiedKFold, and GroupKFold are the
 most common.
+
+Learning Curves
+---------------
+Plots that show the model's performance on both training and validation datasets
+ofer different training sizes or epochs.
+
+---
 
 Grid Search (Hyperparameter Tuning)
 -----------------------------------
@@ -72,16 +129,28 @@ chosen the correct ranges of hyperparameters.
   parameter is not important to tune (or perhaps could be eliminated).
 
 
-Model metrics and scoring
-------------------------
+---
 
-Metrics for binary classification
+
+Model metrics (scoring)
+-----------------------
+
+Binary classification
 ---------------------------------
+Binary classification is classifying data into two groups. There are 4 ways an
+individual result could turn out:
 
-* False positive: incorrect true prediction. Type 1 error.
+* True positive: correctly predicted positive.
+* False positive: incorrect positive prediction. Type 1 error.
 * False negative: incorrect false prediction. Type 2 error.
+* True negative: correctly predicted negative.
 
-When evaluating a binary classifier, associate a cost to each error type.
+When evaluating a binary classifier, associate a cost to each error type. For
+example, when predicting cancer, the cost of a false negative (type 2) is *much*
+higher than a false positive (type 1). If you predict a false positive, the
+patient would need to have more tests performed which would ultimately prove no
+cancer. If you predict a false negative, the patient truly has cancer and
+doctors will think they are fine.
 
 Watch for imbalanced data sets. If 99% of emails are spam, simply predicting
 every email will be spam will be 99% accurate. With imbalanced data sets,
@@ -107,7 +176,9 @@ positives (Recall == True Positive Rate).
 
 There is a tradeoff in precision vs. recall. You can have 100% precision by only
 predicting the sample you are most confident in as positive. However, you'll
-miss a lot of positives (high false negatives) and your recall will suffer.
+miss a lot of positives (high false negatives) and your recall will suffer. If
+you lower the confidence interval, you'll have high false positives (low
+precision).
 
 The goal is to determine how agressive you want to be when predicting positives.
 The optimal threshold is found by testing all thresholds and finding the best
@@ -137,9 +208,6 @@ import pytest
 import seaborn as sns
 from sklearn import datasets, ensemble, linear_model, metrics, model_selection, svm
 
-import lightgbm as lgb
-import xgboost as xgb
-
 
 # Mark all tests this module as 'ml'. These tests will be skipped with
 # `make test` since they are slow.
@@ -147,7 +215,8 @@ pytestmark = pytest.mark.ml
 
 # Many tests will have options to show plots. Setting DEBUG to `True` will
 # display the plots.
-DEBUG = True
+DEBUG = False
+SEED = 42
 
 
 def test_feature_order() -> None:
@@ -180,46 +249,19 @@ def test_feature_order() -> None:
         X, y, random_state=0
     )
 
-    lr = xgb.XGBClassifier()
+    assert len(X_test) == len(y_test)
+    assert len(X_train) == len(y_train)
+
+    lr = linear_model.LogisticRegression(random_state=SEED)
     lr.fit(X_train, y_train)
 
-    lr = lgb.LGBMClassifier()
-    lr.fit(X_train, y_train)
+    assert isinstance(lr.feature_names_in_, np.ndarray)
+    assert len(lr.feature_names_in_) == lr.n_features_in_
 
-    # lr = linear_model.LogisticRegression()
-    # lr.fit(X_train, y_train)
+    print(lr.feature_names_in_)
+    pred1 = lr.predict(X_test)
 
-    print(f"get_feature_names: {get_feature_names(lr)}")
-
-    df1 = pd.DataFrame(
-        {
-            "sepal length (cm)": [1],
-            "sepal width (cm)": [2],
-            "petal length (cm)": [3],
-            "petal width (cm)": [4],
-        }
-    )
-    pred1 = lr.predict(df1)
-
-    # Switch the feature order. Predicting with a different feature order than
-    # used when calling 'fit' raises a FutureWarning in sklearn and will soon
-    # raise.
-    df1 = pd.DataFrame(
-        {
-            "petal length (cm)": [3],
-            "petal width (cm)": [4],
-            "sepal length (cm)": [1],
-            "sepal width (cm)": [2],
-        }
-    )
-
-    feature_names = get_feature_names(lr)
-    print(type(feature_names))
-    if feature_names is not None:
-        df1 = df1[feature_names]
-
-    pred2 = lr.predict(df1)
-    assert pred1 == pred2
+    print(lr.score(X_test, y_test))
 
 
 def test_score() -> None:

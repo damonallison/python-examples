@@ -5,13 +5,8 @@ from typing import Any
 import joblib
 import os
 import pandas as pd
-import pytest
 from sklearn import datasets, linear_model, model_selection, preprocessing
 import tempfile
-
-# Mark all tests this module as 'ml'. These tests will be skipped with
-# `make test` since they are slow.
-pytestmark = pytest.mark.ml
 
 
 def test_linear_regresssion() -> None:
@@ -29,7 +24,7 @@ def test_linear_regresssion() -> None:
 
     * Non-linear features can make the data more gaussian and remove outliers.
 
-    Note that kernel SVM or more complex models can learn s similar regression
+    Note that kernel SVM or more complex models can learn a similar regression
     curve without having to tranform features.
 
     Polynomial features can actually decrease performance of more complex models
@@ -59,13 +54,14 @@ def test_linear_regresssion() -> None:
     Always use domain experts if possible. They have intuition on the data to
     use.
 
-    Practical advice
-        * Linear models: The higher the correlation between Xi and Y, the better
-          Xi is.
+    Practical advice:
+
+        * Linear models: The higher the correlation between X(i) and Y, the better
+          X(i) is.
         * Tree models: The higher the feature_importance, the better.
         * Use LASSO or Ridge. The higher the coefficients, the better.
-
     """
+
     X, y = datasets.make_regression(
         n_samples=10000,
         n_features=10,
