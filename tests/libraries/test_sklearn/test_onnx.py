@@ -1,5 +1,5 @@
 """
-Commented out as onnxruntime doesn't support 3.12.
+Commented out as onnxruntime doesn't support Python 3.12.
 
 Requires:
 
