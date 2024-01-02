@@ -199,7 +199,8 @@ recall (low false negatives). Predicting someone as *not* having cancer when
 they indeed do is MUCH more expensive than predicting someone as having cancer
 who doesn't.
 """
-from typing import Any, Optional, cast
+import re
+from typing import cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -208,11 +209,6 @@ import pytest
 import seaborn as sns
 from sklearn import datasets, ensemble, linear_model, metrics, model_selection, svm
 
-
-# Mark all tests this module as 'ml'. These tests will be skipped with
-# `make test` since they are slow.
-pytestmark = pytest.mark.ml
-
 # Many tests will have options to show plots. Setting DEBUG to `True` will
 # display the plots.
 DEBUG = False
@@ -220,48 +216,67 @@ SEED = 42
 
 
 def test_feature_order() -> None:
-    """Features sent to predict must be in the same order as when the model was
+    """
+    Features sent to predict must be in the same order as when the model was
     `fit`.
 
-    This example shows updating a dataframe to match the feature names expected
-    by the model.
+    Note that some ML frameworks (lgb) will replace spaces in feature names with
+    `_`.
     """
 
-    def get_feature_names(model: Any) -> Optional[list[str]]:
-        """Attempts to retrieve feature names from a given model.
-
-        Args:
-            model: The model to retrieve features for
-
-        Returns:
-            A list of feature names if they can be found, otherwise None
-        """
-        if hasattr(model, "feature_names_in_"):  # scikit-learn, xgb
-            return cast(list[str], getattr(model, "feature_names_in_"))
-        if hasattr(model, "feature_name_"):
-            # lgb - note that lgb replaces spaces in feature names with `_`
-            return cast(list[str], getattr(model, "feature_name_"))
-        return None
-
     X, y = datasets.load_iris(return_X_y=True, as_frame=True)
+
+    assert isinstance(X, pd.DataFrame)
+    assert isinstance(y, pd.Series)
+
+    X = cast(pd.DataFrame, X)
+    y = cast(pd.Series, y)
+
+    feature_names = [
+        "sepal length (cm)",
+        "sepal width (cm)",
+        "petal length (cm)",
+        "petal width (cm)",
+    ]
+
+    assert X.columns.to_list() == feature_names
+    assert y.name == "target"
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
         X, y, random_state=0
     )
 
-    assert len(X_test) == len(y_test)
-    assert len(X_train) == len(y_train)
+    assert isinstance(X_train, pd.DataFrame)
+    assert isinstance(y_train, pd.Series)
+    assert isinstance(X_test, pd.DataFrame)
+    assert isinstance(y_test, pd.Series)
+
+    assert X_train.columns.to_list() == feature_names
+    assert X_test.columns.to_list() == feature_names
+    assert y_train.name == "target"
+    assert y_test.name == "target"
 
     lr = linear_model.LogisticRegression(random_state=SEED)
     lr.fit(X_train, y_train)
 
     assert isinstance(lr.feature_names_in_, np.ndarray)
-    assert len(lr.feature_names_in_) == lr.n_features_in_
+    assert lr.feature_names_in_.tolist() == feature_names
+    assert lr.n_features_in_ == len(feature_names)
 
-    print(lr.feature_names_in_)
-    pred1 = lr.predict(X_test)
+    assert lr.score(X_test, y_test) > 0
 
-    print(lr.score(X_test, y_test))
+    X_test_altered = X_test[
+        [
+            "petal length (cm)",
+            "petal width (cm)",
+            "sepal length (cm)",
+            "sepal width (cm)",
+        ]
+    ]
+
+    pattern = re.compile(r"feature names.*same order", re.DOTALL)
+    with pytest.raises(ValueError, match=pattern):
+        lr.score(X_test_altered, y_test)
 
 
 def test_score() -> None:
@@ -1047,6 +1062,24 @@ def test_grid_search_by_metric() -> None:
 
 
 def test_available_scorers() -> None:
-    """You can find a full list of available scorers by looking at the SCORERS dictionary"""
+    """
+    Retrieve the list of scorers. These names can be passed to get_scorer to
+    retrieve a scorer.
+    """
 
-    print(f"Available scorers: {sorted(metrics.SCORERS.keys())}")
+    # A "Predict" scorer will call "predict" on an estimator, so an estimator is required
+    X, y = datasets.load_iris(return_X_y=True, as_frame=True)
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+    lr = linear_model.LogisticRegression(random_state=SEED)
+    lr.fit(X_train, y_train)
+
+    assert "accuracy" in metrics.get_scorer_names()
+    scorer = metrics.get_scorer("accuracy")
+    assert "PredictScorer" in str(type(scorer))
+
+    assert scorer(lr, X_test, y_test) > 0.0
+
+    # Scoring functions are also available on the metrics module
+    assert metrics.accuracy_score([1, 1, 1, 1], [0, 0, 1, 1]) == 0.5
