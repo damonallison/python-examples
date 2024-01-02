@@ -299,7 +299,7 @@ def test_cross_validation() -> None:
 
     Cross validation is more robust since multiple train / test splits are
     scored. Also, all data is used in a test set in one of the folds. This gives
-    us more confidence in the overall model generalization performance (score).
+    us more confidence in the overall model generalization performance (score\).
 
     By default, train_test_split will randomly create the train / test split. If
     we are "unlucky" and receive all hard to score examples in our test set, the
