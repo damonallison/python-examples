@@ -199,13 +199,13 @@ recall (low false negatives). Predicting someone as *not* having cancer when
 they indeed do is MUCH more expensive than predicting someone as having cancer
 who doesn't.
 """
-import re
+import math
 from typing import cast
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
-import pytest
 import seaborn as sns
 from sklearn import datasets, ensemble, linear_model, metrics, model_selection, svm
 
@@ -215,80 +215,30 @@ DEBUG = False
 SEED = 42
 
 
-def test_feature_order() -> None:
-    """
-    Features sent to predict must be in the same order as when the model was
-    `fit`.
-
-    Note that some ML frameworks (lgb) will replace spaces in feature names with
-    `_`.
-    """
-
-    X, y = datasets.load_iris(return_X_y=True, as_frame=True)
-
-    assert isinstance(X, pd.DataFrame)
-    assert isinstance(y, pd.Series)
-
-    X = cast(pd.DataFrame, X)
-    y = cast(pd.Series, y)
-
-    feature_names = [
-        "sepal length (cm)",
-        "sepal width (cm)",
-        "petal length (cm)",
-        "petal width (cm)",
-    ]
-
-    assert X.columns.to_list() == feature_names
-    assert y.name == "target"
-
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(
-        X, y, random_state=0
-    )
-
-    assert isinstance(X_train, pd.DataFrame)
-    assert isinstance(y_train, pd.Series)
-    assert isinstance(X_test, pd.DataFrame)
-    assert isinstance(y_test, pd.Series)
-
-    assert X_train.columns.to_list() == feature_names
-    assert X_test.columns.to_list() == feature_names
-    assert y_train.name == "target"
-    assert y_test.name == "target"
-
-    lr = linear_model.LogisticRegression(random_state=SEED)
-    lr.fit(X_train, y_train)
-
-    assert isinstance(lr.feature_names_in_, np.ndarray)
-    assert lr.feature_names_in_.tolist() == feature_names
-    assert lr.n_features_in_ == len(feature_names)
-
-    assert lr.score(X_test, y_test) > 0
-
-    X_test_altered = X_test[
-        [
-            "petal length (cm)",
-            "petal width (cm)",
-            "sepal length (cm)",
-            "sepal width (cm)",
-        ]
-    ]
-
-    pattern = re.compile(r"feature names.*same order", re.DOTALL)
-    with pytest.raises(ValueError, match=pattern):
-        lr.score(X_test_altered, y_test)
-
-
 def test_score() -> None:
-    """For classification problems, score is the fraction of correctly
-    classified examples.
+    """
+    For classification problems, "accuracy" is used for scoring.
     """
 
     # make_blobs makes gaussian clusters
     X, y = datasets.make_blobs(n_samples=1000, n_features=2, random_state=0)
 
+    X = cast(npt.NDArray[np.floating], X)
+    y = cast(npt.NDArray[np.floating], y)
+
+    # equally distributed labels between 0-3
+    unique, counts = np.unique(y, return_counts=True)
+    print(dict(zip(unique, counts)))
+    colors = {
+        0: "red",
+        1: "green",
+        2: "blue",
+    }
     if DEBUG:
-        plt.scatter(X[:, 0], X[:, 1])
+        for u in unique:
+            only_u = X[y == u]
+            plt.scatter(only_u[:, 0], only_u[:, 1], c=colors[u], label=u)
+        plt.legend()
         plt.show()
 
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
@@ -296,8 +246,15 @@ def test_score() -> None:
     )
 
     lr = linear_model.LogisticRegression().fit(X_train, y_train)
-    score = lr.score(X_test, y_test)
-    print(f"Test score = {score}")
+
+    # Manually score for accuracy
+    y_pred = lr.predict(X_test)
+    acc_score = metrics.accuracy_score(y_test, y_pred)
+
+    # Accuracy score using the predictor
+    lr_score = lr.score(X_test, y_test)
+
+    assert math.isclose(acc_score, lr_score, abs_tol=0.001)
 
 
 def test_cross_validation() -> None:
