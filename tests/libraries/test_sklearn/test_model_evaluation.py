@@ -215,6 +215,30 @@ DEBUG = False
 SEED = 42
 
 
+def test_available_scorers() -> None:
+    """
+    Retrieve the list of scorers. These names can be passed to get_scorer to
+    retrieve a scorer.
+    """
+
+    # A "Predict" scorer will call "predict" on an estimator, so an estimator is required
+    X, y = datasets.load_iris(return_X_y=True, as_frame=True)
+    X_train, X_test, y_train, y_test = model_selection.train_test_split(
+        X, y, random_state=0
+    )
+    lr = linear_model.LogisticRegression(random_state=SEED)
+    lr.fit(X_train, y_train)
+
+    assert "accuracy" in metrics.get_scorer_names()
+    scorer = metrics.get_scorer("accuracy")
+    assert "PredictScorer" in str(type(scorer))
+
+    assert scorer(lr, X_test, y_test) > 0.0
+
+    # Scoring functions are also available on the metrics module
+    assert metrics.accuracy_score([1, 1, 1, 1], [0, 0, 1, 1]) == 0.5
+
+
 def test_score() -> None:
     """
     For classification problems, "accuracy" is used for scoring.
@@ -258,12 +282,16 @@ def test_score() -> None:
 
 
 def test_cross_validation() -> None:
-    """Cross validation is a more robust way to assess generalization
-    performance.
+    """
+    Cross validation is a more robust way to assess generalization performance.
 
-    Cross validation splits the data into multiple "folds", building a model on
-    each fold. Scores are determined on each fold. The aggregate score (mean,
-    for example) is determined for an overall model "score".
+    Cross validation splits data into multiple "folds", building a model on each
+    fold. Scores are determined on each fold. The aggregate score (mean, for
+    example) is determined for an overall model "score".
+
+    The goal of CV is to more accurately determine model performance by using
+    multiple variations of the test dataset. This provides a "strength in
+    numbers" approach
 
     Benefits of CV:
 
@@ -299,6 +327,7 @@ def test_cross_validation() -> None:
     X, y = datasets.load_iris(return_X_y=True)
     lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
 
+    kf = model_selection.StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
     # At least 5-fold CV is recommended
     #
     # Note that for classification tasks (like LogisticRegression), sckit-learn
@@ -308,36 +337,33 @@ def test_cross_validation() -> None:
     #
     # NOTE: Always use stratified k-fold CV for classification tasks.
     #
-    scores = model_selection.cross_val_score(lr, X, y, cv=10)
-    print(f"CV scores: {np.round(scores, 2)}")
-    print(f"Mean score: {scores.mean():.2f}")
+    scores = model_selection.cross_val_score(lr, X, y, cv=kf)
 
     # cross_validate is similar to cross_val_score, but returns a dictionary
     # containing additional data:
     #
-    # * training times
-    # * test times
-    # * training score (optional)
-    # * test scores
+    # * fit_time
+    # * score_time
+    # * test_score
+    # * train_score
 
     cv_results = model_selection.cross_validate(
         lr,
         X,
         y,
-        cv=10,
-        n_jobs=-1,
+        cv=kf,
         verbose=0,
         return_estimator=False,
         return_train_score=True,
     )
 
     df = pd.DataFrame(cv_results)
-    print(df)
-    print(f"Means: {df.mean()}")
+    assert math.isclose(np.mean(scores), df["test_score"].mean(), abs_tol=0.01)
 
 
 def test_cross_validation_custom_splitter() -> None:
-    """A custom splitter (KFold) can be used to control the k-fold splitting
+    """
+    A custom splitter (KFold) can be used to control the k-fold splitting
     process.
 
     Here, we override scikit-learn's default of using stratified k-fold for
@@ -365,12 +391,13 @@ def test_cross_validation_custom_splitter() -> None:
     # You'll typically use StratifiedKFold for classification.
     kfold = model_selection.StratifiedKFold(n_splits=3, shuffle=True, random_state=0)
     scores = model_selection.cross_val_score(lr, X, y, cv=kfold)
-    assert scores.mean() > 0.50
+    assert scores.mean() > 0.90
 
 
 def test_leave_one_out_cv() -> None:
-    """Leave one out corss validation will create a fold with a single sample as
-    the entire test set.
+    """
+    Leave one out CV will create a fold with a single sample as the entire test
+    set.
 
     This is really expensive (n folds == n models) but could produce better
     results when you have smaller data sets.
@@ -380,35 +407,39 @@ def test_leave_one_out_cv() -> None:
     lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
     loo = model_selection.LeaveOneOut()
     scores = model_selection.cross_val_score(lr, X, y, cv=loo)
-    print(f"Number of folds: {len(scores)}")
-    print(f"Mean score: {scores.mean()}")
+
+    assert len(scores) == len(X)
+    assert scores.mean() > 0.90
 
 
 def test_shuffle_split() -> None:
-    """Shuffle split will split a configured number of samples for the training
-    and test sets.
+    """
+    Shuffle split will split a configured number of samples for the training and
+    test sets.
 
     Shuffle split allows you to control the number of iterations (folds)
     independently of the data. For exanple, you could use a training size of 50%
     and a test size of 20% (leaving 30% of the data out).
 
     This can be used with large data sets. This can be useful for experimenting
-    with large data sets.
+    with large data sets (or running tests - anywhere you could use a smaller
+    data set).
     """
 
     X, y = datasets.load_iris(return_X_y=True)
 
-    lr = linear_model.LogisticRegression(max_iter=1000, random_state=0)
+    lr = linear_model.LogisticRegression(random_state=SEED)
     shuffle = model_selection.StratifiedShuffleSplit(
         n_splits=10, train_size=0.5, test_size=0.1
     )
     scores = model_selection.cross_val_score(lr, X, y, cv=shuffle)
-    print(f"Mean score: {scores.mean()}")
+    assert scores.mean() > 0.90
 
 
 def test_cv_with_groups() -> None:
-    """Grouping ensures that data belonging to the same group (say faces for
-    facial recognition), are not split between the training and test sets.
+    """
+    Grouping ensures that data belonging to the same group (say faces for facial
+    recognition), are not split between the training and test sets.
 
     Examples of groups:
 
@@ -425,11 +456,13 @@ def test_cv_with_groups() -> None:
     groups = ["Y", "Y", "Y", "G", "G", "G", "G", "B", "B", "B", "R", "R"]
     groupCV = model_selection.GroupKFold(n_splits=3)
     scores = model_selection.cross_val_score(lr, X, y, groups=groups, cv=groupCV)
-    print(f"Mean score: {scores.mean()}")
+
+    assert len(scores) == 3
 
 
 def test_grid_search() -> None:
-    """Grid search is used for hyperparameter tuning. Each combination of
+    """
+    Grid search is used for hyperparameter tuning. Each combination of
     parameters in the grid are evaluated and the best performing parameter
     combination is kept as the "tuned hyperparameters" to use for final model
     generation."""
@@ -443,8 +476,9 @@ def test_grid_search() -> None:
         "gamma": [0.001, 0.01, 0.1, 1, 10, 100],
     }
     # Since SVC is a classifier, stratified CV is used
+    kf = model_selection.StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
     gs = model_selection.GridSearchCV(
-        svm.SVC(), param_grid=param_grid, cv=5, return_train_score=True
+        svm.SVC(), param_grid=param_grid, cv=kf, return_train_score=True
     )
 
     #
@@ -453,13 +487,30 @@ def test_grid_search() -> None:
     # or `predict` on the grid search object will use the best estimator.
     #
     gs.fit(X_train, y_train)
-    print(f"gs best params: {gs.best_params_}")
+
+    assert all((param in gs.best_params_.keys() for param in param_grid.keys()))
 
     #
     # All CV results are stored in cv_results_. Each record in cv_results_
     # represents a different parameter combination.
     #
     cv_results = pd.DataFrame(gs.cv_results_)
+    # 6 x 6 - a row for each parameter combination
+    assert len(cv_results) == 36
+
+    # CV is performed on the grid using depth first parameter combinations. For
+    # example, C=0.001 is used with all combinations of gamma first.
+    #
+    # C = 0.001, gamma=0.001
+    # C = 0.001, gamma=0.01
+    # C = 0.001, gamma=0.1
+    # ...
+    #
+    # Verify the order
+    param_C = scores = np.array(cv_results["param_C"]).reshape(6, 6)
+    for i, row in enumerate(param_C):
+        assert np.all(np.equal(x, param_grid["C"][i]) for x in row)
+
     print(cv_results.head())
 
     #
@@ -474,7 +525,6 @@ def test_grid_search() -> None:
     #
     if DEBUG:
         scores = np.array(cv_results["mean_test_score"]).reshape(6, 6)
-
         sns.heatmap(
             scores,
             xticklabels=param_grid["gamma"],
@@ -487,11 +537,13 @@ def test_grid_search() -> None:
     # The only place in the grid search process the test set is used is during
     # final model scoring. The test set is *NOT* used to find the best model.
     #
+    assert gs.best_score_ > 0.0
     print(f"gs score: {gs.score(X_test, y_test)}")
 
 
-def test_grid_search_numtiple_grids() -> None:
-    """In some cases, not all parameters will be valid when used together.
+def test_grid_search_multiple_grids() -> None:
+    """
+    In some cases, not all parameters will be valid when used together.
 
     For example, when using SVC with a kernel parameter, when kernel='linear',
     only C is used. When kernel='rbf', C and gamma are used.
@@ -518,7 +570,9 @@ def test_grid_search_numtiple_grids() -> None:
 
 
 def test_nested_cross_validation() -> None:
-    """Nested cross validation performs two cross validations.
+    """
+    Nested cross validation is a more advanced form of CV by testing all
+    combinations of hyperparameters on multiple folds.
 
     First, For each parameter combination, GridSearchCV will use cross
     validation to determine the mean test score by splitting the training set
@@ -527,8 +581,10 @@ def test_nested_cross_validation() -> None:
     Second, CV is used to vary the training / test split.
 
     In the examples above, we are only splitting the data once into train / test
-    sets. This makes model performance dependent on a single split of the data
-    (which is why we do CV).
+    sets, then running GridSearchCV once using the single train / test split.
+    This makes model performance dependent on a single split of the data. A more
+    robust (but expensive) solution would be to run the entire GridSearchCV
+    using multiple folds..
 
     In nested cross-validation, there is an outer loop over splits of the data
     into training and test sets. For each of them, a grid search is run (which
@@ -540,27 +596,40 @@ def test_nested_cross_validation() -> None:
     tells us how well a model generalizes. Nested CV is used to determine how
     well a given model works on a dataset.
 
-    Note that nested CV is expensive. Here, we have 4 * 2 = 6 parameter
-    combinations. We use 5-fold CV within GridSearchCV, resulting in 6 * 5 = 30
+    Note that nested CV is expensive. Here, we have 4 * 2 = 8 parameter
+    combinations. We use 5-fold CV within GridSearchCV, resulting in 8 * 5 = 40
     models being trained. We use 5-fold CV to validate the entire dataset, which
     results in a total of 30 * 5 == 150 models.
     """
 
     X, y = datasets.load_iris(return_X_y=True)
 
-    param_grid = [
-        {"kernel": ["rbf"], "C": [0.01, 0.1], "gamma": [0.01, 0.1]},
-        {"kernel": ["linear"], "C": [0.01, 0.1]},
-    ]
-    grid_search = model_selection.GridSearchCV(svm.SVC(), param_grid, cv=5, n_jobs=-1)
-    scores = model_selection.cross_val_score(grid_search, X, y, cv=5, n_jobs=-1)
+    param_grid = {
+        "C": [0.0001, 0.001, 0.01, 0.1],
+        "gamma": [0.01, 0.1],
+    }
+
+    # the "inner loop" - which will evaluate the param grid for an individual fold
+    kf = model_selection.StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
+    grid_search = model_selection.GridSearchCV(svm.SVC(), param_grid, cv=kf)
+    grid_search.fit(X, y)
+
+    # Here, we ran 5-fold CV for each parameter combination. A total of 40
+    # models being trained and scored.
+    assert len(grid_search.cv_results_["mean_test_score"]) == 8
+
+    # the "outer loop" - which breaks the outer data set into folds
+    scores = model_selection.cross_val_score(grid_search, X, y, cv=kf)
+
+    # Each iteration of the outer loop results is a score for one execution of
+    # GridSearchCV. With each iteration of GridSearchCV building 40 models, we
+    # have a total of 40 * 5 == 200 models being trained.
+    assert len(scores) == 5
     #
     # The result of nested CV can be summarized as "SVC can achieve a 97% mean
     # CV accuracy on the iris dataset". It will *not* produce a model.
     #
-    print(f"Nested CV scores: {scores}")
-    print(f"Mean nested CV Score: {scores.mean()}")
-    assert scores.mean() > 0.0
+    assert scores.mean() > 0.90
 
 
 #
@@ -1016,27 +1085,3 @@ def test_grid_search_by_metric() -> None:
             metrics.accuracy_score(y_test, grid.predict(X_test))
         )
     )
-
-
-def test_available_scorers() -> None:
-    """
-    Retrieve the list of scorers. These names can be passed to get_scorer to
-    retrieve a scorer.
-    """
-
-    # A "Predict" scorer will call "predict" on an estimator, so an estimator is required
-    X, y = datasets.load_iris(return_X_y=True, as_frame=True)
-    X_train, X_test, y_train, y_test = model_selection.train_test_split(
-        X, y, random_state=0
-    )
-    lr = linear_model.LogisticRegression(random_state=SEED)
-    lr.fit(X_train, y_train)
-
-    assert "accuracy" in metrics.get_scorer_names()
-    scorer = metrics.get_scorer("accuracy")
-    assert "PredictScorer" in str(type(scorer))
-
-    assert scorer(lr, X_test, y_test) > 0.0
-
-    # Scoring functions are also available on the metrics module
-    assert metrics.accuracy_score([1, 1, 1, 1], [0, 0, 1, 1]) == 0.5
