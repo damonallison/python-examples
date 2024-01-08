@@ -17,6 +17,11 @@ from sklearn.model_selection import train_test_split
 def test_one_hot_encoding() -> None:
     """Using sklearn to one-hot encode columns.
 
+    There are two ways to OHE features:
+
+    * Pandas: pd.get_dummies
+    * scikit-learn: preprocessing.OneHotEncoder
+
     The advantage to using sklearn is you can embed emcoding into your sklearn
     pipleine.
     """
@@ -73,23 +78,48 @@ def test_one_hot_encoding() -> None:
     #
     vals: np.ndarray = ct.fit_transform(df)
     df = pd.DataFrame(vals, columns=ct.get_feature_names_out())
-    assert (
-        set(
-            [
-                "scaling__int_feature",
-                "onehot__categorical_feature_green",
-                "onehot__categorical_feature_red",
-                "onehot__categorical_feature_yellow",
-            ]
-        )
-        == set(df.columns)
-    )
+    assert set(
+        [
+            "scaling__int_feature",
+            "onehot__categorical_feature_green",
+            "onehot__categorical_feature_red",
+            "onehot__categorical_feature_yellow",
+        ]
+    ) == set(df.columns)
+    df.notna()
 
 
-def test_ravel() -> None:
-    a = np.array([[1, 2], [3, 4]])
-    print(a.flatten())
-    print(a.flatten().astype(str))
+def test_outlier_detection() -> None:
+    """
+    Outliers are often considered values outside a certain multiple of the IQR.
+    """
+
+    f1 = np.linspace(0, 1, 9)
+    # append an f1 outlier at the end
+    f1 = np.append(f1, 5)
+
+    f2 = np.linspace(1, 100, 9)
+    # append an f3 outlier at the beginning
+    f2 = np.append([-200], f2)
+
+    df = pd.DataFrame({"f1": f1, "f2": f2})
+
+    # quantile will return the given quantile value for each column
+    q1 = df.quantile(0.25)
+    q3 = df.quantile(0.75)
+    iqr = q3 - q1
+    factor = 1.5
+
+    lower_limit = q1 - (factor * iqr)
+    upper_limit = q3 + (factor * iqr)
+
+    # assume outlier detection is 1.5x or more outside IQR
+    # returns a boolean mask if any column is outide the IQR multiplier range
+    outliers = ((df < lower_limit) | (df > (upper_limit))).any(axis=1)
+    assert outliers.sum() == 2
+
+    outliers_df = df[outliers]
+    assert np.array_equal(outliers_df.index.values, np.array([0, 9]))
 
 
 def test_binning() -> None:

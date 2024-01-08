@@ -299,7 +299,6 @@ def test_reshaping() -> None:
 
     flatten: flattens an n-dimensional array into a 1D vector, returning a copy
     of the original array. flatten reduces potential reference errors.
-
     """
     a = np.arange(0, 6)
     assert a.shape == (6,)

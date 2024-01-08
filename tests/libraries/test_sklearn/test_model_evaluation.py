@@ -55,8 +55,10 @@ Regression model metrics:
 Note that RMSE is sensitive to outliers. Typically both RMSE and R^2 are used
 together to score a regression model.
 
-
-----
+Scaling
+-------
+Models that are distance based (kNN, linear regression, logistic regression,
+NNs) are subject to scaling imbalances. **Scale data before model training**.
 
 Cross Validation
 ----------------
