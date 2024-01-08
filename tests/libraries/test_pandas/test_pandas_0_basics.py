@@ -45,8 +45,41 @@ indexing operations will return copies. "Advanced" indexing includes:
 import pathlib
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 import pytest
+
+
+def test_dataframe_exploration() -> None:
+    df = pd.DataFrame(
+        {"one": [1, 2, 3], "two": [4, 5, 6], "name": ["damon", "kari", "roxie"]}
+    )
+
+    # info()
+    # print a concise summary (index, columns, data types, and memory)
+    # https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.info.html
+    df.info()
+
+    # describe() generate a df of descriptive statistics
+    #
+    # For numeric data, the index will incude count / mean / std / min / max,
+    # lower / 50 / upper quartiles.
+    #
+    # For object types, return count, unique, top, and frequency
+    #
+    # https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html
+    print(df.describe())
+    print(df.describe(include=[np.object_]))
+
+    # When mixed data types (numeric / non-numeric) are in a dataframe, only
+    # numeric types are used. To include all columns, use `include="all"`
+    print(df.describe(include="all"))
+
+    # return a subset of rows
+    print(df.head())
+
+    # get a random sample
+    print(df.sample(n=1))
 
 
 def test_series() -> None:
