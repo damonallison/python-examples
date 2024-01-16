@@ -45,9 +45,38 @@ indexing operations will return copies. "Advanced" indexing includes:
 import pathlib
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 import pytest
+
+
+# def test_temp() -> None:
+#     class A:
+#         pass
+
+#     class B:
+#         pass
+
+#     df = pd.read_csv
+#     df = pd.DataFrame(
+#         {
+#             "one": [1, 2, 3],
+#             "two": [4, 5, 6],
+#             "name": ["damon", "kari", "roxie"],
+#             "bonus": [A(), B(), A()],
+#         }
+#     )
+#     df.to_parquet("/tmp/out2.parquet")
+#     print(df["one"].value_counts())
+#     print(type(df["one"][2]))
+#     print(df["one"][2] == 2)
+
+#     print(df.at[0, "bonus"])
+#     pd.get_dummies(df, drop_first=True)
+
+
+# values - returns numpy array
+# labels - columns / index
+# pandas does *not* follow Python's "there should one obvious way to do it" philosophy
 
 
 def test_dataframe_exploration() -> None:
