@@ -454,7 +454,7 @@ def test_reindexing() -> None:
     df = pd.DataFrame(["cole", "lily", "grace"], index=[3, 2, 1], columns=["kids"])
 
     # Calling reindex arranges the data acccording to the new index, introducing
-    # pd.na values if any index values are not present.
+    # pd.NA values if any index values are not present.
     df = df.reindex([1, 2, 3, 4])
 
     assert df.loc[[1, 2, 3], "kids"].tolist() == ["grace", "lily", "cole"]
