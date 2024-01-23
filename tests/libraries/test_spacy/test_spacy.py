@@ -59,6 +59,7 @@ pipeline.
 
 """
 
+import re
 import tempfile
 
 import matplotlib.pyplot as plt
@@ -66,8 +67,10 @@ import numpy as np
 import pytest
 import spacy
 import spacy.tokens
-from sklearn.decomposition import PCA
 from spacy import displacy  # document visualizer
+from spacy.matcher import Matcher, PhraseMatcher
+
+from sklearn.decomposition import PCA
 
 NLP = spacy.load("en_core_web_sm")
 NLP_MD = spacy.load("en_core_web_md")
@@ -332,7 +335,8 @@ def test_measuring_similarity() -> None:
 
 def test_pipelines() -> None:
     """
-    How to create and add pipeline components to a spacy pipeline.
+    How to build a custom spacy pipeline. Why? Peformance, simplicity,
+    customization.
 
     Many times an off the shelf pipeline isn't flexible enough or we want to
     expand it to include additional steps.
@@ -366,4 +370,214 @@ def test_pipelines() -> None:
 
 
 def test_entity_ruler() -> None:
-    pass
+    """
+    EntityRuler adds named entities to a `Doc` container. It can be used on it's
+    own or combined with EntityRecognizer.
+
+    EntityPattern: assigns entities to matched patterns.
+
+    There are two types of patterns:
+
+    * Token pattern
+        {"label": "GPE", "pattern": [{"LOWER": "san"}, {"LOWER": "francisco"}]}
+
+    * Phrase entity patterns (exact string)
+        {"label": "ORG", "pattern": "Microsoft"}
+    """
+    text = " ".join(
+        ["Manhattan associates was started by Damon Allison in Redmond, Washington."]
+    )
+
+    # don't mess with the global, default NLP instance as we are modifying it
+    nlp = spacy.load("en_core_web_sm")
+
+    # Add our ruler *before* ner - our ruler should take priority over the
+    # built-in NER ruler. Any token found by our ruler will not be considered
+    # for NER.
+    #
+    # In our case, "Manhattan associates" will be found as an ORG and
+    # "Manhattan" (GPE) will *not* be considered by the default NER pipeline
+    # step since it's already used as a token in a previous step.
+    #
+    # Had we added our pipeline *after* NER, we would not have found "Manhattan
+    # associates" as "Manhattan" would have already been used in a token.
+    ruler = nlp.add_pipe("entity_ruler", before="ner")
+
+    patterns = [
+        # you can use whatever label you want - but you probably want to stick to
+        # the labels spacy recognizes by default (i.e., PERSON, ORG, GPE, DATE, TIME, MONEY)
+        # {"label": "PERSON", "pattern": [{"LOWER": "damon"}, {"LOWER": "allison"}]},
+        {"label": "ORG", "pattern": [{"LOWER": "manhattan"}, {"LOWER": "associates"}]},
+        {
+            "label": "GPE",
+            "pattern": [{"LOWER": "redmond"}, {"LOWER": ","}, {"LOWER": "washington"}],
+        },
+    ]
+    ruler.add_patterns(patterns)
+
+    doc = nlp(text)
+
+    def contains(token_text: str, token_label: str) -> bool:
+        return (token_text, token_label) in [(ent.text, ent.label_) for ent in doc.ents]
+
+    assert len(doc.ents) == 3
+    assert contains("Damon Allison", "PERSON")
+    assert contains("Manhattan associates", "ORG")
+    assert contains("Redmond, Washington", "GPE")
+
+
+def test_regex() -> None:
+    pattern = r"((\d{3})-(\d{3})-(\d{4}))"
+    text = "My cell number is 612-912-1211 and my work number is 612-887-2392"
+
+    # Returns all groups. The outer group is first, thin
+    matches = re.findall(pattern, text)
+    assert len(matches) == 2
+
+    assert isinstance(matches[0][0], str)
+    assert matches[0][0] == "612-912-1211"
+    assert matches[0][1] == "612"
+    assert matches[0][2] == "912"
+    assert matches[0][3] == "1211"
+
+    assert matches[1][0] == "612-887-2392"
+    assert matches[1][1] == "612"
+    assert matches[1][2] == "887"
+    assert matches[1][3] == "2392"
+
+
+def test_phone_regex() -> None:
+    pattern = r"(\((\d){3}\)-(\d){3}-(\d){4})"
+    text = "The number is (612)-765-4321"
+    for match in re.finditer(pattern, text):
+        print(match)
+        print(type(match.start()))
+        print(type(match.end()))
+
+
+def test_regex() -> None:
+    """
+    Use regex to search / replace (links / emails). Regex is fast, well
+    supported, but complex as it requires understanding the DSL.
+
+    We can use regex patterns with EntityRuler
+    """
+
+    pattern = r"((\d{3})-(\d{3})-(\d{4}))"
+    text = "My cell number is 612-912-1211 and my work number is 612-887-2392"
+
+    # using finditer will return re.Match objects
+    for match in re.finditer(pattern, text):
+        assert isinstance(match, re.Match)
+        # you would think that ".string" would return the matched string, but you'd be wrong.
+        print(f"match: {match.group()} start: {match.start()} end: {match.end()}")
+        # `.string` returns the string passed into find.
+        assert match.string == text
+
+    # using EntityRuler to add regex pattern search to a pipeline
+    patterns = [
+        {
+            "label": "PHONE_NUMBER",
+            "pattern": [
+                {"SHAPE": "ddd"},  # regex?
+                {"ORTH": "-"},  # literal
+                {"SHAPE": "ddd"},
+                {"ORTH": "-"},
+                {"SHAPE": "dddd"},
+            ],
+        }
+    ]
+    nlp = spacy.blank("en")
+    ruler = nlp.add_pipe("entity_ruler")
+    ruler.add_patterns(patterns)
+    doc = nlp(text)
+
+    ents = [ent.text for ent in doc.ents]
+    assert ents[0] == "612-912-1211"
+    assert ents[1] == "612-887-2392"
+
+    # using a "REGEX" pattern
+    text = "The number is 1234567890"
+    pattern = r"(\d){10}"
+    patterns = [{"label": "PHONE_NUMBERS", "pattern": [{"TEXT": {"REGEX": pattern}}]}]
+    nlp = spacy.blank("en")
+    ruler = nlp.add_pipe("entity_ruler")
+    ruler.add_patterns(patterns)
+    doc = nlp(text)
+
+    ents = [(ent.text, ent.label_) for ent in doc.ents]
+    assert len(ents) == 1
+    assert ents[0][0] == "1234567890"
+    assert ents[0][1] == "PHONE_NUMBERS"
+
+
+def test_matcher() -> None:
+    """
+    Regex is complex an difficult to debug.
+
+    Matcher is a readable and production-level alternative to regex.
+    """
+
+    doc = NLP("Good morning, this is our first day on campus")
+    matcher = Matcher(NLP.vocab)
+
+    # include start and end token indices of the matched pattern
+    pattern = [{"LOWER": "good"}, {"LOWER": "morning"}]
+    matcher.add("morning_greeting", [pattern])
+
+    # [(id, start_token, end_token)]
+    matches = matcher(doc)
+
+    assert len(matches) == 1
+    start = matches[0][1]  # good
+    end = matches[0][2]  # token after "morning"
+    assert doc[start].text == "Good"
+    assert doc[end - 1].text == "morning"
+    assert doc[start:end].text == "Good morning"
+
+
+def test_matcher_operators() -> None:
+    """
+    Regular expressions are difficult to debug. Spacy provides a higher level
+    alternative with "Matcher" which is more explicit, easier to debug, but also
+    more limited.
+
+    Matcher allows you to include *some* operators similar to python's "in"
+    statement:
+
+    IN, NOT_IN, ==, >=, <, >
+    """
+    doc = NLP("Good morning and good evening")
+    matcher = Matcher(NLP.vocab)
+    pattern = [{"LOWER": "good"}, {"LOWER": {"IN": ["morning", "evening"]}}]
+    matcher.add("morning_greeting", [pattern])
+
+    matches = matcher(doc)
+    assert len(matches) == 2
+
+
+def test_phrase_matcher() -> None:
+    """
+    PhraseMatcher matches a long list of phrases in a given text.
+    """
+
+    terms = ["Bill Gates", "John Smith"]
+    patterns = [NLP.make_doc(term) for term in terms]
+    matcher = PhraseMatcher(NLP.vocab, attr="LOWER")
+    matcher.add("PeopleOfInterest", patterns)
+    doc = NLP("I'm sitting here with Bill Gates and John Smith")
+
+    matches = matcher(doc)
+    ents = [doc[match[1] : match[2]] for match in matches]
+    assert [ent.text for ent in ents] == ["Bill Gates", "John Smith"]
+
+    # You can also use the "SHAPE" attr class to find patterns by a shape.
+    matcher = PhraseMatcher(NLP.vocab, attr="SHAPE")
+    terms = ["123.0.0.0", "101.123.0.0"]
+    patterns = [NLP.make_doc(term) for term in terms]
+    matcher.add("IPAddress", patterns)
+    doc = NLP("The IP address is 111.222.0.0")
+
+    matches = matcher(doc)
+    assert len(matches) == 1
+    assert doc[matches[0][1] : matches[0][2]].text == "111.222.0.0"
