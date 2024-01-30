@@ -3,12 +3,22 @@ Natural Language Processing is the discipline of finding meaning in text data.
 Examples include topic identification (what's the main point?), chat bots, text
 classification, and sentiment analysis.
 
-Before you can analyze text, you probably need to preproces it - including
-tokenization. Regular expressions are a powerful form of text search. A regular
-expression allows you to find patterns in text. Tokenization is the process of
-converting a piece of text into tokens. For example, into sentences, words,
-email addresses, hashtags, or any other token you'd like to identify.
+Before you can understand text, you need to preproces it by breaking it down
+into tokens (tokenization) and finding entities like people, places, or things.
 
+spacy is a pipeline based language processing library which includes prebuilt
+pipelines trained on large amounts of data. It provides the ability to extend it
+by writing custom pipelines.
+
+Pattern Matching
+-----------------
+Regular expressions are a powerful form of text search. A regular expression
+allows you to find patterns in text. Tokenization is the process of converting a
+piece of text into tokens. For example, into sentences, words, email addresses,
+hashtags, or any other token you'd like to identify.
+
+Text Processing
+----------------
 Other text processing include lemmatization (finding base words, or lemmas),
 Named Entity Recognition - identifying an object (entity) within text. A person,
 place, organization, date, hashtag, email address, etc, finding sentiment in
@@ -55,10 +65,9 @@ pipeline.
 > python -m spacy download en_core_web_em
 
 > python -m spacy download en_core_web_md
-
-
 """
 
+import random
 import re
 import tempfile
 
@@ -67,6 +76,7 @@ import numpy as np
 import pytest
 import spacy
 import spacy.tokens
+import spacy.training
 from spacy import displacy  # document visualizer
 from spacy.matcher import Matcher, PhraseMatcher
 
@@ -581,3 +591,123 @@ def test_phrase_matcher() -> None:
     matches = matcher(doc)
     assert len(matches) == 1
     assert doc[matches[0][1] : matches[0][2]].text == "111.222.0.0"
+
+
+#
+# Customizing (training) spacy models.
+#
+# Most spacy models are used out of the box, however it is possible to train
+# custom models (like twitter (hashtags) or custom domains (like medical data)).
+#
+# Because existing spacy NER models are generic, custom domains require special
+# vocabularies, grammar, or entity recognition pipelines.
+#
+# Before buidling a custom model:
+#
+# 1. Determine if training is needed. Do the default models perform well enough
+#    on our data?
+#
+# 2. Does our domain contain labels which spacy doesn't recgnize (i.e., drug
+#    types in medical data)
+#
+# If we determine we need custom model training, we have to create a training
+# data set and determine if we want to use a completely new model or update an
+# existing spacy model.
+#
+
+
+def test_entity_recognition() -> None:
+    """
+    Assume here we are trying to find product entities. Notice the default spacy
+    model assumes "Jumbo Salted Peanuts" and "Jumbo" are recognized as "PERSON"
+    entities. Thus, we need to train a new model or augment the default spacy
+    model to give it information about "PRODUCT"s.
+    """
+    texts = [
+        "Product arrived labeled as Jumbo Salted Peanuts.",
+        "Not sure if the product was labeled as Jumbo.",
+    ]
+    ents = []
+    for d in [NLP(text) for text in texts]:
+        ents.extend([(ent.text, ent.label_) for ent in d.ents])
+
+    assert all([ent[1] == "PERSON" for ent in ents])
+
+    # Training steps (general steps):
+    # ---------------------------------------------------
+    # 1. Annotate and prepare input data.
+    # 2. Initialize model weights.
+    # 3. Predict a few examples with the current weights.
+    # 4. Compare prediction with correct answers.
+    # 5. Use optimizer to optimize weights.
+
+    training_data = [
+        (
+            "I will visit you in Austin.",
+            {"entities": [(20, 26, "GPE")]},
+        ),
+        (
+            "I'm going to Sam's house.",
+            {"entities": [(13, 18, "PERSON"), (19, 24, "GPE")]},
+        ),
+    ]
+
+    # We need to create an Example object for each training sample
+    for text, annotations in training_data:
+        doc = NLP(text)
+        example_sent = spacy.training.Example.from_dict(doc, annotations)
+        print(example_sent.to_dict())
+
+
+def test_custom_pipeline_component_training() -> None:
+    """
+    Here, we build a custom NER pipeline component.
+    """
+    # Training a pipeline component
+    #
+    # 1. Annotate input data
+    # 2. Disable other pipeline components except NER (to isolate training)
+    #
+
+    nlp = spacy.blank("en")
+    nlp.add_pipe("ner")
+
+    other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
+    nlp.disable_pipes(*other_pipes)
+
+    # train model over multiple epochs w/ weight adjustments using an optimizer
+    training_data = [
+        ("I will visit you in Austin.", {"entities": [(20, 26, "GPE")]}),
+    ]
+
+    optmizier = nlp.begin_training()
+    epochs = 10
+    # losses are the predictions, a number representing error
+    losses = {}
+
+    for i in range(epochs):
+        random.shuffle(training_data)
+        for text, annotations in training_data:
+            doc = nlp.make_doc(text)
+            example = spacy.training.Example.from_dict(doc, annotations)
+            nlp.update([example], sgd=optmizier, losses=losses)
+            print(losses)
+
+    # save the model
+    ner = nlp.get_pipe("ner")
+    ner.to_disk("model.mdl")
+
+    # load the model
+    nlp = spacy.blank("en")
+    other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
+    nlp.disable_pipes(*other_pipes)
+
+    ner = nlp.create_pipe("ner")
+    ner.from_disk("model.mdl")
+
+    # nlp.add_pipe(ner, "model.mdl")
+
+    # # use the model
+    # doc = nlp(text)
+    # entities = [(ent.text, ent.label_) for ent in doc.ents]
+    # print(entities)
