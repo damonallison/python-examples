@@ -8,6 +8,7 @@ import copy
 # A type variable (generic type)
 T = TypeVar("T")
 
+
 def test_types() -> None:
     x = 5
 
@@ -17,7 +18,7 @@ def test_types() -> None:
 
     class MyClass:
         def __init__(self, value: int) -> None:
-            self.value  = value
+            self.value = value
 
     # Creating a new type
     t = type("MyDynamicClass", (MyClass,), {})
@@ -29,7 +30,7 @@ def test_types() -> None:
     # Introspecting a type
     assert t.__name__ == "MyDynamicClass"
     assert MyClass in t.__bases__  # A tuple of base types from which the type inherits.
-    t.__module__ == "test_types" # The module name where the type is defined.
+    t.__module__ == "test_types"  # The module name where the type is defined.
 
 
 def test_generic_types() -> None:
@@ -40,6 +41,7 @@ def test_generic_types() -> None:
     that can operate on different types in a type-safe manner, without
     sacrificing the flexability and reusability of the code.
     """
+
     class Stack(Generic[T]):
         def __init__(self):
             self.items: list[T] = []
@@ -60,8 +62,8 @@ def test_generic_types() -> None:
     s2.push("test")
     assert s2.pop() == "test"
 
-def test_copy() -> None:
 
+def test_copy() -> None:
     class A:
         def __init__(self, name: str, children: list[Self] = None) -> None:
             self.name = name
@@ -73,7 +75,6 @@ def test_copy() -> None:
             if self.children != rhs.children:
                 return False
             return True
-
 
     a1 = A("damon", [A("grace")])
 
@@ -95,6 +96,7 @@ def test_copy() -> None:
 
 def test_equality() -> None:
     """Implement the dunder methods __lt__ and friends to allow for sorting."""
+
     class Person:
         def __init__(self, name: str, age: int):
             self.name = name

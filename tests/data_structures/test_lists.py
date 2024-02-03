@@ -84,11 +84,14 @@ def test_copy() -> None:
 
 
 def test_sorting() -> None:
-    """Example showing max(), min(), sorted()
+    """
+    Example showing max(), min(), sorted()
 
-    max() retrieves the max element (as defined by >)
-    min() retrieves the min element (as defined by <)
-    sorted() will sort according to < and return a *new* list.
+    * max() retrieves the max element (as defined by __lt__)
+    * min() retrieves the min element (as defined by __lt__)
+
+    * The sorted() built-in will sort according to < and return a *new* list.
+    * list.sort() will sort the list in place.
     """
 
     a = [10, 20, 1, 2, 3]
@@ -98,14 +101,37 @@ def test_sorting() -> None:
     assert [1, 2, 3, 10, 20] == sorted(a)
     assert [20, 10, 3, 2, 1] == sorted(a, reverse=True)
 
-    # Sorted returns a copy
+    # note that sorted() above returns a copy. `a` is unmodified.
     assert a == [10, 20, 1, 2, 3]
-
     b = copy.deepcopy(a)
-    a.sort()  # sort() will sort in place.
+
+    # sort() will sort in place.
+    a.sort()
 
     assert a == [1, 2, 3, 10, 20]
     assert b == [10, 20, 1, 2, 3]
+
+
+def test_custom_sorting() -> None:
+    # implement __lt__ to implement compare
+    class A:
+        def __init__(self, value: str) -> None:
+            self.value = value
+
+        def __lt__(self, other: "A") -> bool:
+            return self.value < other.value
+
+        def __eq__(self, other: "A") -> bool:
+            return self.__dict__ == other.__dict__
+
+    assert A("one") == A("one")
+    assert A("one") < A("two")
+    assert A("two") > A("one")
+
+    assert max(A("one"), A("two"), A("three")) == A("two")
+    assert min(A("one"), A("two"), A("three")) == A("one")
+
+    assert sorted([A("one"), A("two"), A("three")]) == [A("one"), A("three"), A("two")]
 
 
 def test_iteration() -> None:
@@ -203,13 +229,13 @@ def test_list_comprehensions() -> None:
                     the element is skipped.
     """
 
-    squares = [x ** 2 for x in range(1, 4)]
+    squares = [x**2 for x in range(1, 4)]
     assert [1, 4, 9] == squares
 
     evens = [x for x in range(1, 11) if x % 2 == 0]
     assert [2, 4, 6, 8, 10] == evens
 
-    squares = [(x, x ** 2) for x in [0, 1, 2, 3]]
+    squares = [(x, x**2) for x in [0, 1, 2, 3]]
     assert [(0, 0), (1, 1), (2, 4), (3, 9)] == squares
 
     # Note that the condition can only include an if statement.
@@ -218,7 +244,7 @@ def test_list_comprehensions() -> None:
 
     # Here, we'll only compute squares for even numbers and default
     # odds to 0.
-    even_squares = [x ** 2 if x % 2 == 0 else 0 for x in range(8)]
+    even_squares = [x**2 if x % 2 == 0 else 0 for x in range(8)]
     assert [0, 0, 4, 0, 16, 0, 36, 0] == even_squares
 
     # You can have multiple for and if statements in the same list
