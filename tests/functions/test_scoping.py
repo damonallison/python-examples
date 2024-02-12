@@ -55,10 +55,13 @@ class ScopeTest:
 def test_scope() -> None:
     pass
 
+
 # TODO: finish me...
+
 
 class ScopingTests(unittest.TestCase):
     """Examples showing python scoping"""
+
     #
     # Class level (enclosing scope) variable
     #
@@ -89,7 +92,7 @@ class ScopingTests(unittest.TestCase):
 
         def global_scope():
             """The global statement indicates that the variable lives
-               in the global (module) scope and should be rebound here."""
+            in the global (module) scope and should be rebound here."""
 
             global value
             value = value + 1

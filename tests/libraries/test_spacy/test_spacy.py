@@ -82,8 +82,22 @@ from spacy.matcher import Matcher, PhraseMatcher
 
 from sklearn.decomposition import PCA
 
-NLP = spacy.load("en_core_web_sm")
-NLP_MD = spacy.load("en_core_web_md")
+try:
+    NLP = spacy.load("en_core_web_sm")
+    NLP_MD = spacy.load("en_core_web_md")
+except:
+    print(
+        """spacy models are not downloaded.
+
+          Run the following manually:
+
+          python -m spacy download en_core_web_sm
+          python -m spacy download en_core_web_md
+          """
+    )
+
+
+pytestmark = pytest.mark.ml
 
 
 def test_tokenizer() -> None:
