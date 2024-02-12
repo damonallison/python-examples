@@ -36,13 +36,65 @@ Namespaces
 
 Classes add another namespace.
 """
-from typing import Self
+
+from typing import Self, Type
 
 from copy import copy, deepcopy
 
 from tests.classes.logger import Logger
 from tests.classes.person import Person
 from tests.classes.manager import Manager
+
+
+def test_class_definition() -> None:
+    class A:
+        def __init__(self, value: str) -> None:
+            self._value = value
+
+        @property
+        def value(self) -> str:
+            return self._value
+
+        @value.setter
+        def value(self, value: str) -> None:
+            self._value = value
+
+    class B(A):
+        pass
+
+    def pclass(t: Type):
+        print
+        print(type(t))
+        print(t)
+
+    pclass(A)
+
+    assert isinstance(A, type)
+    assert isinstance(B, type)
+
+    assert not isinstance(B("test"), type)
+
+    assert isinstance(B("test"), B)
+    assert isinstance(B("test"), A)
+    assert isinstance(B("test"), object)
+
+    print(B.__dict__)
+    print(B.__annotations__)
+    print(B.__base__)
+    print(B.__bases__)
+
+    print(issubclass(B, A))
+    print(issubclass(B("test").__class__, A))
+    print(id(A))
+    assert id(A) == id(A)
+
+    print(A.__subclasses__())
+    print(A.__name__)
+    print(A.__qualname__)
+
+    a = A("test")
+    print(a.__dict__)
+    print(a.value)
 
 
 def test_super() -> None:
@@ -89,14 +141,12 @@ def test_super() -> None:
     # Here, we see that B.f resolves before A.f
     assert C.f2 == B.f2 and C.f == B.f
 
-    class D(A, B):
-        ...
+    class D(A, B): ...
 
     d = D()
     assert hasattr(d, "f") and hasattr(d, "f2")
     # Here, we see that A.f resolves before B.f
     assert D.f == A.f and D.f2 == B.f2
-
 
 
 def test_class_variables() -> None:
@@ -146,6 +196,7 @@ def test_inheritance() -> None:
     assert issubclass(type(m), Person)
     assert issubclass(type(m), object)
 
+
 def test_equality() -> None:
     """Object equality
 
@@ -154,6 +205,7 @@ def test_equality() -> None:
     * `==` is for object equality (calls __eq__)
     * `is` is for object identity (two objects are the *same* object)
     """
+
     class A:
         def __init__(self, value: str) -> None:
             self.value = value
@@ -163,9 +215,8 @@ def test_equality() -> None:
     # reference equality?
     a1 = A("test")
     a2 = A("test")
-    assert a1 is a1 # reference equality
-    assert a1 != a2 # value equality (falls back to reference equality)
-
+    assert a1 is a1  # reference equality
+    assert a1 != a2  # value equality (falls back to reference equality)
 
     class B(A):
         def __eq__(self, rhs: Self):
@@ -179,12 +230,11 @@ def test_equality() -> None:
 
     assert b1 == b2
 
-
     x = None
     assert x is None, "always use `is None` to check for None (pythonic)"
 
-class TestClasses:
 
+class TestClasses:
 
     def test_formatting(self) -> None:
         """__repr__ defines a string representation for a class.

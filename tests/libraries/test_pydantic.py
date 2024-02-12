@@ -21,15 +21,6 @@ Differences between BaseModel and dataclasses include:
 Unless you have a specific reason *not* to use BaseModel, always use BaseModel.
 """
 
-#
-# `from __future__ import annotations`` allows you to reference a type as an
-# annotation within the type declaration.
-#
-# For example, we define the attr `children` as a list of `Person`. In order to
-# refer to ``Person`, we must import annotations.`
-#
-from __future__ import annotations
-
 import pydantic
 import pytest
 
@@ -39,16 +30,28 @@ def test_frozen() -> None:
         model_config = pydantic.ConfigDict(frozen=True)
         # Example recursive model
         name: str
-        children: list[Person] = []  # Pydantic will deepcopy() the default argument.
+
+        # NOTE: pydantic will deepcopy() the default argument, giving each
+        # instance a copy of the default argument rather than all instances
+        # pointing at the same list.
+        children: list["Person"] = []
 
     p = Person(name="damon")
     # Immutability only impacts the model object itself. Mutable values stored
     # on the model are still capable of being edited.
     p.children.append(Person(name="kari"))
 
+    # test pydantic's behavior with mutable default parameters. The default
+    # value for "children" is copied for each instance rather than reused across
+    # instances.
+    pp = Person(name="cole")
+    assert len(pp.children) == 0
+
+    # pydantic's value equality
     p2 = p.model_copy(deep=True)
     assert p == p2
 
+    # test frozen
     with pytest.raises(pydantic.ValidationError):
         p.name = "no"
 
