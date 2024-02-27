@@ -77,7 +77,7 @@ def run():
 
 def run_with_loop():
     # The function itself is still a function.
-    inspect.isfunction(say_hello)
+    assert inspect.isfunction(say_hello)
     # Determine if a function is a coroutine function (both are equal)
     assert inspect.iscoroutinefunction(say_hello)
     assert asyncio.iscoroutinefunction(say_hello)
