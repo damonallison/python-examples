@@ -5,6 +5,7 @@ multiple environment managers (`pyenv`, `virtualenv`, `conda`, others).
 
 I use [asdf](https://asdf-vm.com/) to manage python and other dev tool versions
 and [poetry](https://python-poetry.org/) to manage python virtual environments.
+
 All python development should be done within a `virtualenv` to prevent polluting
 the global environment.
 
