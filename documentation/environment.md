@@ -67,13 +67,6 @@ before creating the virtual environment (using `poetry init` or `poetry
 install`, you need to be running a python version compatible with the project.
 
 ```shell
-pyenv install 3.9.7
-#
-# Set the python version for the local directory.
-# pyenv will switch to this python version when
-# entering the local directory.
-#
-pyenv local 3.9.7
 
 # Verify we are running 3.9.7
 python --version

@@ -2,6 +2,9 @@
 Feature engineering is the process of creating features which allow the model to
 predict accurately.
 
+Note it is important to normalize the data first / remove outliers.
+
+
 Feature reduction
 -----------------
 * Multiple highly correlated features may not both be necessary. Consider
@@ -30,6 +33,4 @@ There are three ways to measure feature importance:
 Recursive feature elinination (RFE) iteratively trains a model, drops the least
 valuable features with each iteration. It stops when reducing features no longer
 improves model performance.
-
-
 """
