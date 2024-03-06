@@ -15,15 +15,15 @@ learning allows the network to *detect* relevant features from raw data.
 
 Neural networks were inspired by how the brain operates. Neurons operate in
 layers, taking the pixels you see and turning them into meaning (flowers, trees,
-etc) in multiple sequences.
+etc) in multiple sequences. This is why deep learning is often referred to as
+"neural networks".
 
 Deep learning typically require large amounts of data (100k+ samples).
 
 PyTorch
 -------
 
-Intuitive and user friendly, similar to numpy. Used by researchers and in
-industry.
+Intuitive and user friendly. Used by researchers and in industry.
 
 Torch support tabular data by default, other data types with additional
 libraries (torchaudio, torchvision, torchtext).
@@ -37,13 +37,24 @@ import torch.optim as optim
 
 
 def test_tensor_creation() -> None:
+    """
+    A tensor is the foundational data structure in torch. Tensors are
+    multi-dimensional.
+    """
     arr = [[1, 2, 3], [4, 5, 6]]
-    tensor = torch.tensor(arr)
+    tensor = torch.tensor(arr, dtype=torch.int64, device=torch.device("cpu"))
+    print(tensor.device)
+    print(tensor.dtype)
 
     assert isinstance(tensor, torch.Tensor)
 
     np_arr = np.array(arr)
     np_tensor = torch.from_numpy(np_arr)
+
+    # shape
+    # dtype
+    # device
+    # operations (addition / multiplication)
 
     assert isinstance(np_tensor, torch.Tensor)
 
