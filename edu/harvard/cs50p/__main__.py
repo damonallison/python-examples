@@ -63,11 +63,28 @@ Types:
 
 """
 
-from edu.harvard.cs50p import week0
+from edu.harvard.cs50p import week0, week1
 
-if __name__ == "__main__":
+
+def run_week0() -> None:
     # print(f"indoor voice: {week0.indoor_voice()}")
     # print(f"playback speed: {week0.playback_speed()}")
     # print(f"making faces: {week0.making_faces()}")
     # print(f"eninsten: {week0.einstein()}")
     print(f"tip calculator: {week0.tip_calculator()}")
+
+
+def run_week1() -> None:
+    # week1.compare()
+    # week1.grade()
+    # week1.parity()
+
+    # week1.deep_thought()
+    # week1.bank()
+    # print(week1.file_extensions())
+    # week1.math_interpreter()
+    week1.meal_time()
+
+
+if __name__ == "__main__":
+    run_week1()

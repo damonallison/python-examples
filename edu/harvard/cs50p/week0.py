@@ -1,3 +1,14 @@
+"""
+Week 0: Functions, Variables
+https://cs50.harvard.edu/python/2022/weeks/0
+
+Introduces the reader to functions and variables. Starts to introduce objects
+and calling methods on objects (like `str.replace`).
+
+The console and comamnd line are introduced as needed to run programs and some
+shell tricks are explained (up arrow for last command).
+"""
+
 from typing import Any
 
 
