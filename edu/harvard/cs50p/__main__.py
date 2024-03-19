@@ -63,7 +63,7 @@ Types:
 
 """
 
-from edu.harvard.cs50p import week0, week1
+from edu.harvard.cs50p import week0, week1, week2
 
 
 def run_week0() -> None:
@@ -86,5 +86,35 @@ def run_week1() -> None:
     week1.meal_time()
 
 
+def run_week2() -> None:
+    # week2.test_while(5)
+    # week2.test_for(5)
+    # week2.test_operator(5)
+    # week2.test_infinite()
+    # week2.test_lists()
+    # week2.test_dictionaries()
+    # week2.print_square(3)
+    # week2.print_square_nested(4)
+    # week2.camel_case("aTestName")
+    # week2.coke_machine()
+    week2.twttr("sam raiche")
+
+    assert week2.validate_vanity_plate("AA123")
+    assert week2.validate_vanity_plate("AA")
+
+    assert not week2.validate_vanity_plate("1")  # too short
+    assert not week2.validate_vanity_plate("AA34567")  # too long
+    assert not week2.validate_vanity_plate("A123456")  # must start with 2 latters
+    assert not week2.validate_vanity_plate("AA1A")  # numbers must come at end
+    assert not week2.validate_vanity_plate("AA0123")  # first number cannot be zero
+    assert not week2.validate_vanity_plate("AA 123")  # cannot have spaces
+    assert not week2.validate_vanity_plate("AA.123")  # cannot have periods
+    assert not week2.validate_vanity_plate("AA,123")  # cannot have punctuation
+
+    assert week2.nutrition_facts("apple") == 130
+    assert week2.nutrition_facts("banana") == 110
+    assert week2.nutrition_facts("orange") is None
+
+
 if __name__ == "__main__":
-    run_week1()
+    run_week2()
