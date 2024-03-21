@@ -117,4 +117,41 @@ def run_week2() -> None:
 
 
 if __name__ == "__main__":
-    run_week2()
+
+    # week2.test_dictionaries()
+    try:
+        week2.test_exc(11)
+    except ValueError as e:
+        print(e)
+        raise e
+    exit(0)
+
+    # create a list
+    students = [
+        "damon",  # 0
+        "sam",  # 1
+        "grace",  # 2
+    ]
+
+    # read things in or about the list
+    assert len(students) == 3
+
+    assert students[0] == "damon"
+    assert students[0:2] == ["damon", "sam"]
+    assert students[-1] == "grace"
+    assert students[-2] == "sam"
+    assert students[:-1] == ["damon", "sam"]
+    assert students[0 : len(students)] == students
+
+    # manipulate the list
+    students.append("lily")
+    students.extend(["cris", "joe"])
+    students.remove("damon")
+
+    # check if items exist
+    assert "damon" not in students
+    assert "cole" not in students
+
+    print(students)
+
+    # run_week2()

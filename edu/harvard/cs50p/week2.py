@@ -56,6 +56,11 @@ def test_lists() -> None:
     for student in students:
         print(student)
 
+    i = 0
+    while i < len(students):
+        print(f"{i} == {students[i]}")
+        i += 1
+
     for i in range(len(students)):
         print(f"{i} == {students[i]}")
 
@@ -77,12 +82,30 @@ def test_dictionaries() -> None:
     for k in d:
         print(f"{k} == {d[k]}")
 
-    # items iterates (key, value) pairs
+    # checking for existence
+    if "students" in d:
+        print("we have students!")
+    assert "students" in d
+
+    # get a value
+    assert d["parents"] == ["Joe", "Damon"]
+
+    # add
+    d["new_elenent"] = 10
+
+    # remove
+    if "new_element" in d:
+        del d["new_element"]
+
+    # loop
+
+    # defaults to keys only
+    for k in d:
+        print(k)
+
+    # items() iterates (key, value) pairs
     for k, v in d.items():
         print(f"{k} == {v}")
-
-    print(f"students == {d['students']}")
-    print(f"parents == {d['parents']}")
 
 
 # nested loops
@@ -192,3 +215,8 @@ def nutrition_facts(fruit: str) -> int | None:
     fruits = {"apple": 130, "banana": 110}
 
     return fruits.get(fruit.strip().lower())
+
+
+def test_exc(val: int) -> None:
+    if val > 10:
+        raise ValueError("oops, number too big")
