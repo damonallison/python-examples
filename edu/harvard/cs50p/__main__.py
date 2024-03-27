@@ -63,7 +63,7 @@ Types:
 
 """
 
-from edu.harvard.cs50p import week0, week1, week2
+from edu.harvard.cs50p import week0, week1, week2, week3
 
 
 def run_week0() -> None:
@@ -91,7 +91,7 @@ def run_week2() -> None:
     # week2.test_for(5)
     # week2.test_operator(5)
     # week2.test_infinite()
-    # week2.test_lists()
+    week2.test_lists()
     # week2.test_dictionaries()
     # week2.print_square(3)
     # week2.print_square_nested(4)
@@ -116,42 +116,25 @@ def run_week2() -> None:
     assert week2.nutrition_facts("orange") is None
 
 
+def run_week3() -> None:
+    week3.validate_int(1) == 1
+    week3.validate_int(-1) == -1
+    week3.validate_int(0) == 0
+    week3.validate_int("damon") == 0
+    week3.validate_int("") == 0
+
+    week3.fuel_gauge("1/1") == "F"
+    week3.fuel_gauge("1/2") == "50%"
+    week3.fuel_gauge("1/100") == "E"
+
+    week3.felipes_taqueria(["Baja Taco", "Burrito"]) == 11.75
+    # print(week3.live_input())
+
+    week3.sort_groceries(["banana", "apple", "banana"]) == ["1 APPLE", "2 BANANA"]
+
+    week3.outdated("1/2/2020") == "2020-01-02"
+    week3.outdated("January 2, 2020") == "2020-01-02"
+
+
 if __name__ == "__main__":
-
-    # week2.test_dictionaries()
-    try:
-        week2.test_exc(11)
-    except ValueError as e:
-        print(e)
-        raise e
-    exit(0)
-
-    # create a list
-    students = [
-        "damon",  # 0
-        "sam",  # 1
-        "grace",  # 2
-    ]
-
-    # read things in or about the list
-    assert len(students) == 3
-
-    assert students[0] == "damon"
-    assert students[0:2] == ["damon", "sam"]
-    assert students[-1] == "grace"
-    assert students[-2] == "sam"
-    assert students[:-1] == ["damon", "sam"]
-    assert students[0 : len(students)] == students
-
-    # manipulate the list
-    students.append("lily")
-    students.extend(["cris", "joe"])
-    students.remove("damon")
-
-    # check if items exist
-    assert "damon" not in students
-    assert "cole" not in students
-
-    print(students)
-
-    # run_week2()
+    run_week3()
