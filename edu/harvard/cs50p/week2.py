@@ -47,23 +47,53 @@ def test_infinite() -> None:
 def test_lists() -> None:
     students = ["Sam", "Grace", "Lily"]
 
+    # len() is a python built-in which takes an arbitrary container (list,
+    # tuple, dict, iterable, str) and returns it's length.
+    assert len(students) == 3
+
     # list accessors - accessing values in a list
+    #
+    # [pos] - returns element at pos starting from the beginning of the list.
+    # raises an exception if the item is out of bounds [-pos]
+    #
+    # [-pos] - returns elemnt at pos starting from the end of the list. raises
+    # an error if the index is out of range.
+    #
+    # [start:end] - returns a new list for the range starting at pos `start` up
+    # to (but not including) `end`. Leaving start empty (i.e., [:end]) assumes
+    # start = 0. Leaving end empty (i.e., [0:]) assumes the end (i.e., len[))
+    #
     assert students[0] == "Sam"
     assert students[1:2] == ["Grace"]
-    assert students[1:1] == []
-    assert students[1:0] == []
+    assert students[1:1] == []  # no range - returns an empty list
+    assert students[1:0] == []  # backwards - returns an empty list
+    assert students[:-1] == ["Sam", "Grace"]
 
+    # adding
+    students.append("Cole")
+    assert students == ["Sam", "Grace", "Lily", "Cole"]
+
+    # removing
+    students.remove("Lily")
+
+    assert students == ["Sam", "Grace", "Cole"]
+
+    # iterating a list by value
     for student in students:
         print(student)
 
+    # iterating using a while (typically not used - use range(len()) or
+    # enumerate()
     i = 0
     while i < len(students):
         print(f"{i} == {students[i]}")
         i += 1
 
+    # iterating by position
     for i in range(len(students)):
         print(f"{i} == {students[i]}")
 
+    # iterating by position and value with enumerate()
     for i, v in enumerate(students):
         print(f"{i} == {v}")
 
