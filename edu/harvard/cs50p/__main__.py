@@ -63,7 +63,7 @@ Types:
 
 """
 
-from edu.harvard.cs50p import week0, week1, week2, week3, week4
+from edu.harvard.cs50p import week0, week1, week2, week3, week4, week5
 
 
 def run_week0() -> None:
@@ -167,9 +167,13 @@ def run_week4() -> None:
     print(f"current bitcoin price: {week4.bitcoin_price_index(1.0)}")
 
 
+def run_week5():
+    week5.list_test()
+
+
 if __name__ == "__main__":
     """__name__ will be __main__ when the file is the "main" module or script being executed.
 
     This allows the script to distinguish between being run directly or being imported as a module into another script.
     """
-    run_week4()
+    run_week5()
