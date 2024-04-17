@@ -163,7 +163,9 @@ def print_square_nested(size: int) -> None:
         print()  # print new line
 
 
-# problems
+#
+# Exercises
+#
 
 
 def camel_case(name: str) -> None:

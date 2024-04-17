@@ -63,7 +63,7 @@ Types:
 
 """
 
-from edu.harvard.cs50p import week0, week1, week2, week3
+from edu.harvard.cs50p import week0, week1, week2, week3, week4
 
 
 def run_week0() -> None:
@@ -136,5 +136,40 @@ def run_week3() -> None:
     week3.outdated("January 2, 2020") == "2020-01-02"
 
 
+def run_week4() -> None:
+
+    week4.coin_flip() in [True, False]
+
+    # set args on the command line or vscode launch.json
+    print(f"User entered args: {week4.args()[1:]}")
+
+    week4.cow_say_hello("Damon")
+    for song in week4.call_itunes_api("billy joel"):
+        print(song)
+
+    # exercises
+    assert week4.emojize("hello, :thumbs_up:") == "hello, 👍"
+
+    week4.fig_letter("damon")
+
+    assert week4.adieu(["damon"]) == "Adieu, adieu, to damon"
+    assert week4.adieu(["damon", "allison"]) == "Adieu, adieu, to damon and allison"
+    assert (
+        week4.adieu(["damon", "ryan", "allison"])
+        == "Adieu, adieu, to damon, ryan and allison"
+    )
+
+    assert week4.guessing_game(5) in ["you win", "too small", "too large"]
+
+    # Uncomment if you want to play the game. Requires user input.
+    # week4.little_professor()
+
+    print(f"current bitcoin price: {week4.bitcoin_price_index(1.0)}")
+
+
 if __name__ == "__main__":
-    run_week3()
+    """__name__ will be __main__ when the file is the "main" module or script being executed.
+
+    This allows the script to distinguish between being run directly or being imported as a module into another script.
+    """
+    run_week4()
