@@ -99,7 +99,7 @@ def house() -> None:
 
 
 #
-# Problems
+# Exercises
 #
 
 

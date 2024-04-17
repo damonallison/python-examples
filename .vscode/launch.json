@@ -36,7 +36,12 @@
             "type": "debugpy",
             "request": "launch",
             "module": "edu.harvard.cs50p",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "--font",
+                // figlet.getFonts()
+                "bigchief",
+            ],
         }
     ]
 }

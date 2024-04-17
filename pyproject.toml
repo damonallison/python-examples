@@ -51,6 +51,9 @@ polars = "^0"
 pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
 torch = "^2.1.2"
+cowsay = "^6.1"
+emoji = "^2.11.0"
+pyfiglet = "^1.0.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
