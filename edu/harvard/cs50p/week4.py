@@ -252,6 +252,44 @@ def little_professor() -> None:
 
 
 def bitcoin_price_index(count: float) -> str:
+    """Returns the current USD value for the given amount of bitcoin.
+
+    Example coindesk response
+    -------------------------
+    {
+        "time": {
+            "updated": "Apr 17, 2024 14:10:47 UTC",
+            "updatedISO": "2024-04-17T14:10:47+00:00",
+            "updateduk": "Apr 17, 2024 at 15:10 BST"
+        },
+        "disclaimer": "This data was produced from the CoinDesk Bitcoin Price Index (USD). Non-USD currency data converted using hourly conversion rate from openexchangerates.org",
+        "chartName": "Bitcoin",
+        "bpi": {
+            "USD": {
+                "code": "USD",
+                "symbol": "&#36;",
+                "rate": "62,280.927",
+                "description": "United States Dollar",
+                "rate_float": 62280.9267
+            },
+            "GBP": {
+                "code": "GBP",
+                "symbol": "&pound;",
+                "rate": "50,023.418",
+                "description": "British Pound Sterling",
+                "rate_float": 50023.4175
+            },
+            "EUR": {
+                "code": "EUR",
+                "symbol": "&euro;",
+                "rate": "58,563.254",
+                "description": "Euro",
+                "rate_float": 58563.2536
+            }
+        }
+    }
+
+    """
 
     def current_price() -> float:
         try:
