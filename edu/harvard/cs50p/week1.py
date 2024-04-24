@@ -115,20 +115,20 @@ def deep_thought() -> None:
         print("No")
 
 
-def bank() -> None:
-    """Implement a program that prompts the user for a greeting.
+def bank(greeting: str) -> int:
+    """Implement a program that accepts a greeting.
 
-    * If the greeting starts with hello, output $0.
-    * If it starts with an "h", output $20
-    * Else output $100
+    * If the greeting starts with hello, return 0.
+    * If it starts with an "h", return 20
+    * Else return 100
     """
-    greeting = input("Greeting: ").lower().strip()
+    greeting = greeting.lower()
     if greeting.startswith("hello"):
-        print("$0")
+        return 0
     elif greeting.startswith("h"):
-        print("$20")
+        return 20
     else:
-        print("$100")
+        return 100
 
 
 def file_extensions() -> str:
