@@ -192,16 +192,17 @@ def coke_machine() -> None:
     print(f"changed owed: {total - 50}")
 
 
-def twttr(val: str) -> None:
+def twttr(val: str) -> str:
     # implement a program that prompts the user for a str of text (passed in)
     # and ouputs that same text but without all vowels whether imputted in upper
     # or lower case.
 
     vowels = "aeiou"
+    ret = ""
     for c in val:
         if c.lower() not in vowels:
-            print(c, end="")
-    print()
+            ret += c
+    return ret
 
 
 def validate_vanity_plate(plate: str) -> bool:
