@@ -36,17 +36,27 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 
+def training_device() -> torch.device:
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        return torch.device("mps")
+    else:
+        return torch.device("cpu")
+
+
 def test_tensor_creation() -> None:
     """
     A tensor is the foundational data structure in torch. Tensors are
     multi-dimensional.
     """
     arr = [[1, 2, 3], [4, 5, 6]]
-    tensor = torch.tensor(arr, dtype=torch.int64, device=torch.device("cpu"))
-    print(tensor.device)
-    print(tensor.dtype)
+    tensor = torch.tensor(arr, device=torch.device("cpu"))
 
-    assert isinstance(tensor, torch.Tensor)
+    assert tensor.size() == (2, 3)
+    assert tensor.shape == tensor.size()  # shape and size are synonyms
+    assert tensor.dtype == torch.int64
+    assert tensor.device == torch.device("cpu")
 
     np_arr = np.array(arr)
     np_tensor = torch.from_numpy(np_arr)
