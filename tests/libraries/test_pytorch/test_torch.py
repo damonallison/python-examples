@@ -29,6 +29,7 @@ Torch support tabular data by default, other data types with additional
 libraries (torchaudio, torchvision, torchtext).
 """
 
+import math
 import numpy as np
 import torch
 import torch.nn as nn
@@ -56,29 +57,13 @@ def test_tensor_creation() -> None:
     assert tensor.size() == (2, 3)
     assert tensor.shape == tensor.size()  # shape and size are synonyms
     assert tensor.dtype == torch.int64
+    # the device is typically cpu, but could be cuda (nvidia) or mps (apple metal)
     assert tensor.device == torch.device("cpu")
 
+    # tensor (and torch) is numpy friendly
     np_arr = np.array(arr)
     np_tensor = torch.from_numpy(np_arr)
-
-    # shape
-    # dtype
-    # device
-    # operations (addition / multiplication)
-
-    assert isinstance(np_tensor, torch.Tensor)
-
     assert torch.equal(tensor, np_tensor)
-
-    # tensor attributes
-    assert tensor.size() == np_tensor.size()
-    assert tensor.size() == torch.Size([2, 3])
-    assert tensor.dtype == torch.int64
-
-    tensor = tensor.cpu()  # ensure the tensor is on the CPU
-
-    # the device - typically 'cpu' or 'cuda'
-    assert str(tensor.device) == "cpu"
 
 
 def test_tensor_operations() -> None:
@@ -107,11 +92,13 @@ def test_nn_creation() -> None:
 
     linear_layer = nn.Linear(in_features=3, out_features=2)
 
-    print(linear_layer.weight)
-    print(linear_layer.bias)
+    # manually perform calculation
+    y_manual = torch.matmul(input_tensor, linear_layer.weight.T) + linear_layer.bias
 
-    output = linear_layer(input_tensor)
-    print(output)
+    # use torch to perform calculation
+    y_network = linear_layer(input_tensor)
+
+    assert torch.allclose(y_manual, y_network)
 
 
 def test_sequential() -> None:
@@ -127,11 +114,9 @@ def test_sequential() -> None:
     input_tensor = torch.from_numpy(
         np.random.uniform(low=-1, high=1, size=(1, 10)).astype("float32")
     )
-    print(input_tensor.dtype)
-    output_tensor: torch.Tensor = model(input_tensor)
 
+    output_tensor: torch.Tensor = model(input_tensor)
     assert output_tensor.shape == (1, 5)
-    print(model(input_tensor))
 
 
 def test_activation_functions() -> None:
@@ -164,20 +149,32 @@ def test_activation_functions() -> None:
     # highest softmax value.
     assert torch.argmax(output_tensor) == 1
 
-    # activation functions are used at the last layer of the network
-    model = nn.Sequential(
+    # activation functions are used at the last layer of the network (or between
+    # linear layers)
+    _ = nn.Sequential(
         nn.Linear(6, 4),
         nn.Linear(4, 1),
         nn.Sigmoid(),
     )
 
 
+##
+## Network operations (training and inference)
+##
+
+
 def test_forward_pass() -> None:
     """
+    A forward pass forwards data thru the network to the output layer, which
+    results in model "predictions".
+
+    Backpropagation is the process of updating weights / biases during model
+    training.
+
     The training loop (epoch) consists of:
 
     1. Propogating data forward
-    2. Comparing output to ground truth
+    2. Comparing output to ground truth (i.e., determining loss)
     3. Backpropogation to update weights and biases
 
     Here, we show how to build simple networks for linear classification and
@@ -185,7 +182,7 @@ def test_forward_pass() -> None:
 
     1. Binary classification (using sigmoid)
     2. Multi-class classification (using softmax)
-    3. Regression
+    3. Regression (no activation function - regression is completely linear)
 
     A neural network with a single linear layer followed by a sigmoid function
     is the same as logistic regression.
@@ -213,7 +210,9 @@ def test_forward_pass() -> None:
         nn.Linear(6, 4),
         nn.Linear(4, n_classes),
         # dim=-1 indicates the last dimension has the same last dimension as
-        # it's input layer
+        # it's input layer (n_classes)
+        #
+        # softmax converts raw scores into probabilities that sum to 1.
         nn.Softmax(dim=-1),
     )
     output: torch.Tensor = model(input_data)
@@ -256,7 +255,7 @@ def test_cross_entropy_loss() -> None:
 
     With binary classification, we typically use CrossEntropyLoss.
     """
-    labels = F.one_hot(torch.tensor(1), num_classes=3)  # [0, 1, 0]
+    labels = F.one_hot(torch.tensor(1), num_classes=3).type(torch.float)  # [0, 1.0, 0]
 
     # CrossEntropyLoss (log loss) is the most common loss function for
     # classification problems.
@@ -273,22 +272,20 @@ def test_cross_entropy_loss() -> None:
     scores_better = torch.tensor([0.11, 0.87, 0.02])
     scores_best = torch.tensor([0.01, 0.97, 0.02])
 
-    labels = F.one_hot(torch.tensor(1), num_classes=3)  # [0, 1, 0]
-
     loss = nn.CrossEntropyLoss()
 
-    loss_good = loss(scores_good.double(), labels.double())
-    loss_better = loss(scores_better.double(), labels.double())
-    loss_best = loss(scores_best.double(), labels.double())
-
+    loss_good = loss(scores_good, labels)
+    loss_better = loss(scores_better, labels)
+    loss_best = loss(scores_best, labels)
     assert loss_good > loss_better and loss_better > loss_best
 
 
 def test_binary_classfication_cross_entropy_loss() -> None:
     """
-    Cross entropy loss
+    Cross entropy loss.
+
+    NOTE: This is *not* how pytorch implements cross entropy loss.
     """
-    import math
 
     # assume model predictions returned the following probabilities
     _ = torch.tensor([0.23, 0.77])
@@ -309,10 +306,13 @@ def test_binary_classfication_cross_entropy_loss() -> None:
 
     assert math.isclose(loss, 0.2613647641344075)
 
+    y = F.one_hot(torch.tensor(1), num_classes=2).type(torch.float)
+    print(F.cross_entropy(torch.tensor([0.23, 0.77]), y))
+
 
 def test_backpropogation() -> None:
     """
-    Derivatives (gradient) determine how fast and what direction the loss
+    Derivatives (gradients) determine how fast and what direction the loss
     function changes.
 
     Assuming a negative derivative is good? Moving down as we increase X?
@@ -320,11 +320,10 @@ def test_backpropogation() -> None:
     A null (zero?) derivative means the loss function is at it's minimum.
 
     Backpropogation steps:
-
-    1. Determine gradients (using loss.backward())
-    2. Update weights and biases by adjusting each according to the gradient and
-       learning rate. The lower the learning rate, the less adjustment per
-       epoch.
+        1. Determine gradients (using loss.backward())
+        2. Update weights and biases by adjusting each according to the gradient
+           and learning rate. The lower the learning rate, the less adjustment
+           per epoch.
 
     Global vs. local minima:
 
@@ -334,33 +333,45 @@ def test_backpropogation() -> None:
     We use an "optimizer" to attempt to find the global minima of non-convex
     functions. The optimizer will update weights and apply an iteration
     algorithm. The most common optimizer is stochastic gradient descent.
-
     """
-    input_data = torch.from_numpy(
-        np.random.uniform(low=-1, high=1, size=(1, 16)).astype("float32")
+
+    input_data = torch.from_numpy(np.random.uniform(low=-1, high=1, size=(1, 16))).type(
+        torch.float
     )
-    target = F.one_hot(torch.tensor([1]), num_classes=2)
-    model = nn.Sequential(nn.Linear(16, 8), nn.Linear(8, 4), nn.Linear(4, 2))
-    prediction = model(input_data)
+    target = F.one_hot(torch.tensor([1]), num_classes=2).type(torch.float)
+
+    model = nn.Sequential(
+        nn.Linear(16, 8),
+        nn.Linear(8, 4),
+        nn.Linear(4, 2),
+    )
+    prediction: torch.Tensor = model(input_data)
+
+    # calcluate loss and compute gradient
     criterion = nn.CrossEntropyLoss()
-    loss = criterion(prediction.double(), target.double())
+    loss: torch.Tensor = criterion(prediction, target)
 
-    assert model[0].weight.grad is None and model[0].bias.grad is None
+    layer_0: nn.Linear = model[0]
+    assert layer_0.weight.grad is None and layer_0.bias.grad is None
 
+    # compute gradients
+    #
     # populates the "grad" attribute of the model's weights and biases (how?)
     loss.backward()
-    assert model[0].weight.grad is not None and model[0].bias.grad is not None
+    assert layer_0.weight.grad is not None and layer_0.bias.grad is not None
 
-    before_layer_0_weights: torch.Tensor = model[0].weight
-    before_layer_0_biases: torch.Tensor = model[0].bias
+    before_layer_0_weights: torch.Tensor = layer_0.weight.clone()
+    before_layer_0_biases: torch.Tensor = layer_0.bias.clone()
 
+    # update model parameters (backpropagation)
+    #
+    # weights = weights - lr * weights.grad
+    # biases = biases - lr * biases.grad
     optimizer = optim.SGD(model.parameters(), lr=0.001)
     optimizer.step()  # update weights
 
-    after_layer_0_weights: torch.Tensor = model[0].weight
-    after_layer_0_bias: torch.Tensor = model[0].bias
+    after_layer_0_weights: torch.Tensor = layer_0.weight
+    after_layer_0_biases: torch.Tensor = layer_0.bias
 
-    # TODO(@damon): Why are the weights the same beore / after .step() which is
-    # supposed to update weights?
-    print(before_layer_0_weights)
-    print(after_layer_0_weights)
+    assert not before_layer_0_weights.allclose(after_layer_0_weights)
+    assert not before_layer_0_biases.allclose(after_layer_0_biases)

@@ -63,7 +63,12 @@ Types:
 
 """
 
-from edu.harvard.cs50p import week0, week1, week2, week3, week4, week5
+import os
+from pathlib import Path
+import tempfile
+
+
+from edu.harvard.cs50p import week0, week1, week2, week3, week4, week5, week6
 
 
 def run_week0() -> None:
@@ -167,8 +172,22 @@ def run_week4() -> None:
     print(f"current bitcoin price: {week4.bitcoin_price_index(1.0)}")
 
 
-def run_week5():
-    week5.list_test()
+def run_week5() -> None:
+    week5.test_this()
+
+
+def run_week6() -> None:
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        week6.test_csv(tmp_path)
+
+        tmp_file = tmp_path / "test.txt"
+        with open(tmp_file, "w") as f:
+            f.writelines([f"damon{os.linesep}", f"sam{os.linesep}"])
+            f.writelines([f"# a comment{os.linesep}", os.linesep])
+
+        assert week6.lines_of_code(tmp_file) == 2
+        week6.pizza_py()
 
 
 if __name__ == "__main__":
@@ -176,4 +195,4 @@ if __name__ == "__main__":
 
     This allows the script to distinguish between being run directly or being imported as a module into another script.
     """
-    run_week5()
+    run_week6()
