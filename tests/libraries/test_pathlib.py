@@ -1,7 +1,15 @@
-from pathlib import Path
+"""
+pathlib: object-oriented file system paths
+
+https://peps.python.org/pep-0428/
+
+"""
+
+from pathlib import Path, PosixPath, WindowsPath
 
 
 def test_path(tmp_path: Path) -> None:
+    assert isinstance(tmp_path, PosixPath) or isinstance(tmp_path, WindowsPath)
     assert tmp_path.is_dir()
     assert tmp_path.is_absolute()
 
