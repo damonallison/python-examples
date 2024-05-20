@@ -30,11 +30,14 @@ libraries (torchaudio, torchvision, torchtext).
 """
 
 import math
+import sys
+
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from torch.utils.data import TensorDataset, DataLoader
 
 
 def training_device() -> torch.device:
@@ -49,8 +52,10 @@ def training_device() -> torch.device:
 def test_tensor_creation() -> None:
     """
     A tensor is the foundational data structure in torch. Tensors are
-    multi-dimensional.
+    multi-dimensional, similar to numpy.array. Tensors can be created in
+    multiple ways.
     """
+    # creating: from python arrays
     arr = [[1, 2, 3], [4, 5, 6]]
     tensor = torch.tensor(arr, device=torch.device("cpu"))
 
@@ -60,10 +65,17 @@ def test_tensor_creation() -> None:
     # the device is typically cpu, but could be cuda (nvidia) or mps (apple metal)
     assert tensor.device == torch.device("cpu")
 
-    # tensor (and torch) is numpy friendly
+    # creating: from numpy arrays.
+    #
+    # tensor (and torch) is numpy friendly. Data
+    # can share the same underlying memory via bridging.
     np_arr = np.array(arr)
     np_tensor = torch.from_numpy(np_arr)
     assert torch.equal(tensor, np_tensor)
+
+    # creating: random
+    rand_tensor = torch.rand_like(np_tensor.type(torch.float))
+    assert rand_tensor.shape == np_tensor.shape == (2, 3)
 
 
 def test_tensor_operations() -> None:
@@ -128,7 +140,8 @@ def test_activation_functions() -> None:
 
     In reality, relationships in data is not completely linear. Using non-linear
     "activation functions" allow us to learn non-linear relationships in data.
-    Most NNs contain non-linear activation functions.
+    Most NNs contain non-linear activation functions as the last step (except
+    for linear regression).
 
     Sigmoid is commonly used for binary classification. We send the network
     output to the sigmoid function. If > 0.5, we classify as positive, otherwise
@@ -156,6 +169,38 @@ def test_activation_functions() -> None:
         nn.Linear(4, 1),
         nn.Sigmoid(),
     )
+
+
+def test_relu() -> None:
+    """
+    Softmax (multi-class classification) and Sigmoid (binary classification) are
+    used as the last layer of the network. But activation functions can be used
+    *between* layers.
+
+    The gradient of the softmax or tanh function approach zero for high and low
+    values of X, leading to low or stalled learning during the training process.
+    This is called the "vanishing gradient" problem.
+
+    ReLU will prevent vanishing gradients for positive input values. ReLU can
+    suffer from the "dying ReLU" problem, where neurons can get stuck at a state
+    of zero activation and never recover during training. If the neuron always
+    outputs zero for all values, it will get stuck. LeakyReLU multiplies
+    negative values by a small value (default = 0.01) to prevent "dying ReLU".
+    It never sets the gradients to zero, allowing every neuron to keep learning.
+
+    ReLU is a good default choice for activation between linear layers.
+
+    Question: why would you *not* always use LeakyReLU?
+    """
+
+    relu = nn.ReLU()
+
+    x = torch.tensor(-1.0, requires_grad=True)
+    y: torch.Tensor = relu(x)
+    assert y.item() == 0.0
+
+    y = relu(torch.tensor(3.0, requires_grad=True))
+    assert y.item() == 3.0
 
 
 ##
@@ -375,3 +420,193 @@ def test_backpropogation() -> None:
 
     assert not before_layer_0_weights.allclose(after_layer_0_weights)
     assert not before_layer_0_biases.allclose(after_layer_0_biases)
+
+
+def test_regression_loss() -> None:
+    """
+    L1 loss (Mean Absolute Error)
+        * MAE = Mean Absolute Error
+        * More robust to outliers as the difference is not squared
+
+    L2 loss (Mean Squared Error)
+        * MSE = Mean Squared Error
+        * Penalizes large errors more heavily due to squaring, making it
+          sensitive to outliers.
+
+    Why use L2?
+
+    Sparcity: L1 loss produces sparse solutions because it encourages some
+    weights to become exactly zero, leading to feature selection. L2 tends to
+    produce small non-zero weights, but rarely zero.
+
+
+    * L2 loss (MSE)
+    * L1 loss (MAE)
+    """
+    y_hat = np.array(10)
+    y = np.array(1)
+
+    mse_numpy = np.mean((y_hat - y) ** 2)
+    print(mse_numpy)
+
+    y_hat_t = torch.tensor(y_hat, dtype=torch.float)
+    y_t = torch.tensor(y, dtype=torch.float)
+
+    criterion = nn.MSELoss()
+    mse_pytorch: torch.Tensor = criterion(y_hat_t, y_t)
+
+    assert mse_numpy == mse_pytorch.item() == 81.0
+
+
+def test_model_architecture() -> None:
+    """
+    How do you determine an optimal network architecture?
+
+    The first (input) and last layer (output) are fixed.
+
+    Model capacity is the number of parameters in the model. The more layers,
+    the more capacity and can work with more complex data sets.
+
+    A bigger model will take longer to train and could potentially overfit.
+    Network architecture is like a hyperparameter, we try multiple combinations
+    of depth, breadth, and complexity to determine the optimal size.
+    """
+
+    # Parameters
+    # --------------------------
+    # Layer 1: (8 + 1) * 4 == 36
+    # Layer 2: (4 + 1) * 2 == 10
+    # Total == 46 parameters
+
+    model = nn.Sequential(
+        nn.Linear(8, 4),
+        nn.Linear(4, 2),
+    )
+    total = 0
+    for param in model.parameters():
+        total += param.numel()
+
+    assert total == 46
+
+
+def test_learning_rate_and_momentum() -> None:
+    """
+    The optimizer can dramatically impact training. lr controls the step size.
+    momentum controls inertia, hyperparameter tune these.
+
+    lr is typically between 1e-2 and 1e-3
+
+    Momentum allows the optimizer to overcome local minima. Momentum keeps steps
+    large when previous steps were large.
+
+    momentum is typically between 0.85 and 0.99
+
+    Good defaults are lr=0.0001 and momentum=0.95
+    """
+    model = nn.Sequential(
+        nn.Linear(8, 4),
+        nn.ReLU(),
+        nn.Linear(4, 2),
+    )
+    inputs = torch.rand((10, 8), dtype=torch.float)
+    # random labels
+    raw_labels = torch.cat((torch.ones(5), torch.zeros(5))).type(torch.int)
+    labels = torch.eye(2)[raw_labels]
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.95)
+
+    num_epochs = 10
+    previous_loss = sys.float_info.max
+    for _ in range(num_epochs):
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()  # compute gradients
+        optimizer.step()
+
+        # loss *should * be decreasing but it's not guaranteed
+        if loss > previous_loss:
+            print("warning: loss is increasing")
+        previous_loss = loss
+
+
+def test_layer_initialization() -> None:
+    """
+    How do you initialize layers?
+
+    Layer weights by default are generally initialized to small values. Having
+
+    nn.init provides functions to initialize weights to a distribution.
+
+    Transfer learning
+    -----------------
+    Using a pre-trained model as the starting point for a similar task.
+
+    Use torch.save() and torch.load() to save / load a layer or model
+    respectively.
+
+    Fine tuning
+    -----------
+    A type of tranfer learning. Some layers are frozen (typically the early
+    layers) and others are tuned.
+
+    Transfer learning is great for vision and NLP which have high dimensions
+    (and require a lot of training time).
+
+    Why small, randomizeed initial weights?
+    --------------------------
+    * Aviods saturation. Gradients for tanh and sigmoid vanish for large values.
+    * Symmerty breaking. Randomness breaks symmetry between neurons in the same
+      layer (avoids redundancy as multiple neurons would compute the same
+      gradient).
+    * Gradient propagation. Large gradients can lead to unstable training
+      (exploding gradients). Small gradients lead to slow learning (vanishing
+      gradients).
+    * Avoiding dead neurons. Saturated or vanished gradients are stuck and
+      cannot learn.
+    """
+
+    layer = nn.Linear(5, 1)
+    # initialize layer weights to the uniform distribution between 0.0 and 1.0
+    nn.init.uniform_(layer.weight)
+    nn.init.uniform_(layer.bias)
+
+    # Example of freezing a layer, allowing only *some* layers to be tuned.
+    model = nn.Sequential(
+        nn.Linear(64, 128),
+        nn.Linear(128, 10),
+    )
+
+    # To freeze a layer, remove it from autograd.
+    # TODO(@damon): Is there a better way to determine
+    for name, param in model.named_parameters():
+        if name in ["O.weight", "0.bias"]:
+            param.requires_grad = False
+
+
+#
+# Model Evaluation
+#
+
+
+def test_data_loading() -> None:
+    """
+    Dataset / DataLoader
+    """
+
+    raw_training = torch.rand((100, 8), dtype=torch.float32)
+    raw_targets = torch.tensor(torch.rand(100) >= 0.5).type(torch.float32)
+
+    dataset = TensorDataset(raw_training, raw_targets)
+
+    # dataset can be indexed
+    sample = dataset[0]
+    sample_training, sample_target = sample
+    assert sample_training.size() == (8,)
+    assert sample_target.item() == 0.0 or sample_target.item() == 1.0
+
+    # dataset can be iterated
+    for batch_inputs, batch_targets in DataLoader(dataset, batch_size=2, shuffle=True):
+        print(type(batch_inputs))
+        print(type(batch_targets))
