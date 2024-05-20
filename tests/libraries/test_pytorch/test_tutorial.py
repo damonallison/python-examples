@@ -63,7 +63,10 @@ class NeuralNetwork(nn.Module):
 
 
 def model_train(
-    dataloader: data.DataLoader, model: NeuralNetwork, loss_fn: Any, optimizer: Any
+    dataloader: data.DataLoader,
+    model: NeuralNetwork,
+    loss_fn: Any,  # TODO(@damon): Could we better type this?
+    optimizer: Any,  # TODO(@damon): Could we better type this?
 ) -> None:
     """
     The training loop.
@@ -71,6 +74,7 @@ def model_train(
     size = len(dataloader.dataset)
     # Turns on automatic differentiation (default_mode or "grad mode") to enable autograd recording.
     model.train()
+    training_loss = 0.0
     for batch, (X, y) in enumerate(dataloader):
         X, y = X.to(training_device()), y.to(training_device())
 
@@ -105,21 +109,24 @@ def model_train(
         # rate for each parameter based on the history of gradients, potentially
         # leading to faster convergence and better generalization.
         optimizer.step()
-
+        training_loss += loss.item()
         if batch % 100 == 0:
             loss, current = loss.item(), (batch + 1) * len(X)
             print(f"loss: {loss:>7f} [{current:>5d}/{size:>5d}]")
+
+    epoch_loss = training_loss / len(dataloader)
+    print(f"epoch loss: {epoch_loss:>7f}")
 
 
 def model_test(dataloader: data.DataLoader, model: NeuralNetwork, loss_fn: Any) -> None:
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
 
-    # Set the modeul in "evaluation mode"
-    # TODO(@damon): What does this actually do?
+    # Set the model to "evaluation mode" to shut off automatic differentiation
+    # (pytorch's computational graph).
     model.eval()
     test_loss, correct = 0, 0
-    with torch.no_grad():
+    with torch.no_grad():  # we will *not* be calculating gradient calculation
         for X, y in dataloader:
             X, y = X.to(training_device()), y.to(training_device())
             pred = model(X)
@@ -146,10 +153,9 @@ def test_tutorial() -> None:
     train_loader = data.DataLoader(train, batch_size=64, shuffle=True)
     test_loader = data.DataLoader(test, batch_size=64, shuffle=True)
 
-    for X, y in test_loader:
-        print(f"Shape of X [N, C, H, W]: {X.shape}")
-        print(f"Shape of y: {y.shape} {y.dtype}")
-        break
+    X, y = next(iter(test_loader))
+    print(f"Shape of X [N, C, H, W]: {X.shape}")
+    print(f"Shape of y: {y.shape} {y.dtype}")
 
     # Step 2: Create the model (a.k.a., nn.Module)
     # nn.Modules, like tensors, also have devices
@@ -177,5 +183,6 @@ def test_tutorial() -> None:
     epochs = 10
     for epoch in range(epochs):
         print(f"Epoch: {epoch + 1}\n--------------------------------------")
+        # TODO(@damon): plot train / test loss
         model_train(train_loader, model, loss_fn, optimizer)
         model_test(test_loader, model, loss_fn)
