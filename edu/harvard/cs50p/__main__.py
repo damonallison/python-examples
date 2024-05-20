@@ -68,7 +68,7 @@ from pathlib import Path
 import tempfile
 
 
-from edu.harvard.cs50p import week0, week1, week2, week3, week4, week5, week6
+from edu.harvard.cs50p import week0, week1, week2, week3, week4, week5, week6, week7
 
 
 def run_week0() -> None:
@@ -187,7 +187,21 @@ def run_week6() -> None:
             f.writelines([f"# a comment{os.linesep}", os.linesep])
 
         assert week6.lines_of_code(tmp_file) == 2
-        week6.pizza_py()
+
+
+def run_week7() -> None:
+    assert week7.is_ipv4("0.0.0.0")
+    assert not week7.is_ipv4("0256.0.0.0")
+
+    assert week7.Person.hi("damon") == ""
+    p = week7.Person("damon", 47)
+    assert p.greet() == "hello, damon. you are 47"
+
+    # assert week7.is_ipv4("999.999.999.999")
+
+    # assert not week7.is_ipv4("0.0.0.")
+    # assert not week7.is_ipv4("0.0.0")
+    # assert not week7.is_ipv4("0.0.0.A")
 
 
 if __name__ == "__main__":
@@ -195,4 +209,5 @@ if __name__ == "__main__":
 
     This allows the script to distinguish between being run directly or being imported as a module into another script.
     """
-    run_week6()
+    # run_week6()
+    run_week7()
