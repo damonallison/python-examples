@@ -39,6 +39,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 
+import torchmetrics
+
 
 def training_device() -> torch.device:
     if torch.cuda.is_available():
@@ -586,17 +588,26 @@ def test_layer_initialization() -> None:
 
 
 #
-# Model Evaluation
+# Dataset / DataLoader
 #
 
 
 def test_data_loading() -> None:
     """
     Dataset / DataLoader
+
+    Dataset and DataLoader are abstractions which standardizes working with
+    data.
+
+    Dataset retrieves our data one sample at a time via a __getitem__ method.
+
+    DataLoader retrieves data from a Dataset. It provides the ability to
+    retrieve data in batches, shuffling, and uses `multiprocessing` to make
+    loading more efficient.
     """
 
-    raw_training = torch.rand((100, 8), dtype=torch.float32)
-    raw_targets = torch.tensor(torch.rand(100) >= 0.5).type(torch.float32)
+    raw_training = torch.rand((100, 8))
+    raw_targets = torch.tensor(torch.rand(100) >= 0.5)
 
     dataset = TensorDataset(raw_training, raw_targets)
 
@@ -607,6 +618,171 @@ def test_data_loading() -> None:
     assert sample_target.item() == 0.0 or sample_target.item() == 1.0
 
     # dataset can be iterated
-    for batch_inputs, batch_targets in DataLoader(dataset, batch_size=2, shuffle=True):
-        print(type(batch_inputs))
-        print(type(batch_targets))
+    loader = DataLoader(dataset, batch_size=2, shuffle=True)
+    batch_inputs, batch_targets = next(iter(loader))
+
+    assert len(batch_inputs) == len(batch_targets) == 2
+    assert isinstance(batch_inputs, torch.Tensor) and batch_inputs.size() == (2, 8)
+    assert isinstance(batch_targets, torch.Tensor) and batch_targets.size() == (2,)
+
+
+#
+# Evaluating and Improving Models
+#
+
+
+def test_model_performance() -> None:
+    """
+    Evaluating a model involves splitting the data into training / validation /
+    test sets.
+
+    * Training: 80-90%
+    * Validation: 10-20%
+    * Test: 5-10%
+
+    * In classification, accuracy is used.
+    * In regression, loss is used.
+
+    1. Calculate loss for each batch in the dataloader.
+    2. Calculate the mean training loss at the end of each epoch.
+    """
+    pass
+    # for i, data in enumerate(trainloader):
+    #     # run the forward pass
+    #     loss = criterion(outputs, labels)
+    #     training_loss += loss.item()
+    # epoch_loss = training_loss / len(trainloader)
+
+    # torchmetrics
+    # metric = torchmetrics.Accuracy(task="multiclass", num_classes=3)
+    # for i, data in enumerate(dataloader, 0):
+    #     features, labels = data
+    #     outputs = model(features)
+
+    #     acc = metric(output, labels.argmax(dim=-1))
+    # acc = metric.compute()
+    # print(f"Accuracy: {acc}")
+    # metric.reset()
+
+
+# Overfitting
+#
+# Validation loss starts to increase or diverge from training loss.
+#
+# Overfitting is very common when working with small datasets.
+#
+# What causes overfitting?
+#
+# * Small dataset. Use more data / use data augmentation (synthetic data).
+# * Model has too much capacity. Reduce model size / add dropout.
+# * Weights are too large. Weight decay for force parameters to remain small.
+#
+
+# Preventing overfitting
+# ----------------------
+#
+# * Data agumentation / synthetic data.
+# * Dropout layer. Reduces dependence on features (makes model less complex).
+# * Weight decay. Adds regularization to penalize large weights.
+
+#
+#
+# "Regularization" using a dropout layer
+# --------------------------------------
+#
+# To fight overfitting due to model complexity, you could simplify the model and
+# reduce the number of parameters. Or use a dropout layer, which would allow you
+# to keep the same model complexity but reduce dependence on parameters.
+#
+# Randomly zeroes out elements of the input tensor during training.
+# Corresponding connections are temporarily removed from the network, making the
+# network less likely to overrely on specific features.
+#
+#
+# model = nn.Sequential(nn.Linear(8, 4), nn.ReLU(), nn.Dropout(p=0.5)) features
+# = torch.randn((1, 8)) model(i)
+#
+
+#
+# Weight Decay
+# -------------
+#
+# Weight decay adds a penalty to the loss function to discourage large weights
+# and biases and prevents overfitting. The higher the decay (more
+# regularization), the less likely the model is to overfit.
+#
+# # weight_decay is typically pretty small (i.e., 1e-3)
+# optimizer = optim.SDG(model.parameters(), lr=1e-3, weight_decay=1e-4)
+
+
+#
+# Improving model performance
+# ---------------------------
+#
+# Steps to maximize performance
+#
+# 1. Overfit the training set
+#   * Proves we can solve the problem.
+#   * Sets a performance baseline.
+#
+# 2. Reduce overfitting
+#   * Improve performance
+#
+# 3. Fine-tune hyperparameters
+#   * Grid search. If we have the compute resources, we could do a grid search
+#     over the hyperparameters (typically the optimizer's learning_rate or
+#     momentum)
+#
+#   * Random search. Randomly sample hyperparameters.
+
+
+def test_step1_intentional_overfit() -> None:
+    raw_training = torch.rand((100, 8))
+    raw_targets = torch.randint(0, 2, (100, 1)).float()
+
+    dataset = TensorDataset(raw_training, raw_targets)
+    loader = DataLoader(dataset, batch_size=2, shuffle=True)
+
+    # The model should be large enough to overtrain
+    model = nn.Sequential(
+        nn.Linear(8, 4),
+        nn.ReLU(),
+        nn.Linear(4, 1),
+        nn.Sigmoid(),
+    )
+    criterion = nn.BCELoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3, momentum=0.95)
+
+    # Train on a single datapoint (will overfit)
+    features, labels = next(iter(loader))
+    epochs = 1_000
+
+    # this should reach 1.0 accuracy and 0 loss
+    metric = torchmetrics.Accuracy(task="binary")
+    for i in range(epochs):
+        model.train()
+        # Resets the gradients. By default, PyTorch accumulates gradients on
+        # subsequent backward passes. If you don't zero out the gradients, they
+        # will be summed over multiple batches. You typically want the gradient
+        # to represent the partial derivative of the loss with respect to the
+        # parametesr for the current batch only.
+        optimizer.zero_grad()
+
+        outputs = model(features)  # forward pass
+        loss = criterion(outputs, labels)  # compute loss
+        _ = metric(outputs, labels)  # updates accuracy metric
+
+        loss.backward()  # backpropagation (backward pass - updates gradients)
+        optimizer.step()  # update parameters
+
+    overall_accuracy = metric.compute().item()
+    overall_loss = loss.item()
+
+    # print(f"overall accuracy: {overall_accuracy}")
+    # print(f"overall loss: {overall_loss}")
+
+    assert overall_accuracy > 0.90
+    assert overall_loss < 0.10
+
+    # not strictly necessary, but required if the metric is going to be reused.
+    metric.reset()
