@@ -140,10 +140,10 @@ def test_activation_functions() -> None:
     used in models where the output is expected to be a linear combination of
     input features.
 
-    In reality, relationships in data is not completely linear. Using non-linear
-    "activation functions" allow us to learn non-linear relationships in data.
-    Most NNs contain non-linear activation functions as the last step (except
-    for linear regression).
+    In reality, relationships in data are not completely linear. Using
+    non-linear "activation functions" allow us to learn non-linear relationships
+    in data. Most NNs contain non-linear activation functions as the last step
+    (except for linear regression).
 
     Sigmoid is commonly used for binary classification. We send the network
     output to the sigmoid function. If > 0.5, we classify as positive, otherwise
@@ -168,7 +168,9 @@ def test_activation_functions() -> None:
     # linear layers)
     _ = nn.Sequential(
         nn.Linear(6, 4),
+        nn.ReLU(),
         nn.Linear(4, 1),
+        nn.ReLU(),
         nn.Sigmoid(),
     )
 
@@ -196,13 +198,8 @@ def test_relu() -> None:
     """
 
     relu = nn.ReLU()
-
-    x = torch.tensor(-1.0, requires_grad=True)
-    y: torch.Tensor = relu(x)
-    assert y.item() == 0.0
-
-    y = relu(torch.tensor(3.0, requires_grad=True))
-    assert y.item() == 3.0
+    x = torch.tensor([-2.0, -1.0, 0.0, 1.0, 2.0])
+    assert torch.equal(relu(x), torch.tensor([0.0, 0.0, 0.0, 1.0, 2.0]))
 
 
 ##
@@ -298,7 +295,7 @@ def test_cross_entropy_loss() -> None:
     * Truth (y)           = [0, 1, 0]
     * Predictions (y_hat) = [0.21, 0.77, 0.02]
 
-    Loss == 0.23 ust using straight subtraction to determine loss)
+    Loss == 0.23 when using straight subtraction to determine loss
 
     With binary classification, we typically use CrossEntropyLoss.
     """
@@ -327,44 +324,12 @@ def test_cross_entropy_loss() -> None:
     assert loss_good > loss_better and loss_better > loss_best
 
 
-def test_binary_classfication_cross_entropy_loss() -> None:
-    """
-    Cross entropy loss.
-
-    NOTE: This is *not* how pytorch implements cross entropy loss.
-    """
-
-    # assume model predictions returned the following probabilities
-    _ = torch.tensor([0.23, 0.77])
-
-    # Cross-entropy loss for binary classification:
-    #
-    # L(y, y_hat) = -(y * log(y_hat) + (1 - y) * log(1 - y_hat))
-    # L(y, y_hat) = -(1 * log(0.77) + (1 - 1) * log(1 - 0.77))
-    # L(y, y_hat) = -(1 * log(0.77) + (1 - 1) * log(1 - 0.77))
-    # L(y, y_hat) = -(1 * -0.2613647641344075 + (1 - 1) * -1.4696759700589417)
-    # L(y, y_hat) = -(1 * -0.2613647641344075 + 0)
-    # L(y, y_hat) = -(-0.2613647641344075)
-    # L(y, y_hat) = 0.2613647641344075
-
-    y = 1
-    y_hat = 0.77
-    loss = -(y * math.log(y_hat) + (1 - y) * math.log(1 - y_hat))
-
-    assert math.isclose(loss, 0.2613647641344075)
-
-    y = F.one_hot(torch.tensor(1), num_classes=2).type(torch.float)
-    print(F.cross_entropy(torch.tensor([0.23, 0.77]), y))
-
-
 def test_backpropogation() -> None:
     """
     Derivatives (gradients) determine how fast and what direction the loss
     function changes.
 
-    Assuming a negative derivative is good? Moving down as we increase X?
-
-    A null (zero?) derivative means the loss function is at it's minimum.
+    A null (zero) derivative means the loss function is at it's minimum.
 
     Backpropogation steps:
         1. Determine gradients (using loss.backward())
@@ -403,7 +368,10 @@ def test_backpropogation() -> None:
 
     # compute gradients
     #
-    # populates the "grad" attribute of the model's weights and biases (how?)
+    # populates the "grad" attribute of the model's weights and biases using
+    # pytorch's autograd (automatic differentiation) library which tracks
+    # operations on tensors and builds a computational graph.
+    #
     loss.backward()
     assert layer_0.weight.grad is not None and layer_0.bias.grad is not None
 
@@ -426,6 +394,8 @@ def test_backpropogation() -> None:
 
 def test_regression_loss() -> None:
     """
+    How do you determine overall model quality (i.e., loss)?
+
     L1 loss (Mean Absolute Error)
         * MAE = Mean Absolute Error
         * More robust to outliers as the difference is not squared
@@ -448,8 +418,8 @@ def test_regression_loss() -> None:
     y_hat = np.array(10)
     y = np.array(1)
 
+    # manually calculate the loss
     mse_numpy = np.mean((y_hat - y) ** 2)
-    print(mse_numpy)
 
     y_hat_t = torch.tensor(y_hat, dtype=torch.float)
     y_t = torch.tensor(y, dtype=torch.float)
@@ -470,25 +440,41 @@ def test_model_architecture() -> None:
     the more capacity and can work with more complex data sets.
 
     A bigger model will take longer to train and could potentially overfit.
+
     Network architecture is like a hyperparameter, we try multiple combinations
     of depth, breadth, and complexity to determine the optimal size.
+
+    How do you determine the optimal network architecture?
+
+    * Start small, gradually increasing complexity while tracking performance.
+    * Use CV to assess performance across different dataset splits.
+    * Apply regularization to penalize high model parameters.
+    * Plot learning curves for training / validation to visualize model
+      performance. If training error is low / validation error high, the model
+      is overfitting.
+    * Use hyperparameter optimization techniques like grid search or random
+      search over various model architecture combinations
+        * Hidden layer count / size / dropout
+    * Use early stopping. Stop when model performance starts to degrade.
     """
 
     # Parameters
     # --------------------------
     # Layer 1: (8 + 1) * 4 == 36
     # Layer 2: (4 + 1) * 2 == 10
-    # Total == 46 parameters
+    # Layer 3: (2 + 1) * 1 == 3
+    # Total == 49 parameters
 
     model = nn.Sequential(
         nn.Linear(8, 4),
         nn.Linear(4, 2),
+        nn.Linear(2, 1),
     )
     total = 0
     for param in model.parameters():
         total += param.numel()
 
-    assert total == 46
+    assert total == 49
 
 
 def test_learning_rate_and_momentum() -> None:
@@ -520,6 +506,7 @@ def test_learning_rate_and_momentum() -> None:
 
     num_epochs = 10
     previous_loss = sys.float_info.max
+
     for _ in range(num_epochs):
         optimizer.zero_grad()
         outputs = model(inputs)
@@ -537,7 +524,8 @@ def test_layer_initialization() -> None:
     """
     How do you initialize layers?
 
-    Layer weights by default are generally initialized to small values. Having
+    Layer weights by default are generally initialized to small values. Small
+    values:
 
     nn.init provides functions to initialize weights to a distribution.
 
@@ -557,7 +545,7 @@ def test_layer_initialization() -> None:
     (and require a lot of training time).
 
     Why small, randomizeed initial weights?
-    --------------------------
+    ----------------------------------------
     * Aviods saturation. Gradients for tanh and sigmoid vanish for large values.
     * Symmerty breaking. Randomness breaks symmetry between neurons in the same
       layer (avoids redundancy as multiple neurons would compute the same
@@ -567,6 +555,9 @@ def test_layer_initialization() -> None:
       gradients).
     * Avoiding dead neurons. Saturated or vanished gradients are stuck and
       cannot learn.
+
+    Most initialization strategies are randomly drawn from a distribution with a
+    variance that scales with the number of input (or input and output) units.
     """
 
     layer = nn.Linear(5, 1)
@@ -699,8 +690,9 @@ def test_model_performance() -> None:
 # network less likely to overrely on specific features.
 #
 #
-# model = nn.Sequential(nn.Linear(8, 4), nn.ReLU(), nn.Dropout(p=0.5)) features
-# = torch.randn((1, 8)) model(i)
+# model = nn.Sequential(nn.Linear(8, 4), nn.ReLU(), nn.Dropout(p=0.5))
+#
+# features = torch.randn((1, 8)) model(i)
 #
 
 #
@@ -713,7 +705,6 @@ def test_model_performance() -> None:
 #
 # # weight_decay is typically pretty small (i.e., 1e-3)
 # optimizer = optim.SDG(model.parameters(), lr=1e-3, weight_decay=1e-4)
-
 
 #
 # Improving model performance
