@@ -29,17 +29,21 @@ Torch support tabular data by default, other data types with additional
 libraries (torchaudio, torchvision, torchtext).
 """
 
-import math
+from typing import cast
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import Dataset, TensorDataset, DataLoader
 
 import torchmetrics
+
+import torchvision
 
 
 def training_device() -> torch.device:
@@ -777,3 +781,470 @@ def test_step1_intentional_overfit() -> None:
 
     # not strictly necessary, but required if the metric is going to be reused.
     metric.reset()
+
+
+#
+# Datacamp: Intermediate Deep Learning with Pytorch
+# --------------------------------------------------
+# * Improving training with optimizers
+# * Mitigating vanishing / exploding gradients
+# * CNNs
+# * RNNs
+# * Multi-input / multi-output models
+#
+
+
+def test_pytorch_oop() -> None:
+    """
+    pytorch allows you to use OOP to define models or datasets.
+
+    Custom model classes gives us more customizability as complexity grows.
+    """
+
+    class WaterDataset(Dataset):
+        def __init__(self, csv_path) -> None:
+            super().__init__()
+            self.data = pd.read_csv(csv_path).to_numpy()
+
+        def __len__(self) -> int:
+            return self.data.shape[0]
+
+        def __getitem__(self, idx: int) -> tuple[np.ndarray, np.ndarray]:
+            return self.data[idx, :-1].astype(np.float32), self.data[idx, -1].astype(
+                np.float32
+            )
+
+    dataset_train = WaterDataset("data/water/train.csv")
+    dataloader_train = DataLoader(dataset_train, batch_size=2, shuffle=True)
+
+    features, labels = next(iter(dataloader_train))
+
+    features = cast(np.ndarray, features)
+    labels = cast(np.ndarray, labels)
+
+    assert features.shape[0] == labels.shape[0] == 2
+
+    class WaterNet(nn.Module):
+        def __init__(self) -> None:
+            super(WaterNet, self).__init__()
+            self.fc1 = nn.Linear(9, 16)
+            # Batch normalization
+            #
+            # Prevents large gradients from appearing during training by
+            # normalizing the layer's output. i.e., subtracting the mean /
+            # dividing by stddev, then scaling and shifting the ouputs using
+            # learned parameters in the same way linear layers learn their
+            # weights.
+            #
+            # Allows for faster loss decrease and helps prevent against unstable
+            # gradients.
+            self.bn1 = nn.BatchNorm1d(16)
+            # Traditional ReLU is subjected to the dying neuron problem when
+            # inputs are negative. Leaky ReLU or ELU (Expoential Linear Unit)
+            #
+            # Leaky ReLU applies an alpha to negative values. Alpha is typically
+            # small, like 0.01.
+            #
+            # Example leaky_relu(-9) = -9 * 0.01 == -0.09
+            #
+            # ELU (Exponential Linear Unit) applies a smooth, expoential decay
+            # for negative inputs.
+            #
+            # alpha(e^x - 1) where alpha is typically 1
+            self.act1 = nn.ELU()
+            self.fc2 = nn.Linear(16, 8)
+            self.bn2 = nn.BatchNorm1d(8)
+            self.act2 = nn.ELU()
+            self.fc3 = nn.Linear(8, 1)
+
+            # Weight Initialization
+            #
+            # Proper weight initialization allows the model to converge faster
+            # by accounting for the activation function's non-linearity.
+
+            # Initialization which is not done properly can lead to vanishing or
+            # exploding gradients.
+            #
+            # If gradients are zero, the model doesn't learn. If gradients are
+            # too large, model training diverges.
+
+            # How do you prevent vanishing / exploding  gradients?
+
+            # 1. Proper weight initialization
+
+            # Good initialization ensures:
+            #     * Variants of layer inputs == variance of layer outputs
+            #     * Variants of gradients are the same before / after a layer
+            #     * For relu and similar, use He/Haiming initialization
+
+            # 2. Good activations
+
+            # Use a good activation function.
+
+            # For example, relu will cause dying neurons when all inputs are negative. Use
+            # leaky_relu() or nn.functional.elu() instead.
+
+            # 3. Batch normalization
+
+            # After a layer, the layers outputs are normalized. Normalization is subtracted
+            # from the mean, divided by the standard deviation. This ensures the output
+            # distribution is roughly normal.
+
+            # Scale and shift normalized outputs using learned parameters (like a linear layer
+            # would learn weights)
+
+            # Initialize weights using kaiming initialization, which takes into
+            # account ReLU's non-linearity.
+            torch.nn.init.kaiming_uniform_(self.fc1.weight)
+            torch.nn.init.kaiming_uniform_(self.fc2.weight)
+            torch.nn.init.kaiming_uniform_(self.fc3.weight, nonlinearity="sigmoid")
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            x = self.fc1(x)
+            x = self.bn1(x)
+            x = self.act1(x)
+
+            x = self.fc2(x)
+            x = self.bn2(x)
+            x = self.act2(x)
+
+            x = self.fc3(x)
+            x = nn.functional.sigmoid(x)
+
+            return x
+
+    net = WaterNet()
+
+    # BCE == binary cross entropy: commonly used for binary classification
+    criterion = nn.BCELoss()
+
+    #
+    # Optimizers
+    #
+
+    # SGD is simple and efficient, but because of its simplicity, it's rarely
+    # used in practice.
+    # optimizer = optim.SGD(net.parameters(), lr=0.01)
+
+    # Adaptive Grdient (Adagrad)
+    # --------------------------
+    # Adapts learning rate for each parameter. It lowers the learning rate for
+    # parameters which are infrequently updated. This is good for sparse data.
+    # Sparse data is a dataset where some features are not often observed.
+    #
+    # The problem with AdaGrad is it may decrease the learning rate too fast.
+
+    # Root Mean Square Propagation (RMSProp)
+    # --------------------------------------
+    # Updates the learning rate for each parameter based on the size of the
+    # previous gradients.
+
+    # Adaptive Moment Estimation (Adam)
+    # ---------------------------------
+    # Combiness RMSProp with the concept of momentum. It's the average of
+    # previous gradients but the most recent gradients have more weight.
+    #
+    # Basing gradient updates on both size and momentum helps accelerate
+    # training.
+    #
+    # Adam is often the default optimizer.
+    # optimizer = optim.Adam(net.parameters(), lr=0.001)
+
+    optimizers = {
+        "sgd": optim.SGD(net.parameters(), lr=0.01),
+        "adagrad": optim.Adagrad(net.parameters(), lr=0.01),
+        "rmsprop": optim.RMSprop(net.parameters(), lr=0.01),
+        "adam": optim.Adam(net.parameters(), lr=0.01),
+    }
+
+    epochs = 5
+    for key, optimizer in optimizers.items():
+        print(f"testing optimizer: {key}")
+        net = WaterNet()
+        for _ in range(epochs):
+            for features, labels in dataloader_train:
+                optimizer.zero_grad()
+                outputs = net(features)
+                # reshape labels to match the shape of the outputs
+                loss = criterion(outputs, labels.view(-1, 1))
+                loss.backward()
+                optimizer.step()
+
+        dataset_test = WaterDataset("data/water/test.csv")
+        dataloader_test = DataLoader(dataset_test, batch_size=2, shuffle=2)
+        acc = torchmetrics.Accuracy(task="binary")
+        net.eval()  # disable autograd for the model
+        # TODO(@damon): What is the difference between calling .eval() and using torch.no_grad()?
+        with torch.no_grad():
+            for features, labels in dataloader_test:
+                outputs = net(features)
+                preds = (outputs >= 0.5).to(torch.float)
+                acc(preds, labels.view(-1, 1))
+
+        accuracy = acc.compute()
+        print(f"Accuracy ({key}): {accuracy}")
+
+
+def test_images_cnn() -> None:
+    """
+    What is an image? A matrix of pixels (picture element). Each pixel is
+    typically described in RGB format
+
+    RGB = (51, 171, 214)
+
+    Data Augmentation
+    -----------------
+
+    Data augmentation is the process of generating new training data by
+    augmenting existing training data. Data augmentation increases model
+    robustness by:
+
+    * Increasing training set size.
+    * Training on "real world" data. Real-world data is not perfect.
+    * Reduces overfitting.
+
+    Model Architecture (Convolutions)
+    ------------------
+
+    Why not use linear layers? Images are large. Having a parameter per pixel is
+    too expensive. A 256x256x3 image is ~ 200k input parameters. A layer with
+    100 neurons would contain 200M parameters. Linear layers also don't
+    recognize patterns of spacial related pixels.
+
+
+    Convolutional layers slide filters (small grid) over the image, performing a
+    convolution at each position. This allows us to perserve input patters and
+    uses fewer parameters than a linear layer.
+
+    # input feature maps, output feature maps, kernel_size=3
+
+    nn.Conv2d(3, 32, kernel_size=3)
+
+    What is a convolution?
+
+    * The sum of the dot product of the input patch and filter.
+
+    * Zero padding adds a frame of zeros to the convolutional layers input (not
+      patch). This maintains spacial dimensions of input and output tensors and
+      ensures border pixels are treated equally to others. If we *don't* have
+      padding, border pixels wouldn't have as many filters pass over them.
+
+    * Max Pooling is another technique commonly used after convolutional layers.
+      It slides a non-overlapping window over the output and takes the max value
+      for all elements in the window. This reduces the dimensions and parameters
+      in the network.
+
+    nn.MaxPool2d(kernel_size=2)
+    """
+
+    train_transformers = torchvision.transforms.Compose(
+        [
+            # Agument the data by introducing randomness to the image, making
+            # the model more robost to real world images. Be careful *not* to
+            # augment the data in ways that would change the label. For example,
+            # augmenting the color of a lemon could confuse it for a lime.
+            # Always consider your dataset before applying transformations.
+            torchvision.transforms.RandomHorizontalFlip(),
+            torchvision.transforms.RandomRotation(45),
+            torchvision.transforms.RandomAutocontrast(),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Resize((64, 64)),
+        ]
+    )
+
+    dataset_train = torchvision.datasets.ImageFolder(
+        "data/clouds/clouds_train",
+        transform=train_transformers,
+    )
+    dataloader_train = DataLoader(dataset_train, batch_size=1, shuffle=True)
+    #
+    # To display an image, put the image into a shape compatible w/ matplotlib
+    #
+    # image, label = next(iter(dataloader_train))
+    # # Remove the first dimension
+    # img_to_show = image.squeeze()
+    # # Height,Width,Channel
+    # img_to_show = img_to_show.permute(1, 2, 0)
+    # plt.imshow(img_to_show)
+    # plt.show()
+
+    class ConvNet(nn.Module):
+        def __init__(self, num_classes: int) -> None:
+            super().__init__()
+
+            # This CNN has two parts: a feature_extractor and a classifier
+            #
+            # Most CNN architectures look similar: repeated blocks of
+            # convolution / activation / pooling layers with increasing number
+            # of feature outputs (why increasing?), followed by flatten and one
+            # or more layers for classification or regression.
+            self.feature_extractor = nn.Sequential(
+                # The input feature map has 3 fearures corresponding to the RGB channels.
+                nn.Conv2d(3, 32, kernel_size=3, padding=1),
+                nn.ELU(),
+                nn.MaxPool2d(kernel_size=2),
+                nn.Conv2d(32, 64, kernel_size=3, padding=1),
+                nn.ELU(),
+                nn.MaxPool2d(kernel_size=2),
+                nn.Flatten(),
+            )
+
+            # how do we get 16x16?
+            #
+            # Input image = 3 x 64 x 64
+            #
+            # Conv2d(3, 32) == 32 output filters = 32 * 64 * 64
+            #
+            # MaxPool2d(2) == halve the width / height = 32 * 32 * 32
+            #
+            # Conv2d(32, 64) == 64 ourput filters = 64 * 32 * 32
+            #
+            # MaxPool2d(2) == halve the width / height = 64 * 16 * 16
+
+            self.classifier = nn.Linear(
+                in_features=64 * 16 * 16,
+                out_features=num_classes,
+            )
+
+        def forward(self, x):
+            x = self.feature_extractor(x)
+            x = self.classifier(x)
+            return x
+
+    # Data agumentation and how it can impact the training process:
+    #
+    # Consider image implications when augmenting data! If the augmentation
+    # would change the label, do *not* augment along that dimension.
+    #
+    # Examples:
+    #
+    # * Color: Augmenting color will confuse the model. lemon / lime are the
+    #   same image w/ different colors.
+    # * Vertical flip: W turns into M
+    #
+    # Some augmentation strategies that are typically OK:
+    #
+    # Horizontal flip
+    # Rotation
+    # Contrast adjustments
+
+    net = ConvNet(num_classes=7)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(net.parameters(), lr=0.001)
+
+    # training
+    epochs = 1
+    for epoch in range(epochs):
+        total_loss = 0.0
+        for features, labels in dataloader_train:
+            optimizer.zero_grad()
+            outputs = net(features)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
+        epoch_loss = total_loss / len(dataloader_train)
+        print(f"epoch {epoch + 1}, loss: {epoch_loss:.4f}")
+
+    # evaluation
+    #
+    # In binary classification, we use precision and recall
+    #
+    # Precision
+    #
+    # True Positives / True Positives + False Positives
+    #
+    # "Of all the positive predictions, how many were actually positive?"
+    #
+    # High precision - the model avoids false positives. If it predicts true,
+    # it's probably true.
+
+    # Recall
+    #
+    # True Positives / True Positives + False Negatives
+    #
+    # "Of all the instances that were actually positive, how many did the model
+    # predict as positive?"
+    #
+    # High recall - correctly predicts true positives.
+    #
+    # Low recall indicates the model misses a lot of positive instances. Many
+    # positives are labeled as negatives.
+    #
+
+    # With multi-class, each class has a precision and a recall.
+    #
+    # We can analyze them per class, or in aggregate.
+    #
+    # Micro average: global calculation. Calcuates precision / recall globally
+    # across all classes. Computes a global precision / recall using all classes
+    #
+    # Macro: Computes precision / recall for each class, using a mean across all
+    # classes.
+    #
+    # Weighted average: Computes precision / recall for each class, using a
+    # *weighted* mean across all classes. Larger classes have a greater impact
+    # on the final result.
+    #
+    # When should we use different recall types?
+    #
+    # * Micro: Use with imbalanced data sets as it takes into account class
+    #   imbalance.
+    # * Macro: Use when you care about performance of a small class (all classes
+    #   treated equally)
+    # * Weighted: When you consider errors in larger classes more important
+    #
+
+    test_transformers = torchvision.transforms.Compose(
+        [
+            # do not augument test data (of course :)
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Resize((64, 64)),
+        ]
+    )
+
+    dataset_test = torchvision.datasets.ImageFolder(
+        "data/clouds/clouds_test",
+        transform=test_transformers,
+    )
+    dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=True)
+
+    precision = torchmetrics.Precision(
+        task="multiclass",
+        num_classes=7,
+        average="macro",
+    )
+
+    recall = torchmetrics.Recall(
+        task="multiclass",
+        num_classes=7,
+        average="macro",
+    )
+
+    recall_per_class = torchmetrics.Recall(
+        task="multiclass", num_classes=7, average="none"
+    )
+
+    net.eval()  # disable autograd for the model
+    with torch.no_grad():
+        for features, labels in dataloader_test:
+            outputs = net(features)
+            # preds are the indices (class) where the max value was found
+            _, preds = torch.max(input=outputs, dim=1)
+            precision(preds, labels)
+            recall(preds, labels)
+            recall_per_class(preds, labels)
+
+    final_precision = precision.compute()
+    final_recall = recall.compute()
+    print(f"Precision: {final_precision} Recall: {final_recall}")
+
+    final_recall_per_class = recall_per_class.compute()
+    print(f"Recall per class: {final_recall_per_class}")
+
+    # mapping of class name to index
+    recall_by_class_name = {
+        k: final_recall_per_class[v].item()
+        for k, v in dataset_test.class_to_idx.items()
+    }
+    print(recall_by_class_name)
