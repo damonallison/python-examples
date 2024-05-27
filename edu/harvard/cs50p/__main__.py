@@ -137,8 +137,9 @@ def run_week3() -> None:
 
     week3.sort_groceries(["banana", "apple", "banana"]) == ["1 APPLE", "2 BANANA"]
 
-    week3.outdated("1/2/2020") == "2020-01-02"
-    week3.outdated("January 2, 2020") == "2020-01-02"
+    assert week3.outdated("1/2/2020") == "2020-01-02"
+    assert week3.outdated("January 2, 2020") == "2020-01-02"
+    assert week3.outdated("January 2, 05") == "0005-01-02"
 
 
 def run_week4() -> None:
@@ -209,5 +210,6 @@ if __name__ == "__main__":
 
     This allows the script to distinguish between being run directly or being imported as a module into another script.
     """
+    run_week3()
     # run_week6()
-    run_week7()
+    # run_week7()
