@@ -137,12 +137,14 @@ def outdated(d: str) -> str:
             raise ValueError("invalid date")
     else:
         parts = [part.replace(",", "").strip() for part in d.split()]
+
         if len(parts) != 3:
             raise ValueError("invalid date")
-        if parts[0].title() not in months:
+
+        parts[0] = parts[0].title()
+        if parts[0] not in months:
             raise ValueError("invalid month")
         parts[0] = str(months.index(parts[0]) + 1)
-
     try:
         int_parts = [int(part) for part in parts]
     except ValueError as ve:
@@ -152,8 +154,8 @@ def outdated(d: str) -> str:
         raise ValueError("invalid month")
     if int_parts[1] < 1 or int_parts[1] > 31:
         raise ValueError("invalid day")
-    if int_parts[2] < 2:
+    if int_parts[2] < 0:
         raise ValueError("invalid year")
 
     # MM/DD/YYYY -> YYYY-MM-DD
-    return f"{int_parts[2]}-{int_parts[0]:02}-{int_parts[1]:02}"
+    return f"{int_parts[2]:04}-{int_parts[0]:02}-{int_parts[1]:02}"
