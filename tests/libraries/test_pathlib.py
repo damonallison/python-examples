@@ -9,6 +9,8 @@ from pathlib import Path, PosixPath, WindowsPath
 
 
 def test_path(tmp_path: Path) -> None:
+    # concrete classes can only be created on which the code is being executed.
+    # in most cases, you'll only deal with Path.
     assert isinstance(tmp_path, PosixPath) or isinstance(tmp_path, WindowsPath)
     assert tmp_path.is_dir()
     assert tmp_path.is_absolute()
