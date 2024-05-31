@@ -58,6 +58,9 @@ torchmetrics = "^1.4.0.post0"
 torchvision = "^0.18.0"
 xgboost = "^2.0.3"
 
+# for submitting work to harvard's CS50 repo
+submit50 = "^3.1.4"
+
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
 black = "^23.12.1"
