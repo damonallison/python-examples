@@ -43,8 +43,6 @@ from torch.utils.data import Dataset, TensorDataset, DataLoader
 
 import torchmetrics
 
-import torchvision
-
 
 def training_device() -> torch.device:
     if torch.cuda.is_available():
@@ -240,7 +238,7 @@ def test_forward_pass() -> None:
     )
 
     #
-    # binary classification model
+    # binary classification
     #
     model = nn.Sequential(
         nn.Linear(6, 4),
@@ -251,6 +249,7 @@ def test_forward_pass() -> None:
     output: torch.Tensor = model(input_data)
     assert isinstance(output, torch.Tensor)
     assert output.size() == (5, 1)
+    assert np.all([(output >= 0.0) & (output <= 1.0)])
 
     # multi-class classification
     n_classes = 3
@@ -529,7 +528,8 @@ def test_layer_initialization() -> None:
     How do you initialize layers?
 
     Layer weights by default are generally initialized to small values. Small
-    values:
+    values ensure that, at least initially, values produced by the layer are
+    small and do not produce vanishing or exploding gradients.
 
     nn.init provides functions to initialize weights to a distribution.
 
@@ -550,7 +550,7 @@ def test_layer_initialization() -> None:
 
     Why small, randomizeed initial weights?
     ----------------------------------------
-    * Aviods saturation. Gradients for tanh and sigmoid vanish for large values.
+    * Avoids saturation. Gradients for tanh and sigmoid vanish for large values.
     * Symmerty breaking. Randomness breaks symmetry between neurons in the same
       layer (avoids redundancy as multiple neurons would compute the same
       gradient).
@@ -576,7 +576,7 @@ def test_layer_initialization() -> None:
     )
 
     # To freeze a layer, remove it from autograd.
-    # TODO(@damon): Is there a better way to determine
+    # TODO(@damon): Is there a better way to determine layer level
     for name, param in model.named_parameters():
         if name in ["O.weight", "0.bias"]:
             param.requires_grad = False
@@ -640,17 +640,89 @@ def test_model_performance() -> None:
 
     1. Calculate loss for each batch in the dataloader.
     2. Calculate the mean training loss at the end of each epoch.
+
+
+    Overfitting
+    -----------
+    Validation loss starts to increase or diverge from training loss.
+
+    Overfitting is very common when working with small datasets.
+
+    What causes overfitting?
+
+    * Small dataset. Use more data / use data augmentation (synthetic data).
+    * Model has too much capacity. Reduce model size / add dropout.
+    * Weights are too large. Weight decay for force parameters to remain small.
+
+    Preventing overfitting
+    ----------------------
+
+    * Data agumentation / synthetic data.
+    * Dropout layer. Reduces dependence on features (makes model less complex).
+    * Weight decay. Adds regularization to penalize large weights.
+
+
+    "Regularization" using a dropout layer
+    --------------------------------------
+
+    To fight overfitting due to model complexity, you could simplify the model and
+    reduce the number of parameters. Or use a dropout layer, which would allow you
+    to keep the same model complexity but reduce dependence on parameters.
+
+    Randomly zeroes out elements of the input tensor during training.
+    Corresponding connections are temporarily removed from the network, making the
+    network less likely to overrely on specific features.
+
+
+    model = nn.Sequential(nn.Linear(8, 4), nn.ReLU(), nn.Dropout(p=0.5))
+
+    features = torch.randn((1, 8)) model(i)
+
+
+
+    Weight Decay
+    -------------
+
+    Weight decay adds a penalty to the loss function to discourage large weights
+    and biases and prevents overfitting. The higher the decay (more
+    regularization), the less likely the model is to overfit.
+
+    # weight_decay is typically pretty small (i.e., 1e-3)
+    optimizer = optim.SDG(model.parameters(), lr=1e-3, weight_decay=1e-4)
+
+
+    Improving model performance
+    ---------------------------
+
+    Steps to maximize performance
+
+    1. Overfit the training set
+    * Proves we can solve the problem.
+    * Sets a performance baseline.
+
+    2. Reduce overfitting
+    * Improve performance
+
+    3. Fine-tune hyperparameters
+    * Grid search. If we have the compute resources, we could do a grid search
+        over the hyperparameters (typically the optimizer's learning_rate or
+        momentum)
+
+    * Random search. Randomly sample hyperparameters.
+
     """
     pass
+
     # for i, data in enumerate(trainloader):
     #     # run the forward pass
     #     loss = criterion(outputs, labels)
     #     training_loss += loss.item()
     # epoch_loss = training_loss / len(trainloader)
-
-    # torchmetrics
+    # Determine accuracy on test set
+    #
+    # import torchmetrics
     # metric = torchmetrics.Accuracy(task="multiclass", num_classes=3)
-    # for i, data in enumerate(dataloader, 0):
+    # for i, data in enumerate(testloader, 0):
     #     features, labels = data
     #     outputs = model(features)
 
@@ -658,77 +730,6 @@ def test_model_performance() -> None:
     # acc = metric.compute()
     # print(f"Accuracy: {acc}")
     # metric.reset()
-
-
-# Overfitting
-#
-# Validation loss starts to increase or diverge from training loss.
-#
-# Overfitting is very common when working with small datasets.
-#
-# What causes overfitting?
-#
-# * Small dataset. Use more data / use data augmentation (synthetic data).
-# * Model has too much capacity. Reduce model size / add dropout.
-# * Weights are too large. Weight decay for force parameters to remain small.
-#
-
-# Preventing overfitting
-# ----------------------
-#
-# * Data agumentation / synthetic data.
-# * Dropout layer. Reduces dependence on features (makes model less complex).
-# * Weight decay. Adds regularization to penalize large weights.
-
-#
-#
-# "Regularization" using a dropout layer
-# --------------------------------------
-#
-# To fight overfitting due to model complexity, you could simplify the model and
-# reduce the number of parameters. Or use a dropout layer, which would allow you
-# to keep the same model complexity but reduce dependence on parameters.
-#
-# Randomly zeroes out elements of the input tensor during training.
-# Corresponding connections are temporarily removed from the network, making the
-# network less likely to overrely on specific features.
-#
-#
-# model = nn.Sequential(nn.Linear(8, 4), nn.ReLU(), nn.Dropout(p=0.5))
-#
-# features = torch.randn((1, 8)) model(i)
-#
-
-#
-# Weight Decay
-# -------------
-#
-# Weight decay adds a penalty to the loss function to discourage large weights
-# and biases and prevents overfitting. The higher the decay (more
-# regularization), the less likely the model is to overfit.
-#
-# # weight_decay is typically pretty small (i.e., 1e-3)
-# optimizer = optim.SDG(model.parameters(), lr=1e-3, weight_decay=1e-4)
-
-#
-# Improving model performance
-# ---------------------------
-#
-# Steps to maximize performance
-#
-# 1. Overfit the training set
-#   * Proves we can solve the problem.
-#   * Sets a performance baseline.
-#
-# 2. Reduce overfitting
-#   * Improve performance
-#
-# 3. Fine-tune hyperparameters
-#   * Grid search. If we have the compute resources, we could do a grid search
-#     over the hyperparameters (typically the optimizer's learning_rate or
-#     momentum)
-#
-#   * Random search. Randomly sample hyperparameters.
 
 
 def test_step1_intentional_overfit() -> None:
@@ -983,268 +984,3 @@ def test_pytorch_oop() -> None:
 
         accuracy = acc.compute()
         print(f"Accuracy ({key}): {accuracy}")
-
-
-def test_images_cnn() -> None:
-    """
-    What is an image? A matrix of pixels (picture element). Each pixel is
-    typically described in RGB format
-
-    RGB = (51, 171, 214)
-
-    Data Augmentation
-    -----------------
-
-    Data augmentation is the process of generating new training data by
-    augmenting existing training data. Data augmentation increases model
-    robustness by:
-
-    * Increasing training set size.
-    * Training on "real world" data. Real-world data is not perfect.
-    * Reduces overfitting.
-
-    Model Architecture (Convolutions)
-    ------------------
-
-    Why not use linear layers? Images are large. Having a parameter per pixel is
-    too expensive. A 256x256x3 image is ~ 200k input parameters. A layer with
-    100 neurons would contain 200M parameters. Linear layers also don't
-    recognize patterns of spacial related pixels.
-
-
-    Convolutional layers slide filters (small grid) over the image, performing a
-    convolution at each position. This allows us to perserve input patters and
-    uses fewer parameters than a linear layer.
-
-    # input feature maps, output feature maps, kernel_size=3
-
-    nn.Conv2d(3, 32, kernel_size=3)
-
-    What is a convolution?
-
-    * The sum of the dot product of the input patch and filter.
-
-    * Zero padding adds a frame of zeros to the convolutional layers input (not
-      patch). This maintains spacial dimensions of input and output tensors and
-      ensures border pixels are treated equally to others. If we *don't* have
-      padding, border pixels wouldn't have as many filters pass over them.
-
-    * Max Pooling is another technique commonly used after convolutional layers.
-      It slides a non-overlapping window over the output and takes the max value
-      for all elements in the window. This reduces the dimensions and parameters
-      in the network.
-
-    nn.MaxPool2d(kernel_size=2)
-    """
-
-    train_transformers = torchvision.transforms.Compose(
-        [
-            # Agument the data by introducing randomness to the image, making
-            # the model more robost to real world images. Be careful *not* to
-            # augment the data in ways that would change the label. For example,
-            # augmenting the color of a lemon could confuse it for a lime.
-            # Always consider your dataset before applying transformations.
-            torchvision.transforms.RandomHorizontalFlip(),
-            torchvision.transforms.RandomRotation(45),
-            torchvision.transforms.RandomAutocontrast(),
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Resize((64, 64)),
-        ]
-    )
-
-    dataset_train = torchvision.datasets.ImageFolder(
-        "data/clouds/clouds_train",
-        transform=train_transformers,
-    )
-    dataloader_train = DataLoader(dataset_train, batch_size=1, shuffle=True)
-    #
-    # To display an image, put the image into a shape compatible w/ matplotlib
-    #
-    # image, label = next(iter(dataloader_train))
-    # # Remove the first dimension
-    # img_to_show = image.squeeze()
-    # # Height,Width,Channel
-    # img_to_show = img_to_show.permute(1, 2, 0)
-    # plt.imshow(img_to_show)
-    # plt.show()
-
-    class ConvNet(nn.Module):
-        def __init__(self, num_classes: int) -> None:
-            super().__init__()
-
-            # This CNN has two parts: a feature_extractor and a classifier
-            #
-            # Most CNN architectures look similar: repeated blocks of
-            # convolution / activation / pooling layers with increasing number
-            # of feature outputs (why increasing?), followed by flatten and one
-            # or more layers for classification or regression.
-            self.feature_extractor = nn.Sequential(
-                # The input feature map has 3 fearures corresponding to the RGB channels.
-                nn.Conv2d(3, 32, kernel_size=3, padding=1),
-                nn.ELU(),
-                nn.MaxPool2d(kernel_size=2),
-                nn.Conv2d(32, 64, kernel_size=3, padding=1),
-                nn.ELU(),
-                nn.MaxPool2d(kernel_size=2),
-                nn.Flatten(),
-            )
-
-            # how do we get 16x16?
-            #
-            # Input image = 3 x 64 x 64
-            #
-            # Conv2d(3, 32) == 32 output filters = 32 * 64 * 64
-            #
-            # MaxPool2d(2) == halve the width / height = 32 * 32 * 32
-            #
-            # Conv2d(32, 64) == 64 ourput filters = 64 * 32 * 32
-            #
-            # MaxPool2d(2) == halve the width / height = 64 * 16 * 16
-
-            self.classifier = nn.Linear(
-                in_features=64 * 16 * 16,
-                out_features=num_classes,
-            )
-
-        def forward(self, x):
-            x = self.feature_extractor(x)
-            x = self.classifier(x)
-            return x
-
-    # Data agumentation and how it can impact the training process:
-    #
-    # Consider image implications when augmenting data! If the augmentation
-    # would change the label, do *not* augment along that dimension.
-    #
-    # Examples:
-    #
-    # * Color: Augmenting color will confuse the model. lemon / lime are the
-    #   same image w/ different colors.
-    # * Vertical flip: W turns into M
-    #
-    # Some augmentation strategies that are typically OK:
-    #
-    # Horizontal flip
-    # Rotation
-    # Contrast adjustments
-
-    net = ConvNet(num_classes=7)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=0.001)
-
-    # training
-    epochs = 1
-    for epoch in range(epochs):
-        total_loss = 0.0
-        for features, labels in dataloader_train:
-            optimizer.zero_grad()
-            outputs = net(features)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            total_loss += loss.item()
-        epoch_loss = total_loss / len(dataloader_train)
-        print(f"epoch {epoch + 1}, loss: {epoch_loss:.4f}")
-
-    # evaluation
-    #
-    # In binary classification, we use precision and recall
-    #
-    # Precision
-    #
-    # True Positives / True Positives + False Positives
-    #
-    # "Of all the positive predictions, how many were actually positive?"
-    #
-    # High precision - the model avoids false positives. If it predicts true,
-    # it's probably true.
-
-    # Recall
-    #
-    # True Positives / True Positives + False Negatives
-    #
-    # "Of all the instances that were actually positive, how many did the model
-    # predict as positive?"
-    #
-    # High recall - correctly predicts true positives.
-    #
-    # Low recall indicates the model misses a lot of positive instances. Many
-    # positives are labeled as negatives.
-    #
-
-    # With multi-class, each class has a precision and a recall.
-    #
-    # We can analyze them per class, or in aggregate.
-    #
-    # Micro average: global calculation. Calcuates precision / recall globally
-    # across all classes. Computes a global precision / recall using all classes
-    #
-    # Macro: Computes precision / recall for each class, using a mean across all
-    # classes.
-    #
-    # Weighted average: Computes precision / recall for each class, using a
-    # *weighted* mean across all classes. Larger classes have a greater impact
-    # on the final result.
-    #
-    # When should we use different recall types?
-    #
-    # * Micro: Use with imbalanced data sets as it takes into account class
-    #   imbalance.
-    # * Macro: Use when you care about performance of a small class (all classes
-    #   treated equally)
-    # * Weighted: When you consider errors in larger classes more important
-    #
-
-    test_transformers = torchvision.transforms.Compose(
-        [
-            # do not augument test data (of course :)
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Resize((64, 64)),
-        ]
-    )
-
-    dataset_test = torchvision.datasets.ImageFolder(
-        "data/clouds/clouds_test",
-        transform=test_transformers,
-    )
-    dataloader_test = DataLoader(dataset_test, batch_size=1, shuffle=True)
-
-    precision = torchmetrics.Precision(
-        task="multiclass",
-        num_classes=7,
-        average="macro",
-    )
-
-    recall = torchmetrics.Recall(
-        task="multiclass",
-        num_classes=7,
-        average="macro",
-    )
-
-    recall_per_class = torchmetrics.Recall(
-        task="multiclass", num_classes=7, average="none"
-    )
-
-    net.eval()  # disable autograd for the model
-    with torch.no_grad():
-        for features, labels in dataloader_test:
-            outputs = net(features)
-            # preds are the indices (class) where the max value was found
-            _, preds = torch.max(input=outputs, dim=1)
-            precision(preds, labels)
-            recall(preds, labels)
-            recall_per_class(preds, labels)
-
-    final_precision = precision.compute()
-    final_recall = recall.compute()
-    print(f"Precision: {final_precision} Recall: {final_recall}")
-
-    final_recall_per_class = recall_per_class.compute()
-    print(f"Recall per class: {final_recall_per_class}")
-
-    # mapping of class name to index
-    recall_by_class_name = {
-        k: final_recall_per_class[v].item()
-        for k, v in dataset_test.class_to_idx.items()
-    }
-    print(recall_by_class_name)
