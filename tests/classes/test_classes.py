@@ -37,16 +37,25 @@ Namespaces
 Classes add another namespace.
 """
 
-from typing import Self, Type
+from typing import Self
 
 from copy import copy, deepcopy
+import inspect
 
 from tests.classes.logger import Logger
 from tests.classes.person import Person
 from tests.classes.manager import Manager
 
 
-def test_class_definition() -> None:
+def test_type_hierarchy() -> None:
+    """Shows how to create and inspect types as part of a type hierarchy.
+
+    Python classes store attributes in an internal __dict__ variable.
+
+    The dir() function retrieves returns a list of all attributes and methods.
+    You can use the `inspect` module to determine a member is a method
+    """
+
     class A:
         def __init__(self, value: str) -> None:
             self._value = value
@@ -62,39 +71,46 @@ def test_class_definition() -> None:
     class B(A):
         pass
 
-    def pclass(t: Type):
-        print
-        print(type(t))
-        print(t)
-
-    pclass(A)
-
+    # verify the type hierarchy
     assert isinstance(A, type)
     assert isinstance(B, type)
+    assert issubclass(B, A)
+    # there is only one instance of each class type
+    assert id(A) == id(A)
 
+    # verify the instance hierarchy
+    b = B("test")
     assert not isinstance(B("test"), type)
+    assert isinstance(b, B)
+    assert isinstance(b, A)
+    assert isinstance(b, object)
+    assert issubclass(b.__class__, A)
 
-    assert isinstance(B("test"), B)
-    assert isinstance(B("test"), A)
-    assert isinstance(B("test"), object)
+    # list all methods
+    assert ["__init__"] == [
+        name for name, _ in inspect.getmembers(b, predicate=inspect.ismethod)
+    ]
 
+    # list all properties
+    properties = [
+        name
+        for name, _ in inspect.getmembers(type(b), lambda x: isinstance(x, property))
+    ]
+    assert ["value"] == properties
+
+    print(dir(b))
     print(B.__dict__)
     print(B.__annotations__)
     print(B.__base__)
     print(B.__bases__)
-
-    print(issubclass(B, A))
-    print(issubclass(B("test").__class__, A))
-    print(id(A))
-    assert id(A) == id(A)
 
     print(A.__subclasses__())
     print(A.__name__)
     print(A.__qualname__)
 
     a = A("test")
-    print(a.__dict__)
-    print(a.value)
+    assert a.__dict__ == {"_value": "test"}
+    assert a.value == "test"
 
 
 def test_super() -> None:
@@ -234,84 +250,102 @@ def test_equality() -> None:
     assert x is None, "always use `is None` to check for None (pythonic)"
 
 
-class TestClasses:
+def test_formatting() -> None:
+    """__str__ and __repr__ define string representations for a class."""
+    p = Person("damon", "allison")
 
-    def test_formatting(self) -> None:
-        """__repr__ defines a string representation for a class.
+    expected = "Person('damon', 'allison')"
+    assert str(p) == expected
+    assert repr(p) == expected
 
-        TODO(@damon): What is the difference between __str__ and __repr__ in terms of priority for print(),
-        """
 
-        assert "Person('damon', 'allison')" == str(Person("damon", "allison"))
-        assert "Manager('damon', 'allison')" == str(Manager("damon", "allison"))
+def test_container() -> None:
+    """Person is a container (of "child" Person objects). It allows you to
+    perform container operations like indexing and slicing."""
 
-    def test_container(self) -> None:
-        """Person is a container (of "child" Person objects). It allows you to
-        perform container operations like indexing and slicing."""
+    p = Person("damon", "allison")
+    p.children = [
+        Person("grace", "allison"),
+        Person("lily", "allison"),
+        Person("cole", "allison"),
+    ]
 
-        p = Person("damon", "allison")
-        p.children = [
-            Person("grace", "allison"),
-            Person("lily", "allison"),
-            Person("cole", "allison"),
-        ]
+    # note we are taking the length of the *person*, not the children collection
+    assert 3 == len(p)
 
-        # note we are taking the length of the *person*, not the children collection
-        assert 3 == len(p)
+    # containers also supports slicing.
+    cc = p[0:2]
+    assert 2 == len(cc)
+    assert "grace" == cc[0].first_name
+    assert "lily" == cc[1].first_name
 
-        # containers also supports slicing.
-        cc = p[0:2]
-        assert 2 == len(cc)
-        assert "grace" == cc[0].first_name
-        assert "lily" == cc[1].first_name
+    # here we are obtaining an iterator for p and exhausting the iterator to
+    # create cc.
+    cc = list(p)
 
-        # here we are obtaining an iterator for p and exhausting the iterator to
-        # create cc.
-        cc = list(p)
+    assert 3 == len(cc)
+    assert "grace" == cc[0].first_name
+    assert "cole" == cc[2].first_name
 
-        assert 3 == len(cc)
-        assert "grace" == cc[0].first_name
-        assert "cole" == cc[2].first_name
+    cc = []
+    for c in p:
+        cc.append(c)
 
-        cc = []
-        for c in p:
-            cc.append(c)
+    assert 3 == len(cc)
 
-        assert 3 == len(cc)
 
-    def test_generator(test) -> None:
-        """Person.child_first_names() is a generator function.
+def test_generator() -> None:
+    """Person.child_first_names() is a generator function.
 
-        Generators return iterators. In practice, generators are cleaner than
-        iterators since you don't need to implement __iter__, __next__ and keep
-        iterator state.
-        """
+    Generators return iterators. In practice, generators are cleaner than
+    iterators since you don't need to implement __iter__, __next__ and keep
+    iterator state.
+    """
 
-        p = Person("damon", "allison")
-        p.children = [
-            Person("grace", "allison"),
-            Person("lily", "allison"),
-            Person("cole", "allison"),
-        ]
+    p = Person("damon", "allison")
+    p.children = [
+        Person("grace", "allison"),
+        Person("lily", "allison"),
+        Person("cole", "allison"),
+    ]
 
-        names = []
+    actual: list[str] = []
 
-        # child_first_names is a generator. list() will exhaust the generator
-        names = list(p.child_first_names())
-        assert 3 == len(names)
-        assert "grace" == names[0]
-        assert "cole" == names[2]
+    for name in p.child_first_names():
+        actual.append(name)
 
-    def test_context_manager(self) -> None:
-        """Python's context managers allow you to support
-        python's `with` statement."""
-        with Person("damon", "allison") as p:
-            assert "damon", p.first_name
+    expected = ["grace", "lily", "cole"]
+    assert actual == expected
+
+    # automatically exhaust the generator (retrieve all elements) by
+    # converting it into a list
+    actual = list(p.child_first_names())
+    assert actual == expected
+
+    # manually using a generator object
+    gen = p.child_first_names()
+    assert next(gen) == "grace"
+    assert next(gen) == "lily"
+    assert next(gen) == "cole"
+
+    # close the generator to return a value
+    try:
+        gen.send(None)
+    except StopIteration as e:
+        assert e.value == 3
+
+
+def test_context_manager() -> None:
+    """Python's context managers allow you to support
+    python's `with` statement.
+
+    Context managers require the object to support __enter__ and __exit__.
+    """
+    with Person("damon", "allison") as p:
+        assert "damon", p.first_name
 
 
 def test_object_copy() -> None:
-    logs: list[str] = []
-
     # All func arguments are "pass by value"
     class C:
         #

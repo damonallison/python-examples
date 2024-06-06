@@ -1,6 +1,7 @@
 """A simple person class."""
+
 import logging
-from typing import Any, ClassVar, List, Sequence, Self
+from typing import Any, ClassVar, Generator, List, Sequence, Self
 
 
 class GenericIterator:
@@ -159,9 +160,10 @@ class Person:
     # When the generator function ends, it raises a "StopIteration" error,
     # terminating the iterator.
 
-    def child_first_names(self):
+    def child_first_names(self) -> Generator[str, None, int]:
         for child in self.children.copy():
             yield child.first_name
+        return len(self.children)
 
     # Adds support for "with". Python calls the with construct a "context
     # manager".
