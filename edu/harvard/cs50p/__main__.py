@@ -199,17 +199,34 @@ def run_week6() -> None:
 
 def run_week7() -> None:
     assert week7.is_ipv4("0.0.0.0")
+    assert not week7.is_ipv4("1")
+    assert not week7.is_ipv4("1.2")
+    assert not week7.is_ipv4("1.2.3")
     assert not week7.is_ipv4("0256.0.0.0")
 
-    assert week7.Person.hi("damon") == ""
+    assert week7.Person.hi("damon") == "hi damon"
     p = week7.Person("damon", 47)
     assert p.greet() == "hello, damon. you are 47"
 
-    # assert week7.is_ipv4("999.999.999.999")
+    youtube_urls = week7.youtube(
+        """<iframe width="560" height="315" src="https://www.youtube.com/embed/1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/2" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>"""
+    )
+    expected = [
+        "https://www.youtube.com/embed/1",
+        "https://www.youtube.com/embed/2",
+        "https://www.youtube.com/embed/3",
+    ]
+    assert youtube_urls == expected
 
-    # assert not week7.is_ipv4("0.0.0.")
-    # assert not week7.is_ipv4("0.0.0")
-    # assert not week7.is_ipv4("0.0.0.A")
+    assert week7.nine_to_five("9:00 AM to 5:00 PM") == "09:00 to 17:00"
+    assert week7.nine_to_five("12:00 AM to 12:00 PM") == "00:00 to 12:00"
+
+    assert week7.count_ums("this is, um, an, um, long ultimatum") == 2
+
+    assert week7.validate_email("damon@damonallison.com")
+    assert not week7.validate_email("damon@damonallison dot com")
 
 
 if __name__ == "__main__":
@@ -218,5 +235,5 @@ if __name__ == "__main__":
     This allows the script to distinguish between being run directly or being imported as a module into another script.
     """
     # run_week3()
-    run_week6()
-    # run_week7()
+    # run_week6()
+    run_week7()
