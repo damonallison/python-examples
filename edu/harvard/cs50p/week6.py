@@ -3,17 +3,25 @@ Week 6: File I/O
 
 poetry run pytest edu/harvard/cs50p/week6.py
 
-* with == context manager will call __enter__ and __exit__ on the context object
-* Use good data structures
-    * read / write structured types as opposed to positional types
-* Use lambda for simple functions only (lambda is a single line function)
 
+* with == context manager
+    *  call __enter__ and __exit__ on the context object
+    * Allows the context object to "wrap" the block and do instiantiation and
+      cleanup.
+    * Used to ensure resources (file handles / network sockets) are closed.
+
+* Use good data structures
+    * read / write structured types as opposed to simple string concatenation
+    * For example, read and write "first_name" and "last_name" fields rather
+      than a single "name".
 """
 
 import csv
 import os
 import pathlib
 import tempfile
+
+from PIL import Image, ImageOps
 
 
 def test_io_basics(tmp_path: pathlib.Path) -> None:
@@ -28,8 +36,10 @@ def test_io_basics(tmp_path: pathlib.Path) -> None:
         f.writelines([f"hello{os.linesep}", f"world{os.linesep}"])
 
     with open(fname, "r") as f:
-        # for line in f
-        #    # do something with f
+        for line in f:
+            assert line.endswith(os.linesep)
+
+    with open(fname, "r") as f:
         assert [line.rstrip() for line in sorted(f.readlines())] == ["hello", "world"]
 
 
@@ -66,7 +76,7 @@ def test_csv(tmp_path: pathlib.Path) -> None:
     fname = tmp_path / "students.csv"
     with open(fname, "w") as f:
         w = csv.DictWriter(f, fieldnames=["name", "greeting"])
-        w.writeheader()  # you need to .writeheader() before reading it back in
+        w.writeheader()  # note the file needs a header to read back column names
         w.writerows(
             [
                 {"name": "damon", "greeting": "hello, test"},
@@ -76,11 +86,6 @@ def test_csv(tmp_path: pathlib.Path) -> None:
 
     students: list[dict[str, str]] = []
 
-    def echo(p: pathlib.Path) -> None:
-        with open(p, "r") as f:
-            print(f.read())
-
-    echo(fname)
     with open(fname, "r") as f:
         for row in csv.DictReader(f):
             students.append({"name": row["name"], "greeting": row["greeting"]})
@@ -90,8 +95,14 @@ def test_csv(tmp_path: pathlib.Path) -> None:
     assert students[0]["greeting"] == "hello, test"
 
 
+#
+# Problem Set 6
+#
+
+
 def lines_of_code(p: pathlib.Path) -> int:
-    """Outputs the number of lines in a file"""
+    """Outputs the number of lines in a file, excluding blank lines and strings
+    that start with # (comments)."""
     lines = 0
     with open(p, "r") as f:
         for line in f:
@@ -111,11 +122,11 @@ def pizza_py() -> None:
             w.writeheader()
             w.writerows(
                 [
-                    {"Sicilian Pizza": "Cheese", "Small": "$25.50", "Large": "$39.95"}
+                    {"Sicilian Pizza": "Cheese", "Small": "$25.50", "Large": "$39.95"},
+                    {"Sicilian Pizza": "Special", "Small": "$33.50", "Large": "$47.95"},
                     # 1 item,$27.50,$41.95
                     # 2 items,$29.50,$43.95
                     # 3 items,$31.50,$45.95
-                    # Special,$33.50,$47.95
                 ]
             )
 
@@ -129,7 +140,7 @@ def pizza_py() -> None:
             print(tabulate.tabulate(rows, headers="keys", tablefmt="grid"))
 
 
-def scourgify() -> None:
+def scourgify() -> list[dict[str, str]]:
     """Read a file, separate out first and last name"""
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -147,10 +158,34 @@ def scourgify() -> None:
             )
 
         tmp_out = tmp_path / "split-names.csv"
+
+        students: list[dict[str, str]] = []
         with open(tmp_file, "r") as f:
             r = csv.DictReader(f)
             with open(tmp_out, "w") as fout:
-                w = csv.DictWriter()
+                w = csv.DictWriter(fout, ["first", "last", "house"])
+                w.writeheader()
                 for row in r:
                     fullname = row["name"]
-                    f_name, l_name = [name.strip() for name in fullname.split(",")]
+                    l_name, f_name = [name.strip() for name in fullname.split(",")]
+                    student = {"first": f_name, "last": l_name, "house": row["house"]}
+                    students.append(student)
+                    w.writerow(student)
+
+        with open(tmp_out, "r") as final:
+            print(final.read())
+        # To write this back to a file
+        return students
+
+
+def cs50_tshirt() -> None:
+    with Image.open(
+        "edu/harvard/cs50p/week6-images/before.png"
+    ) as original, Image.open("edu/harvard/cs50p/week6-images/shirt.png") as overlay:
+        original = ImageOps.fit(original, size=overlay.size)
+        original.paste(overlay, box=None, mask=overlay)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_file = f"{tmp_dir}/out.png"
+            original.save(tmp_file)
+            # with Image.open(tmp_file) as final:
+            #     final.show()

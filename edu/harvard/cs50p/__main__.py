@@ -189,6 +189,13 @@ def run_week6() -> None:
 
         assert week6.lines_of_code(tmp_file) == 2
 
+    week6.pizza_py()
+    assert week6.scourgify() == [
+        {"first": "damon", "last": "allison", "house": "maple grove"},
+        {"first": "sam", "last": "raiche", "house": "plymouth"},
+    ]
+    week6.cs50_tshirt()
+
 
 def run_week7() -> None:
     assert week7.is_ipv4("0.0.0.0")
@@ -210,6 +217,6 @@ if __name__ == "__main__":
 
     This allows the script to distinguish between being run directly or being imported as a module into another script.
     """
-    run_week3()
-    # run_week6()
+    # run_week3()
+    run_week6()
     # run_week7()
