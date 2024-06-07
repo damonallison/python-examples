@@ -63,12 +63,23 @@ Types:
 
 """
 
+import datetime
 import os
 from pathlib import Path
 import tempfile
 
 
-from edu.harvard.cs50p import week0, week1, week2, week3, week4, week5, week6, week7
+from edu.harvard.cs50p import (
+    week0,
+    week1,
+    week2,
+    week3,
+    week4,
+    week5,
+    week6,
+    week7,
+    week8,
+)
 
 
 def run_week0() -> None:
@@ -229,6 +240,14 @@ def run_week7() -> None:
     assert not week7.validate_email("damon@damonallison dot com")
 
 
+def run_week8() -> None:
+    print(week8.how_old_in_minutes(datetime.date(1976, 8, 22)))
+    print(week8.how_old_in_minutes(datetime.date(2004, 3, 17)))
+    print(week8.how_old_in_minutes(datetime.date(2006, 10, 21)))
+
+    week8.shirtificate("damon allison")
+
+
 if __name__ == "__main__":
     """__name__ will be __main__ when the file is the "main" module or script being executed.
 
@@ -236,4 +255,5 @@ if __name__ == "__main__":
     """
     # run_week3()
     # run_week6()
-    run_week7()
+    # run_week7()
+    run_week8()
