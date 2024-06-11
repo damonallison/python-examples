@@ -35,6 +35,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pytest
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -42,6 +43,8 @@ import torch.optim as optim
 from torch.utils.data import Dataset, TensorDataset, DataLoader
 
 import torchmetrics
+
+pytestmark = pytest.mark.ml
 
 
 def training_device() -> torch.device:

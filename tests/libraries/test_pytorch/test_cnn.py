@@ -6,6 +6,7 @@ network.
 
 """
 
+import pytest
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -13,6 +14,8 @@ from torch.utils.data import Dataset, TensorDataset, DataLoader
 
 import torchmetrics
 import torchvision
+
+pytestmark = pytest.mark.ml
 
 
 def test_images_cnn() -> None:
