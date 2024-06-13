@@ -32,9 +32,9 @@ libraries (torchaudio, torchvision, torchtext).
 from typing import cast
 import sys
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import PIL.Image
 import pytest
 import torch
 import torch.nn as nn
@@ -43,6 +43,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, TensorDataset, DataLoader
 
 import torchmetrics
+import torchvision
 
 pytestmark = pytest.mark.ml
 
@@ -987,3 +988,247 @@ def test_pytorch_oop() -> None:
 
         accuracy = acc.compute()
         print(f"Accuracy ({key}): {accuracy}")
+
+
+def test_multi_input_model() -> None:
+    """A multi-input model accepts multiple inputs to produce an output.
+
+    Examples:
+        * Using more information
+            * Using multiple images to determine what type of vehicle you own.
+        * Multi-modal models
+            * Using an image and a document to find an answer
+        * Metric learning
+            * Are two images the same?
+        * Self-supervised learnning
+            * The model learns two different versions of an image are the same
+
+    Character classification:
+
+    * Takes an image and OHE encoded vector representing the character set.
+    * Both inputs processed separately, then concatenate the representations.
+    * A classification layer predicts which character it is.
+
+
+    """
+
+    class OmniglotDataset(Dataset):
+        def __init__(self, transform, samples) -> None:
+            """
+            A sample is a tuple of:
+
+            (image filename, OHE language vector, target index)
+            """
+            self.transform = transform
+            self.samples = samples
+
+        def __len__(self) -> None:
+            return len(self.samples)
+
+        def __getitem__(self, idx: int) -> tuple[PIL.Image.Image, torch.Tensor, int]:
+            """
+            Returns both inputs and label
+            """
+            img_path, alphabet, label = self.samples[idx]
+            img = PIL.Image.open(img_path).convert("L")  # grayscale
+            img = self.transform(img)
+            return img, alphabet, label
+
+    class Net(nn.Module):
+        def __init__(self) -> None:
+            super(Net, self).__init__()
+            self.image_layer = nn.Sequential(
+                nn.Conv2d(
+                    in_channels=1,
+                    out_channels=16,
+                    kernel_size=3,
+                    padding=1,
+                ),
+                nn.MaxPool2d(kernel_size=2),
+                nn.ELU(),
+                # Flatten() converts a multi-dimensional layer into a 2D layer.
+                # Typically required when convolutional layers process spacial
+                # data and the output needs to be fed into dense (fully
+                # connected) layers (linear) for further processing.
+                nn.Flatten(),
+                # do we have a 32 x 32 original image?
+                nn.Linear(16 * 32 * 32, 128),
+            )
+
+            self.alphabet_layer = nn.Sequential(
+                nn.Linear(30, 8),
+                nn.ELU(),
+            )
+
+            self.classifier = nn.Sequential(
+                # the input is the combination of both linear ouputs above:
+                #
+                # 128 + 8
+                #
+                # 964 is the number of target classes
+                nn.Linear(128 + 8, 964),
+            )
+
+        def __forward__(
+            self, x_image: torch.Tensor, x_alphabet: torch.Tensor
+        ) -> torch.Tensor:
+            x_image = self.image_layer(x_image)
+            x_alphabet = self.alphabet_layer(x_alphabet)
+            x = torch.cat((x_image, x_alphabet), dim=1)
+            return self.classifier(x)
+
+    # training loop
+    net = Net()
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(net.parameters(), lr=0.01)
+
+    # Important
+    # ---------
+    # * The alphabet class is determined by the folder name within
+    #   omniglot_train (i.e., Greek)
+    # * The target is determined by the folder within the alphabet class (i.e.,
+    #   character12)
+    #
+    # TODO: determine how to turn that into a OmniglotDataset set of samples
+    # dataset_train = torchvision.datasets.ImageFolder(
+    #     "data/omniglot/omniglot_train",
+    #     transform=None,
+    # )
+    # dataloader_train = DataLoader(dataset_train, batch_size=1, shuffle=True)
+
+    # net.train()
+    # for epoch in range(10):
+    #     epoch_loss = 0.0
+    #     for img, alphabet, labels in dataloader_train:
+    #         optimizer.zero_grad()
+    #         outputs = net(img, alphabet)
+    #         loss = criterion(outputs, labels)
+    #         loss.backward()
+    #         optimizer.step()
+    #         epoch_loss += loss.item()
+
+    #     epoch_loss = epoch_loss / len(dataloader_train)
+    #     print(f"epoch {epoch}: loss {epoch_loss}")
+
+
+def test_multi_output_model() -> None:
+    """
+    Producing multiple outputs from the same model.
+
+    * Examples
+        * Multi-task learning: predicting a car's make and model.
+        * Multi-label classification: predicting multiple labels (i.e.,
+          has_people, has_beach, time_of_day)
+
+    Here, we predict both the character and the alphabet based on an image.
+
+
+    """
+
+    class OmniglotDataset(Dataset):
+        def __init__(self, transform, samples) -> None:
+            """
+            A sample is a tuple of:
+
+            (image filename, target alphabet index, target character index)
+            """
+            self.transform = transform
+            self.samples = samples
+
+        def __len__(self) -> None:
+            return len(self.samples)
+
+        def __getitem__(self, idx: int) -> tuple[PIL.Image.Image, torch.Tensor, int]:
+            """
+            Returns both inputs and label
+            """
+            img_path, alphabet, label = self.samples[idx]
+            img = PIL.Image.open(img_path).convert("L")  # grayscale
+            img = self.transform(img)
+            return img, alphabet, label
+
+    class Net(nn.Module):
+        def __init__(self) -> None:
+            super(Net, self).__init__()
+            self.image_layer = nn.Sequential(
+                nn.Conv2d(
+                    in_channels=1,
+                    out_channels=16,
+                    kernel_size=3,
+                    padding=1,
+                ),
+                nn.MaxPool2d(kernel_size=2),
+                nn.ELU(),
+                # Flatten() converts a multi-dimensional layer into a 2D layer.
+                # Typically required when convolutional layers process spacial
+                # data and the output needs to be fed into dense (fully
+                # connected) layers (linear) for further processing.
+                nn.Flatten(),
+                # do we have a 32 x 32 original image?
+                nn.Linear(16 * 32 * 32, 128),
+            )
+            self.classifier_alpha = nn.Linear(128, 30)  # alphabet output
+            self.classifier_char = nn.Linear(128, 964)  # character output
+
+        def __forward__(self, x) -> tuple[torch.Tensor, torch.Tensor]:
+            x_image = self.image_layer(x)
+            output_alpha = self.classifier_alpha(x_image)
+            output_char = self.classifier_char(x_image)
+            return output_alpha, output_char
+
+    # net = Net()
+    # net.train()
+    # for epoch in range(10):
+    #     epoch_loss = 0.0
+    #     for imgs, labels_alpha, labels_char in dataloader_train:
+    #         optimizer.zero_grad()
+    #         outputs_alpha, outputs_char = net(imgs)
+
+    #         # calculate loss on both outputs, combining the losses to one total
+    #         # loss. Here we assume the character loss is more important than
+    #         # alphabet loss (because predicting the character is harder than
+    #         # alphabet). If that isn't the case, we could weigh the losses.
+    #         #
+    #         # WARNING: If losses are *not* on the same scale, one loss mawill
+    #         # dominate.
+    #         #
+    #         # Normalize both losses by divinding them by the max in the batch
+    #         #
+    #         # loss_price = loss_price / torch.max(loss_price)
+    #         #
+    #         # loss_quality = loss_quality / torch.max(loss_quality)
+    #         #
+    #         # loss = (0.7 * loss_price) + (0.3 * loss_quality)
+    #         #
+    #         # Gradient descent can only optimize one loss function, thus we do
+    #         # backprop on on the combined loss.
+
+    #         loss_alpha = criterion(outputs_alpha, labels_alpha)
+    #         loss_char = criterion(outputs_char, labels_char)
+
+    #         loss = (0.33 * loss_alpha) + (0.67 * loss_char)
+    #         epoch_loss += loss.item()
+
+    #         loss.backward()
+    #         optimizer.step()
+
+    #     epoch_loss = epoch_loss / len(dataloader_train)
+    #     print(f"epoch {epoch}: loss {epoch_loss}")
+
+    # # model evaluation
+    # #
+    # # We setup an accuracy metric for each output
+    # acc_alpha = torchmetrics.Accuracy(task="multiclass", num_classes=30)
+    # acc_char = torchmetrics.Accuracy(task="multiclass", num_classes=964)
+
+    # net.eval()
+    # with torch.no_grad():
+    #     for images, labels_alpha, labels_char in dataloader_test:
+    #         out_alpha, out_char = net(images)
+    #         _, pred_alpha = torch.max(out_alpha, 1)  # highest predicted class
+    #         _, pred_char = torch.max(out_char, 1)
+
+    #         acc_alpha(pred_alpha, labels_alpha)
+    #         acc_char(pred_char, labels_char)
+    #     print(f"Alphabet accuracy: {acc_alpha.compute()}")
+    #     print(f"Char accuracy: {acc_char.compute()}"
