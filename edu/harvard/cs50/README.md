@@ -93,3 +93,17 @@ internals work, you only need to know its inputs and outputs.
 
 Build programs by composing functions into increasingly complex programs.
 
+## Week 1: C
+
+Evaluating code:
+
+* Correctness. Does it run as intended?
+* Design. How well is the code designed?
+* Style. How asthetically pleasing and consistent is the code?
+
+Abstraction: the art of simplifying code such that it deals with smaller and
+smaller problems.
+
+Types: the possible data stored in a variable.
+
+Variables: a name or value that can change. (A pointer to memory).
