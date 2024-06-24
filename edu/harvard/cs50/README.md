@@ -107,3 +107,114 @@ smaller problems.
 Types: the possible data stored in a variable.
 
 Variables: a name or value that can change. (A pointer to memory).
+
+## Week 3: Algorithms
+
+Learn how to think algorithmically.
+
+### Complexity
+
+Time / complexity (big O notation)
+
+* O(1) = Constant
+* O(log n) = Logarithmic (binary)
+* O(n) = Linear
+* O(n log n) = Logarithmic (merge sort)
+* O(n^2) = Quadratic
+
+Big O == upper bound
+Theta == lower bound
+
+### Linear Search
+
+Linear time.
+
+```c
+
+#include <stdio.h>
+#include <string.h>
+
+int find(int lst[], int len, int goal) {
+    for (int i = 0; i < len; i++) {
+        // use strcmp(s1, s2) == 0 for string equality
+        // asciibetical comparison (ascii character comparison)
+        // -1 == s1 < s2>
+        if lst[i] == goal {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int numbers[] = {1, 2, 3, 4, 5};
+int len = sizeof(numbers) / sizeof(numbers[0]);
+printf("found == %s", find(numbers, len, 4) ? "true" : "false");
+```
+
+L -> R or R -> L
+
+### Binary Search
+
+With sorted input.
+
+* Repeat until found.
+     * Divide the input in half, looking at the middle number.
+     * If we've found what we are looking for, we are done.
+     * If the middle number is greater than what we are looking for, repeat with
+       the left half. Otherwise, repeat with the right half.
+
+### Selection Sort
+
+O(n^2) == n(n-1)/2
+
+For i from o to n-1:  (n)
+    * Iterate all numbers from i, remembering the lowest.  (n)
+    * Swap the lowest into i
+
+### Bubble Sort
+
+O(n^2) == (n - 1)*(n - 1)
+
+Repeat n times
+    for i from 0 to n-2
+        if numbers[i] and numbers[i + 1] out of order
+            swap them
+    if no swaps
+        quit
+
+### Recursion
+
+A function that calls itself with a smaller input and ultimately hitting a base case.
+
+```c
+// Recursion
+void draw(int n) {
+    // base case
+    if (n <= 0) {
+        return;
+    }
+    draw(n - 1)
+    for (int i = 0; i < n; i++>) {
+        print("#");
+    }
+    print("\n");
+}
+```
+
+### Merge Sort
+
+if only one number
+    quit
+else
+    sort left half
+    sort right half
+    merge halves
+
+```c
+// n log n
+// log n height, n width ==
+int mergesort(int[] numbers) {
+
+}
+
+```
