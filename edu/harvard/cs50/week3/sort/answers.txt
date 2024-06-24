@@ -1,0 +1,52 @@
+sort1 uses: bubble
+
+How do you know?: It's very slow on random / reversed data and fast on sorted
+data (no swapping)
+
+random5000: 0m0.060s
+random10000: 0m0.277s
+random50000: 0m5.601s
+
+reversed5000: 0m0.072s
+reversed10000: 0m0.235s
+reversed50000: 0m4.976s
+
+sorted5000:  0m0.033s
+sorted10000:  0m0.071s
+sorted50000: 0m0.545s
+
+
+sort2 uses: merge
+
+How do you know?: It's logarithmic on random data and very fast overall.
+
+random5000:  0m0.042s
+random10000: 0m0.081s
+random50000: 0m0.540s
+
+reversed5000:0m0.035s
+reversed10000: 0m0.068s
+reversed50000: 0m1.134s
+
+sorted5000: 0m0.030s
+sorted10000: 0m0.064s
+sorted50000: 0m0.455s
+
+
+sort3 uses: selection
+
+How do you know?: It's equally expensive for all.
+
+random5000:  0m0.071s
+random10000: 0m0.145s
+random50000: 0m2.372s
+
+reversed5000: 0m0.068s
+reversed10000: 0m0.150s
+reversed50000: 0m2.635s
+
+sorted5000: 0m0.054s
+sorted10000: 0m0.137s
+sorted50000: 0m2.341s
+
+

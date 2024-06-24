@@ -3,6 +3,12 @@
 Teaches computational thinking and programming fundamentals, not a language.
 Languages used include C, python, SQL, JavaScript, HTML, and CSS.
 
+## Codespaces
+
+1. Link github account: https://submit.cs50.io/
+2. Login to cs50.dev: https://cs50.dev/
+3. Run `update50`
+
 ## Week 0: Scratch
 
 Leaning computer science is like drinking from a fire hose. You're not going to
@@ -117,7 +123,7 @@ Learn how to think algorithmically.
 Time / complexity (big O notation)
 
 * O(1) = Constant
-* O(log n) = Logarithmic (binary)
+* O(log n) = Logarithmic (binary == log(2)n)
 * O(n) = Linear
 * O(n log n) = Logarithmic (merge sort)
 * O(n^2) = Quadratic
@@ -127,7 +133,7 @@ Theta == lower bound
 
 ### Linear Search
 
-Linear time.
+Linear time. Iterate the list until the number is found.
 
 ```c
 
@@ -138,12 +144,11 @@ int find(int lst[], int len, int goal) {
     for (int i = 0; i < len; i++) {
         // use strcmp(s1, s2) == 0 for string equality
         // asciibetical comparison (ascii character comparison)
-        // -1 == s1 < s2>
         if lst[i] == goal {
             return 1;
         }
     }
-    return 0;
+    return -1;
 }
 
 int numbers[] = {1, 2, 3, 4, 5};
@@ -151,9 +156,9 @@ int len = sizeof(numbers) / sizeof(numbers[0]);
 printf("found == %s", find(numbers, len, 4) ? "true" : "false");
 ```
 
-L -> R or R -> L
-
 ### Binary Search
+
+log(2)n - Cutting the input in 1/2 with every iteration.
 
 With sorted input.
 
@@ -165,6 +170,10 @@ With sorted input.
 
 ### Selection Sort
 
+Selecting the lowest element from the list with each iteration. Very slow, but
+low space requirements since only a single extra element needs to be stored with
+each iteration.
+
 O(n^2) == n(n-1)/2
 
 For i from o to n-1:  (n)
@@ -172,6 +181,11 @@ For i from o to n-1:  (n)
     * Swap the lowest into i
 
 ### Bubble Sort
+
+Continuing to swap elements, putting the lowest on the left (ascending) or right
+(descending).
+
+The slowest on random data as it's n^2 plus a lot of swaps.
 
 O(n^2) == (n - 1)*(n - 1)
 
@@ -184,7 +198,8 @@ Repeat n times
 
 ### Recursion
 
-A function that calls itself with a smaller input and ultimately hitting a base case.
+A function that calls itself with a smaller input and ultimately hitting a base
+case.
 
 ```c
 // Recursion
@@ -203,12 +218,17 @@ void draw(int n) {
 
 ### Merge Sort
 
+O(n log n)
+
+
 if only one number
     quit
 else
     sort left half
     sort right half
     merge halves
+        for i = 0 to n - 1
+            comapre left and right at n, take lowest, then other
 
 ```c
 // n log n

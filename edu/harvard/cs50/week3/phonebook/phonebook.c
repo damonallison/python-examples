@@ -21,7 +21,9 @@ int main(void)
         }};
 
     string name = get_string("Name: ");
-    for (int i = 0; i < 2; i++)
+    int size = sizeof(people) / sizeof(people[0]);
+
+    for (int i = 0; i < size; i++)
     {
         if (strcmp(people[i].name, name) == 0)
         {
