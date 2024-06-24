@@ -1,0 +1,23 @@
+{
+    "env": {
+        "myIncludePath": [
+            "/opt/homebrew/include",
+        ],
+    },
+    "configurations": [
+        {
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "intelliSenseMode": "macos-clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${myIncludePath}"
+            ]
+        }
+    ],
+    "version": 4
+}
