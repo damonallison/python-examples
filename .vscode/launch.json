@@ -8,14 +8,16 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/edu/harvard/cs50/week2/test",
+            "program": "${workspaceFolder}/edu/harvard/cs50/week3/runoff/runoff",
             "args": [
-                "damon",
+                "alice",
+                "bob",
+                "charlie",
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
-            "externalConsole": false,
+            "externalConsole": true,
             "MIMode": "lldb"
         },
         {
