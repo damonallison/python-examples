@@ -1,0 +1,17 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/damon/dra/python-examples/edu/harvard/cs50/week3/runoff/runoff'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100002AA8, symSize: 0x37C }
+  - { offsetInCU: 0x4D, offset: 0x4D, size: 0x8, addend: 0x0, symName: _preferences, symBinAddr: 0x100008098, symSize: 0x0 }
+  - { offsetInCU: 0x7B, offset: 0x7B, size: 0x8, addend: 0x0, symName: _candidates, symBinAddr: 0x100008008, symSize: 0x0 }
+  - { offsetInCU: 0xE7, offset: 0xE7, size: 0x8, addend: 0x0, symName: _voter_count, symBinAddr: 0x100008EA8, symSize: 0x0 }
+  - { offsetInCU: 0xFC, offset: 0xFC, size: 0x8, addend: 0x0, symName: _candidate_count, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offsetInCU: 0x10C, offset: 0x10C, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x0, symBinAddr: 0x100002AA8, symSize: 0x37C }
+  - { offsetInCU: 0x222, offset: 0x222, size: 0x8, addend: 0x0, symName: _vote, symObjAddr: 0x37C, symBinAddr: 0x100002E24, symSize: 0xE0 }
+  - { offsetInCU: 0x282, offset: 0x282, size: 0x8, addend: 0x0, symName: _tabulate, symObjAddr: 0x45C, symBinAddr: 0x100002F04, symSize: 0xD0 }
+  - { offsetInCU: 0x2EC, offset: 0x2EC, size: 0x8, addend: 0x0, symName: _print_winner, symObjAddr: 0x52C, symBinAddr: 0x100002FD4, symSize: 0x10C }
+  - { offsetInCU: 0x35A, offset: 0x35A, size: 0x8, addend: 0x0, symName: _find_min, symObjAddr: 0x638, symBinAddr: 0x1000030E0, symSize: 0x9C }
+  - { offsetInCU: 0x3BA, offset: 0x3BA, size: 0x8, addend: 0x0, symName: _is_tie, symObjAddr: 0x6D4, symBinAddr: 0x10000317C, symSize: 0xB8 }
+  - { offsetInCU: 0x41A, offset: 0x41A, size: 0x8, addend: 0x0, symName: _eliminate, symObjAddr: 0x78C, symBinAddr: 0x100003234, symSize: 0x84 }
+...
