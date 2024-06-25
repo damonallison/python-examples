@@ -236,5 +236,56 @@ else
 int mergesort(int[] numbers) {
 
 }
+```
+
+---
+
+## Week 4: Memory
+
+### Hexidecimal
+
+RGB contains 3 255 (2^8 - 1) hex (base 16) values to represent color.
 
 ```
+Base 16
+----------------
+
+16        1
+F         F
+16 * 15   1 * 15
+
+240 + 15 == 255
+```
+
+Hex is convenient becausse it requires 4 bits at a time. 8 bits == byte.
+
+Hex is represented as `0xFF`. The `0x` is a convention that says: the following
+number is hexidecimal.
+* The maximum value of a bit == `1`
+* The maximum value of 4 bits == `0xF` == `15`
+* The maximum value of a byte (8 bits) == `0xFF` == `255`
+* The maximum value of a 4 byte integer == `0xFFFFFFFF`
+    * 16^7 + 16^6 + 16^5 + 16^4 + 16^3 + 16^2 + 16^1 + 16^0 = `4294967295`
+
+
+A pointer is a memory address.
+
+A 32 bit OS and chip architecture can only access 3^32 (2 GB) memory addresses.
+
+* 2 GB == 32 bit (4 byte)
+* 16 exabytes == 64 bit (8 bytes)
+
+Pointer arithmetic: doing math on addresses.
+
+`NULL` is the address 0.
+
+### Stack and Heap
+
+When calling functions, each function call adds a frame to the call stack. Each
+frame of the stack includes copies of argument values which are *not* shared
+between frames. Thus, C is a `copy by value` language.
+
+The heap is a sharable memory space which you obtain pointers to by allocating
+memory using `malloc`.
+
+The stack and heap can overflow (buffer overflow).
