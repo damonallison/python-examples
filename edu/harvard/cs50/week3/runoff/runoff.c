@@ -149,7 +149,6 @@ void tabulate(void)
             if (!candidates[preferences[i][j]].eliminated)
             {
                 candidates[preferences[i][j]].votes++;
-                break;
             }
         }
     }
@@ -166,7 +165,7 @@ bool print_winner(void)
         candidate c = candidates[i];
         if (!c.eliminated)
         {
-            float percent = ((float)candidates[i].votes) / ((float)voter_count);
+            float percent = ((float)candidates[i].votes) / ((float)candidate_count);
             if (percent > 0.5)
             {
                 printf("%s\n", c.name);
@@ -223,6 +222,11 @@ void eliminate(int min)
         if (candidates[i].votes == min)
         {
             candidates[i].eliminated = true;
+        }
+        candidate c = candidates[i];
+        if (c.votes == min)
+        {
+            c.eliminated = true;
         }
     }
     return;

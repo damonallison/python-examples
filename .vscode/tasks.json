@@ -9,8 +9,7 @@
                 "-fansi-escape-codes",
                 "-g",
                 "${file}",
-                "-I/opt/homebrew/include",
-                "-lcs50",
+                "-I/usr/""-lcs50",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
