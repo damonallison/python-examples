@@ -86,7 +86,7 @@ void print_winner(void)
     {
         if (candidates[i].votes > highest)
         {
-            highest = candidates[i].votes;
+            highest = candidates[0].votes;
         }
     }
     if (highest == 0)

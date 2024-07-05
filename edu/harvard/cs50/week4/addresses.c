@@ -1,11 +1,7 @@
-#include <cs50.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
-
-typedef uint8_t BYTE;
 
 // How do floats work?
 // how do you find the address of the location?
@@ -83,41 +79,6 @@ int get()
     // printf("s: \n");
     // scanf("%i", &n);
     // printf("n: %i\n", n);
-
-    return 0;
-}
-
-int fileio()
-{
-    FILE *file = fopen("file.txt", "a");
-    if (file == NULL)
-    {
-        return 1;
-    }
-
-    char *name = get_string("Name: ");
-    char *number = get_string("Number: ");
-
-    fprintf(file, "%s,%s\n", name, number);
-    fclose(file);
-    return 0;
-}
-
-int filecopy(char *src, char *dest)
-{
-    FILE *fsrc = fopen(src, "rb");
-    FILE *fdst = fopen(dest, "wb");
-
-    BYTE b;
-
-    // Manually copy a file byte by byte. Note you'd typically copy in chunks.
-    while (fread(&b, sizeof(b), 1, fsrc) != 0)
-    {
-        fwrite(&b, sizeof(b), 1, fdst);
-    }
-
-    fclose(fdst);
-    fclose(fsrc);
     return 0;
 }
 
@@ -125,6 +86,7 @@ int main(void)
 {
     int x;
     long y;
+
     unsigned int xx;
     unsigned long yy;
 
@@ -158,6 +120,12 @@ int main(void)
     printf("address of s[0] == %p\n", &s[0]);
     printf("address of s[1] == %p\n", &s[1]);
 
+    printf("here\n");
+    printf("%c\n", s[0]);
+    printf("%p\n", &s[0]);
+    printf("%c\n", s[1]);
+    printf("%p\n", &s[1]);
+
     // pointer arithmetic
     for (int i = 0; i < strlen(s); i++)
     {
@@ -166,7 +134,15 @@ int main(void)
     }
     printf("\n");
 
+    int yyy[] = {10, 20, 30};
+    int *zzz = &yyy;
+    for (int i = 0; i < 10; i++)
+    {
+        // advancing the pointer one byte at a time
+        printf("%i\n", *(zzz + i));
+        printf("%p\n", (zzz + i));
+    }
+
     comparison();
     copy();
-    filecopy("file.txt", "file2.txt");
 }
