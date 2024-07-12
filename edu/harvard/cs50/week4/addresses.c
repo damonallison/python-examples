@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <cs50.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,6 +8,9 @@
 // How do floats work?
 // how do you find the address of the location?
 
+typedef uint8_t BYTE;
+
+// Compares the value of two strings for equality using strcmp
 bool compare(char *s, char *t)
 {
     // address comparison
@@ -21,16 +26,17 @@ void comparison()
     char *ss = "damon";
     char *st = "damon";
 
-    printf("identity equal == %i\n", compare(ss, ss));
-    printf("value equal == %i\n", compare(ss, st));
+    assert(compare(ss, ss));
+    assert(compare(ss, st));
+
     // strcmp: returns the mangnitue of the first value compared to the second
     // value.
     //
     // If the first value is less than the second, strcmp returns negative.
     //
     // If the first value is greater than the second, strcmp returns positive.
-    printf("damon1 < damon2 == %i\n", strcmp("damon1", "damon2") < 0);
-    printf("damon2 > damon1 == %i\n", strcmp("damon2", "damon1") > 0);
+    assert(strcmp("damon1", "damon2") < 0);
+    assert(strcmp("damon3", "damon1") > 0);
 }
 
 int copy()

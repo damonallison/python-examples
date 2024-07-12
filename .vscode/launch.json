@@ -8,11 +8,11 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/edu/harvard/cs50/week4/addresses",
+            "program": "${workspaceFolder}/edu/harvard/cs50/week4/volume/volume",
             "args": [
-                "alice",
-                "bob",
-                "charlie"
+                "input.wav",
+                "output.wav",
+                "1",
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
