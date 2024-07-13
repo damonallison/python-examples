@@ -9,9 +9,10 @@
                 "-fansi-escape-codes",
                 "-g",
                 "${file}",
-                "-I/usr/""-lcs50",
+                "-I/usr/",
+                "-lcs50",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
             ],
             "options": {
                 "cwd": "${fileDirname}"
