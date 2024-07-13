@@ -56,14 +56,14 @@ int main(int argc, char *argv[])
     int16_t sample;
     while (fread(&sample, sizeof(int16_t), 1, input) == 1)
     {
+        if (ferror(input))
+        {
+            perror("error reading file");
+            fclose(input);
+            fclose(output);
+            return EXIT_FAILURE;
+        }
         printf("%d\n", sample);
-    }
-    if (ferror(input))
-    {
-        perror("error reading file");
-        fclose(input);
-        fclose(output);
-        return EXIT_FAILURE;
     }
     return 0;
 }
