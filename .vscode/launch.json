@@ -1,0 +1,64 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        //
+        // C/C++ debugger settings
+        //
+        {
+            "name": "(lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [
+                "input.wav",
+                "output.wav",
+                "1",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "C/C++: clang build active file",
+        },
+        {
+            "name": "coro",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/coro.py",
+            "justMyCode": true,
+        },
+        {
+            "name": "envt",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/utilities/environment.py",
+            "args": [
+                "10",
+            ],
+            // "console": "integratedTerminal",
+            // // Controls the visibility of the Debug Console
+            // "internalConsoleOptions": "openOnSessionStart",
+            // // Example of running pre/post launch tasks
+            // "preLaunchTask": "say hello",
+            // // "postDebugTask": "say hello",
+            // "presentation": {
+            //     "hidden": false,
+            //     "group": "simple",
+            //     "order": 1
+            // }
+        },
+        {
+            "name": "cs50",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "edu.harvard.cs50p",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "--font",
+                // figlet.getFonts()
+                "bigchief",
+            ],
+        }
+    ]
+}
