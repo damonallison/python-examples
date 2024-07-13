@@ -7,6 +7,8 @@ mlruns/
 # datasets
 temp/
 
+# c / c++ debug symbols
+**/*.dSYM/
 
 # dask
 dask-worker-space/
