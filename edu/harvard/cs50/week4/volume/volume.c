@@ -9,6 +9,11 @@ const int HEADER_SIZE = 44;
 
 int main(int argc, char *argv[])
 {
+    for (int i = 0; i < argc; i++)
+    {
+        printf("argv[%d] == %s\n", i, argv[i]);
+    }
+
     // Check command-line arguments
     if (argc != 4)
     {
@@ -35,7 +40,7 @@ int main(int argc, char *argv[])
 
     // Copy header from input file to output file
     char buffer[HEADER_SIZE];
-    size_t bytesRead = fread(buffer, sizeof(buffer), HEADER_SIZE, input);
+    size_t bytesRead = fread(buffer, sizeof(char), HEADER_SIZE, input);
     if (bytesRead < HEADER_SIZE && !feof(input))
     {
         perror("Error reading input file");
@@ -43,16 +48,13 @@ int main(int argc, char *argv[])
         fclose(output);
         return EXIT_FAILURE;
     }
-    if (fwrite(buffer, sizeof(buffer), HEADER_SIZE, output) != HEADER_SIZE)
+    if (fwrite(buffer, sizeof(char), HEADER_SIZE, output) != HEADER_SIZE)
     {
         perror("Error writing to output file");
         fclose(input);
         fclose(output);
         return EXIT_FAILURE;
     }
-    printf("here we are.........\n");
-
-    // TODO: Read samples from input file and write updated data to output file
     int16_t sample;
     while (fread(&sample, sizeof(int16_t), 1, input) == 1)
     {
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
             fclose(output);
             return EXIT_FAILURE;
         }
-        printf("%d\n", sample);
+        // printf("%d\n", sample);
     }
     return 0;
 }
