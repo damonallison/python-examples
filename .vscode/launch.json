@@ -12,7 +12,7 @@
             "args": [
                 "input.wav",
                 "output.wav",
-                "1",
+                "2",
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
