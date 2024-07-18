@@ -9,10 +9,10 @@ const int HEADER_SIZE = 44;
 
 int main(int argc, char *argv[])
 {
-    for (int i = 0; i < argc; i++)
-    {
-        printf("argv[%d] == %s\n", i, argv[i]);
-    }
+    // for (int i = 0; i < argc; i++)
+    // {
+    //     printf("argv[%d] == %s\n", i, argv[i]);
+    // }
 
     // Check command-line arguments
     if (argc != 4)
@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
     // Copy header from input file to output file
     char buffer[HEADER_SIZE];
     size_t bytesRead = fread(buffer, sizeof(char), HEADER_SIZE, input);
+
     if (bytesRead < HEADER_SIZE && !feof(input))
     {
         perror("Error reading input file");
@@ -65,7 +66,27 @@ int main(int argc, char *argv[])
             fclose(output);
             return EXIT_FAILURE;
         }
-        // printf("%d\n", sample);
+        int16_t adjusted = (int16_t)(sample * factor);
+        // printf("%d\n", adjusted);
+
+        if (fwrite(&adjusted, sizeof(int16_t), 1, output) != 1)
+        {
+            if (ferror(output))
+            {
+                perror("error writing file");
+                fclose(input);
+                fclose(output);
+                return EXIT_FAILURE;
+            }
+        }
+    }
+    if (fclose(input) != 0)
+    {
+        perror("error closing input file");
+    }
+    if (fclose(output) != 0)
+    {
+        perror("error closing output file");
     }
     return 0;
 }
