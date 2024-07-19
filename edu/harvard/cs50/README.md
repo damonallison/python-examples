@@ -289,3 +289,10 @@ The heap is a sharable memory space which you obtain pointers to by allocating
 memory using `malloc`.
 
 The stack and heap can overflow (buffer overflow).
+
+
+## Week 5: Data Structures
+
+* Queue: FIFO / enqueue / dequeue
+* Stack: LIFO / push / pop
+* Linked list: non-contiguous memory

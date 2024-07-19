@@ -10,9 +10,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "-b",
-                "images/stadium.bmp",
-                "out.bmp",
+                "texts/carroll.txt",
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
