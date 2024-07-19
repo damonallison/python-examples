@@ -10,9 +10,9 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "input.wav",
-                "output.wav",
-                "2",
+                "-b",
+                "images/stadium.bmp",
+                "out.bmp",
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
