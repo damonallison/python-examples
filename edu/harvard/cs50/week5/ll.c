@@ -21,7 +21,33 @@ void append(Node *head, Node *val)
 
 int main()
 {
+    // int x = 4;
+    // int *y = NULL;
+    // int *z = NULL;
+
+    // printf("y(addr) = %p\n", y);
+    // printf("z(addr) = %p\n", z);
+
+    // y = &x;
+    // z = &x;
+
+    // printf("x = %d\n", x);
+    // printf("y(addr) = %p\n", y);
+    // printf("x(addr) == %p\n", &x);
+
+    // printf("y = %d\n", (*y));
+    // printf("z = %d\n", (*z));
+
+    // x = 10;
+    // printf("x = %d\n", x);
+    // printf("y(addr) = %p\n", y);
+    // printf("x(addr) == %p\n", &x);
+
+    // printf("y = %d\n", (*y));
+    // printf("z = %d\n", (*z));
+
     Node *head = NULL;
+
     for (int i = 0; i < 10; i++)
     {
         Node *n = malloc(sizeof(Node));
