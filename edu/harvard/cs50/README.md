@@ -296,3 +296,60 @@ The stack and heap can overflow (buffer overflow).
 * Queue: FIFO / enqueue / dequeue
 * Stack: LIFO / push / pop
 * Linked list: non-contiguous memory
+
+## Week 6: Python
+
+* All languages have the same basic building blocks: variables, functions,
+  iteration, errors, abstractions.
+* High level, intrepreted languages like Python are easier but slower. Start w/
+  high level languages, use lower languages (Rust or Go) where you need to.
+* Objects: data and functions
+
+
+## Week 6.5: AI
+
+What is ethical use of AI assuming AI is better than humans?
+
+System prompt "engineering": providing context or rules to "tune" the AI model
+to respond with particular intention or limits.
+
+How does AI change the job market? How is AI the same or different than other
+transformative technologies like the printing press, farm equipment, or
+internet?
+
+Without ego, without judgement.
+
+Why did ChatGPT break the AI industry into the forefront of technology?
+
+* Generative
+* Universal
+
+minimax: maximizing or minimizing probability of a favorable outcome.
+
+### Machine learning
+Machines learn without being explicity programmed.
+
+#### Reinforcement learning
+Reward for success / punish for failure. Reinforces success. Requires labeled data.
+* Example: robot learning
+
+Explore vs. exploit
+* Expliot the knowledge you know
+* But explore a % time (randomness) to improve
+
+#### Deep learning
+
+Neuron based network designed after the human mind.
+
+#### Generative AI
+
+Attention: the relationship between words determines their probability of words
+to group together. Transformer architecture. The "T" in ChatGPT. It takes
+context into account.
+
+> Attention is all you need - Seminal Google paper.
+
+#### Hallucinations
+
+When a chatbot confidently gives a plausible but incorrect answer. Will
+obviously become less frequent as models improve.
