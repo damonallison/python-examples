@@ -353,3 +353,8 @@ context into account.
 
 When a chatbot confidently gives a plausible but incorrect answer. Will
 obviously become less frequent as models improve.
+
+
+## Week 7: SQL
+
+Indexes improve speed at the expense of higher storage cost.
