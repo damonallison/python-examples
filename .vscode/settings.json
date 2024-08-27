@@ -106,6 +106,8 @@
         "stdbool.h": "c",
         "string.h": "c",
         "math.h": "c",
-        "cs50.h": "c"
+        "cs50.h": "c",
+        "ctype.h": "c",
+        "_ctype.h": "c"
     }
 }
