@@ -357,4 +357,8 @@ obviously become less frequent as models improve.
 
 ## Week 7: SQL
 
-Indexes improve speed at the expense of higher storage cost.
+Indexes improve speed at the expense of higher storage cost to store the index.
+
+## Week 8
+
+

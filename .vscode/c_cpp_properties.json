@@ -1,6 +1,3 @@
-//
-// c_cpp_properties.json allows you to control compiler settings.
-//
 {
     "env": {
         "myIncludePath": [
@@ -20,6 +17,9 @@
             "cppStandard": "c++17",
             "includePath": [
                 "${myIncludePath}"
+            ],
+            "compilerArgs": [
+                "-lcs50"
             ]
         }
     ],
