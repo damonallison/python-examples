@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<!--
+html is simply a tree of tags and attributes.
+
+html does not, by default, respect literal whitespace. Multiple whitespace
+charaters are treated as a single space.
+
+To run a local webserver:
+
+npm -g install http-server
+http-server
+
+-->
+
+<!--
+ -->
+<html lang="en">
+
+
+<head>
+    <!-- scale the font porportionally (helpful for mobile devices -->
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+
+    <link href="style.css" rel="stylesheet" />
+    <script src="index.js"></script>
+
+    <title>
+        hello, title
+    </title>
+</head>
+
+<body>
+    <div class="centered">
+        <div>
+            <img alt="sample code" src="media/vscode.png" />
+        </div>
+        <div>
+            <video class="my-video" controls muted>
+                <source src="media/coding.mov" type="video/mp4" />
+            </video>
+        </div>
+    </div>
+    <h1 id="main-header">header one</h1>
+    <h2>header two</h2>
+    <h3>header three</h3>
+    <p>hello, body</p>
+
+    <ul>
+        <li>one</li>
+        <li>two</li>
+        <li>three</li>
+    </ul>
+
+    <table>
+        <tr>
+            <td>cell 1</td>
+            <td>cell 2</td>
+        </tr>
+        <tr>
+            <td>cell 1</td>
+            <td>cell 2</td>
+        </tr>
+    </table>
+
+    <form action=" https://www.google.com/search" method="get">
+        <input autocomplete="on" name="q" placeholder="query" type="search" autofocus>
+        <button>google search</button>
+    </form>
+
+    <form id="local-form">
+        <input id="local-query" autocomplete="on" name="q" placeholder="query" type="search" autofocus />
+        <button id="local-button">alert</button>
+    </form>
+</body>
+
+</html>

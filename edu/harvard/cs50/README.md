@@ -359,6 +359,87 @@ obviously become less frequent as models improve.
 
 Indexes improve speed at the expense of higher storage cost to store the index.
 
-## Week 8
+## Week 8: HTML, CSS, Javascript
 
+Internet: sending packets thru routers (TCP/IP)
 
+* IP: Internet Protocol: addressing (IPv4 32 bits -> IPv6 128 bits)
+* TCP: Transmission Control Protocol: guarantees delivery by retries.
+  * Packet sequencing
+  * Ports (80 / 443)
+* DNS: name -> ip resolution
+* DHCP: "what should be my dns server?" "what is my IP address?"
+
+### HTTP(S)
+
+HyperText Transfer Protocol (Secure)
+
+http://www.example.com/
+
+* http: protocol
+* com: top level domain
+* www.example.com: hostname
+
+#### Requests / Headers
+
+`GET`: "getting" information
+`POST`: sending information
+
+```plain
+GET / HTTP/2
+Host: www.harvard.edu
+
+HTTP/2 200
+Content-Type: text/html
+```
+
+### HTML
+
+HTML files are trees of tags and attriutes.
+
+[html validator](validator.m3.org)
+
+```html
+<!-- html is simply a tree of tags and attributes -->
+<html lang="en">
+    <head>
+        <title>
+            hello, title
+        </title>
+    </head>
+    <body>
+        hello, body
+    </body>
+</html>
+```
+
+### Regular Expressions
+
+A syntax for pattern matching. Browsers (`<input>`) has a `pattern` attribute.
+
+**Don't ever trust the client to validate input. The user can change any HTML.**
+
+```html
+<input pattern=".+@.+.edu>" />
+```
+
+### CSS
+
+Cascading Style Sheets.
+
+Cascading is made possible by using the "cascading" styles from the current HTML elements and it's parent elements.
+
+### Javascript
+
+```html
+<html>
+    <head>
+        <script>
+            function greet() {
+                alert("hello, " + document.querySelector("#main-header").value);
+            }
+        </script>
+    </head>
+</html>
+
+```

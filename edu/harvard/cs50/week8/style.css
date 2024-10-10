@@ -1,0 +1,14 @@
+#main-header {
+    color: red;
+    text-align: center;
+}
+
+.centered {
+    text-align: center;
+}
+
+.my-video {
+    width: 25%;
+    /* automatically adjust height to maintain aspect ratio */
+    height: auto;
+}
