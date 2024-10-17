@@ -67,6 +67,7 @@ style50 = "^2.10.3"
 check50 = "^3.3.11"
 flask = "^3.0.3"
 cs50 = "^9.4.0"
+flask-session = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.3"
