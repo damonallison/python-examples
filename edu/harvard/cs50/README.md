@@ -443,3 +443,14 @@ Cascading is made possible by using the "cascading" styles from the current HTML
 </html>
 
 ```
+
+## Week 9: Flask
+
+* Websites: static
+* Applicatons: dynamic
+
+HTTP Path == HTTP Route (synonyms)
+
+Routes are static (can be copy / pasted)
+
+MVC: Model (database table), View (UI), Controller (app logic)

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+
+{% block body %}
+
+<h1>register</h1>
+
+<!-- get puts inputs into the querystring -->
+<form action="/register" method="post">
+    <input autocomplete="off" autofocus required name="name" placeholder="name" type="text">
+    {% for sport in sports %}
+    <input name="sport" type="checkbox" value="{{ sport }}">{{ sport }}</input>
+    {% endfor %}
+    <button type="submit">register</button>
+</form>
+{% endblock %}
