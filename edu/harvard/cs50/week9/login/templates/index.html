@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+
+{% block body %}
+
+{% if name %}
+
+You are logged in as {{ name }}. <a href="/logout">log out</a>
+
+{% else %}
+
+You are not logged in. <a href="/login">log in</a>
+
+{% endif %}
+
+<input id="search-query" type="search" autocomplete="off" autofocus placeholder="query...">
+<ul id="search-results"></ul>
+
+<script>
+    // asyncronous js using fetch (a.k.a., ajax)
+    let input = document.querySelector("#search-query");
+    input.addEventListener("input", async function () {
+        let response = await fetch("/search?q=" + input.value);
+        let shows = await response.text();
+        document.querySelector("#search-results").innerHTML = shows;
+    });
+</script>
+
+{% endblock %}

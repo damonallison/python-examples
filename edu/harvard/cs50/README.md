@@ -454,3 +454,11 @@ HTTP Path == HTTP Route (synonyms)
 Routes are static (can be copy / pasted)
 
 MVC: Model (database table), View (UI), Controller (app logic)
+
+### Sessions
+
+HTTP is stateless. Sessions are identified using cookies. A session cookie identifies a client.
+
+### API
+
+Application Programming Interface. Programmatic access to a server. Returns JSON.
