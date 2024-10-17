@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+
+{% block body %}
+<!-- get puts inputs into the querystring -->
+<form action="/greet" method="post">
+    <input autocomplete="off" autofocus name="name" placeholder="name" type="text">
+    <button type="submit">greet</button>
+</form>
+{% endblock %}
