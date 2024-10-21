@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block main %}
+
+<table>
+    <tr>
+        <th>Symbol</th>
+        <th>Shares</th>
+        <th>Current Price</th>
+        <th>Total Value</th>
+    </tr>
+    {% for stock in stocks %}
+    <tr>
+        <td>{{ stock["symbol"] }} </td>
+        <td>{{ stock["shares"] }} </td>
+        <td>{{ stock["price"] | usd }} </td>
+        <td>{{ (stock["shares"] * stock["price"]) | usd}} </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if portfolio %}
+<div>
+    Cash: {{ portfolio["cash"] | usd }}
+</div>
+<div>
+    Stocks: {{ portfolio["stocks"] | usd}}
+</div>
+<div>
+    Portfolio total: {{ (portfolio["cash"] + portfolio["stocks"]) | usd }}
+</div>
+
+<div>
+    <form action="/add" method="post">
+        add cash:
+        <input autocomplete="off" autofocus name="amount" placeholder="amount" type="text">
+        <button class="btn btn-primary" type="submit">add</button>
+    </form>
+</div>
+
+{% endif %}
+
+{% endblock %}

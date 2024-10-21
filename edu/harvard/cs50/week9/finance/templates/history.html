@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+History
+{% endblock %}
+
+{% block main %}
+
+<table>
+    <tr>
+        <th>Type</th>
+        <th>Symbol</th>
+        <th>Shares</th>
+        <th>Price</th>
+        <th>Amount</th>
+        <th>Transaction Date</th>
+    </tr>
+    {% for tx in txs %}
+    <tr>
+        <td>{{ tx["tx_type"] }} </td>
+        <td>{{ tx["symbol"] }} </td>
+        <td>{{ tx["shares"] }} </td>
+        <td>{{ tx["price"] | usd }} </td>
+        <td>{{ (tx["price"] * tx["shares"]) | usd }} </td>
+        <td>{{ tx["created_at"] }}</td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
