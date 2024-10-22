@@ -113,13 +113,14 @@ def stocks(id: int) -> list[dict[str, Any]]:
 
     positions: list[dict[str, Any]] = []
     for symbol, shares in stocks.items():
-        positions.append(
-            {
-                "symbol": symbol,
-                "shares": shares,
-                "price": lookup(symbol)["price"],
-            }
-        )
+        if shares > 0:
+            positions.append(
+                {
+                    "symbol": symbol,
+                    "shares": shares,
+                    "price": lookup(symbol)["price"],
+                }
+            )
     logger.debug("positions: %s", positions)
     return positions
 
@@ -188,18 +189,21 @@ def buy():
         symbol = request.form.get("symbol")
 
         if not symbol:
-            flash("symbol required")
-            return render_template("buy.html")
+            return apology("missing symbol", 400)
+            # flash("symbol required")
+            # return render_template("buy.html")
 
         quote = lookup(symbol)
         if not quote:
-            flash("invalid symbol")
-            return render_template("buy.html")
+            return apology("invalid symbol", 400)
+            # flash("invalid symbol")
+            # return render_template("buy.html")
 
         shares = request.form.get("shares")
         if not shares or not shares.isdigit():
-            flash("invalid shares")
-            return render_template("buy.html")
+            return apology("invalid shares", 400)
+            # flash("invalid shares")
+            # return render_template("buy.html")
 
         # validate purchase
         shares = int(shares)
@@ -212,8 +216,9 @@ def buy():
             shares=shares,
             price=price,
         ):
-            flash("not enough funds")
-            return render_template("buy.html")
+            return apology("not enough funds", 400)
+            # flash("not enough funds")
+            # return render_template("buy.html")
         return redirect("/")
     return render_template("buy.html")
 
@@ -287,12 +292,14 @@ def quote():
     if request.method == "POST":
         symbol = request.form.get("symbol")
         if not symbol:
-            flash("quote symbol required")
-            render_template("quote.html")
+            return apology("missing symbol", 400)
+            # flash("quote symbol required")
+            # render_template("quote.html")
         quote = lookup(symbol)
         if quote is None:
-            flash("invalid symbol")
-            return render_template("quote.html")
+            return apology("invalid symbol", 400)
+            # flash("invalid symbol")
+            # return render_template("quote.html")
 
         return render_template("quoted.html", quote=quote)
 
@@ -307,17 +314,17 @@ def register():
         # validation
         username = request.form.get("username")
         if not username:
-            return apology("username required", 403)
+            return apology("username required", 400)
 
         password = request.form.get("password")
-        confirm_password = request.form.get("confirm_password")
+        confirm_password = request.form.get("confirmation")
         if not password:
-            return apology("password required", 403)
+            return apology("password required", 400)
         if password != confirm_password:
-            return apology("passwords must match", 403)
+            return apology("passwords must match", 400)
 
         if user_exists(username):
-            return apology("username already exists", 403)
+            return apology("username already exists", 400)
 
         # create user
         hashed_password = generate_password_hash(password=password)
@@ -345,30 +352,35 @@ def sell():
         symbol = request.form.get("symbol")
         shares = request.form.get("shares")
         if not shares.isdigit():
-            flash("invalid shares")
-            return render_template("sell.html", stocks=portfolio)
+            return apology("invalid shares", 400)
+            # flash("invalid shares")
+            # return render_template("sell.html", stocks=portfolio)
 
         shares = int(shares)
         if shares <= 0:
-            flash("invalid shares")
-            return render_template("sell.html", stocks=portfolio)
+            return apology("invalid shares", 400)
+            # flash("invalid shares")
+            # return render_template("sell.html", stocks=portfolio)
 
         if not symbol:
-            flash("invalid symbol")
-            return render_template("sell.html", stocks=portfolio)
+            return apology("invalid symbol", 400)
+            # flash("invalid symbol")
+            # return render_template("sell.html", stocks=portfolio)
 
         symbol = symbol.upper()
 
         stock_list = list(filter(lambda x: x["symbol"] == symbol, portfolio))
         if len(stock_list) == 0:
-            flash("invalid symbol")
-            return render_template("sell.html", stocks=portfolio)
+            return apology("invalid symbol", 400)
+            # flash("invalid symbol")
+            # return render_template("sell.html", stocks=portfolio)
 
         stock = stock_list[0]
 
         if stock["shares"] < shares:
-            flash(f"you don't own {shares} shares")
-            return render_template("sell.html", stocks=portfolio)
+            return apology("not enough shares", 400)
+            # flash(f"you don't own {shares} shares")
+            # return render_template("sell.html", stocks=portfolio)
 
         quote = lookup(symbol)
         # add a transaction and increase cash
