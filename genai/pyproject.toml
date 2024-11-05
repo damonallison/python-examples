@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "genai"
+version = "0.1.0"
+description = "a sample gen ai project"
+authors = ["Damon Allison <damon@damonallison.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12.4,<3.13"
+# TODO: remove pin(s)
+transformers = "^4.42.2"
+torch = "2.4.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
