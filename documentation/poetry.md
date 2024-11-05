@@ -25,8 +25,8 @@ set -U XDG_DATA_HOME $HOME/.local/share
 
 ## Usage
 
-Before using poetry in a project, create or set the `pyenv` virtualenv you want
-to use with the project.
+Before using poetry in a project, create or set the `python` version you want to
+use in `.tool-versions` (see [asdf](https://asdf-vm.com)).
 
 ```shell
 

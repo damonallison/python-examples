@@ -34,7 +34,6 @@ from typing import Any, cast
 
 import emoji
 import pyfiglet
-import json
 import random
 import sys
 import cowsay
