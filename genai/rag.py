@@ -113,12 +113,12 @@ if __name__ == "__main__":
         )
     )
 
-    # result = sentiment_analysis(
-    #     [
-    #         "hello world",
-    #     ]
-    # )
-    # print(result)
+    result = sentiment_analysis(
+        [
+            "hello world",
+        ]
+    )
+    print(result)
     # logger.info("%s: %s", type(result), result)
     # result = zero_shot_classification(
     #     sent="this is a course about machine learning and data science",
