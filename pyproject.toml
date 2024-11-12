@@ -5,6 +5,7 @@ description = "Python example code"
 authors = ["Damon Allison <damon@damonallison.com>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 # Dependencies are specified with version constraints following:
 # https://python-poetry.org/docs/dependency-specification/
