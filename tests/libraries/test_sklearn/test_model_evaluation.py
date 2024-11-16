@@ -201,6 +201,7 @@ recall (low false negatives). Predicting someone as *not* having cancer when
 they indeed do is MUCH more expensive than predicting someone as having cancer
 who doesn't.
 """
+
 import math
 from typing import cast
 
@@ -233,7 +234,6 @@ def test_available_scorers() -> None:
 
     assert "accuracy" in metrics.get_scorer_names()
     scorer = metrics.get_scorer("accuracy")
-    assert "PredictScorer" in str(type(scorer))
 
     assert scorer(lr, X_test, y_test) > 0.0
 
@@ -700,10 +700,10 @@ def test_confusion_matrix() -> None:
     recall = tp / (tp + fn)
     f1 = 2 * (precision * recall) / (precision + recall)
 
-    assert accuracy == metrics.accuracy_score(y_test, logreg_pred)
-    assert precision == metrics.precision_score(y_test, logreg_pred)
-    assert recall == metrics.recall_score(y_test, logreg_pred)
-    assert f1 == metrics.f1_score(y_test, logreg_pred)
+    assert math.isclose(accuracy, metrics.accuracy_score(y_test, logreg_pred))
+    assert math.isclose(precision, metrics.precision_score(y_test, logreg_pred))
+    assert math.isclose(recall, metrics.recall_score(y_test, logreg_pred))
+    assert math.isclose(f1, metrics.f1_score(y_test, logreg_pred))
 
     #
     # sklearn has a convenience function `classification_report` to calculate

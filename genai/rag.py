@@ -5,7 +5,7 @@ Transformers
 ------------
 A model architecture for solving NLP problems including text generation.
 
-A pipeline performs multiple steps:
+`A pipeline performs multiple steps:
 * Preprocessing
 * Inference
 * Postprocessing

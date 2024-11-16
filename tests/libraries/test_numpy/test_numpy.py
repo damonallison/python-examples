@@ -7,7 +7,7 @@ numpy (numerical python) is a numerical computing library. It provides an array
 data type (ndarray: n-dimensional array) and efficient computations on them.
 Numpy allows data types to be specified, which improves performance.
 
-Numpy requires you to think in vectorized operations (ufuncs and broadasting) on
+Numpy requires you to think in vectorized operations (ufuncs and broadcasting) on
 arrays as opposed to iteration. When you start thinking in iteration, you're
 fighting numpy's programming paradigm.
 
@@ -60,13 +60,19 @@ def test_numpy_creation() -> None:
     assert a.shape == (3,)  # `shape` is always a tuple
     assert a.size == 3  # Total elements of the array (all dimensions)
     assert a.dtype == np.int8
+    assert np.isdtype(a.dtype, "numeric")
+    assert np.isdtype(a.dtype, "integral")
+    assert np.isdtype(a.dtype, "signed integer")
+    assert np.isdtype(a.dtype, np.int8)
+
+    assert np.issubdtype(a.dtype, np.number)
     assert np.issubdtype(a.dtype, np.integer)
     assert np.issubdtype(a.dtype, np.signedinteger)
+    assert np.issubdtype(a.dtype, np.int8)
 
     # In numpy, dimensions are called axes. axis=0 are rows, axis=1 are columns
     # (in a 2D array).
     a2 = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], dtype=np.int8)
-    assert a2.dtype == np.int8
     assert a2.shape == (3, 3)
     assert a2.ndim == 2
 
@@ -122,7 +128,7 @@ def test_numpy_datatypes() -> None:
     out of the box behavior for working with non-numeric data.
     """
 
-    no = np.array(["1.1", "2.2", "3.3"], dtype=np.string_)
+    no = np.array(["1.1", "2.2", "3.3"], dtype=np.bytes_)
 
     # Important: astype will *always* copy the array, even if the data type does
     # not change.

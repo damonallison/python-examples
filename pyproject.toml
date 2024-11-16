@@ -60,14 +60,14 @@ torchvision = "^0.18.0"
 xgboost = "^2.0.3"
 
 # for submitting work to harvard's CS50 repo
-submit50 = "^3.1.4"
+# submit50 = "^3.1.4"
+# style50 = "^2.10.3"
+# check50 = "^3.3.11"
+# cs50 = "^9.4.0"
 validators = "^0.28.3"
 inflect = "^7.2.1"
 fpdf2 = "^2.7.9"
-style50 = "^2.10.3"
-check50 = "^3.3.11"
 flask = "^3.0.3"
-cs50 = "^9.4.0"
 flask-session = "^0.8.0"
 
 [tool.poetry.dev-dependencies]
