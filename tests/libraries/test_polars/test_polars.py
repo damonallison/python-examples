@@ -12,4 +12,4 @@ def test_polars_create() -> None:
     df = pl.DataFrame({"one": [1, 2, 3], "two": [4, 5, 6]})
 
     assert df.columns == ["one", "two"]
-    assert df.get_column("one").series_equal(pl.Series("one", [1, 2, 3]))
+    assert df.get_column("one").equals(pl.Series("one", [1, 2, 3]))
