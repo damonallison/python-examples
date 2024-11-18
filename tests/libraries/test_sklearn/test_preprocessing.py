@@ -39,7 +39,7 @@ def test_one_hot_encoding() -> None:
     # Setting sparse=False tells OneHotEncoder to return a numpy array, not a
     # sparse matrix.
     #
-    ohe = preprocessing.OneHotEncoder(sparse=False)
+    ohe = preprocessing.OneHotEncoder(sparse_output=False)
     ohe.fit_transform(df)
 
     assert set(ohe.get_feature_names_out()) == set(
@@ -66,7 +66,7 @@ def test_one_hot_encoding() -> None:
             ),
             (
                 "onehot",
-                preprocessing.OneHotEncoder(sparse=False),
+                preprocessing.OneHotEncoder(sparse_output=False),
                 ["categorical_feature"],
             ),
         ]
