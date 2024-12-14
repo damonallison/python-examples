@@ -52,8 +52,9 @@ Benefits of threading:
 
 Dawbacks of threading:
 
-* Difficult to reason about. * All shared memory, even seemingly benign
-  assigment statements, must be locked. `a = a + 1` is *not* deterministic.
+* Difficult to reason about.
+* All shared memory, even seemingly benign assigment statements, must be locked.
+  `a = a + 1` is *not* deterministic.
 
 * Resource intensive and inefficient. Each thread requires 8MB (default) stack
   space. The OS will context switch between all threads - regardless if the
@@ -83,17 +84,17 @@ pytest-asyncio:
 
 """
 
-from typing import List, Optional
-
-from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import contextlib
 import inspect
 import logging
 import math
-import pytest
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
+from typing import List, Optional
+
+import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +118,7 @@ async def raise_exc(msg: str) -> None:
 async def long_running(seconds: float) -> str:
     try:
         while True:
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(seconds)
     except asyncio.CancelledError:
         return "cancelled"
 
@@ -339,7 +340,7 @@ def test_asyncio_lifecycle() -> None:
         for i in range(delay):
             logger.info(f"run_for sleeping {i + 1} of {delay}")
             await asyncio.sleep(1.0)
-        logger.info(f"run_for complete")
+        logger.info("run_for complete")
         nonlocal non_blocking_completed
         non_blocking_completed = True
 
@@ -347,7 +348,7 @@ def test_asyncio_lifecycle() -> None:
         for i in range(delay):
             logger.info(f"run_for_blocking {i + 1} of {delay}")
             time.sleep(1.0)
-        logger.info(f"run_for_blocking complete")
+        logger.info("run_for_blocking complete")
         nonlocal blocking_completed
         blocking_completed = True
 
