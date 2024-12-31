@@ -17,11 +17,10 @@
 # Importing CALL_COUNT *directly* from another module will create a copy of the
 # variable in the importing module's namespace
 
-CALL_COUNT = 0
-
 import pydantic
 import pydantic_settings
 
+CALL_COUNT = 0
 
 class AppConfig(pydantic_settings.BaseSettings):
     # model_config = pydantic_settings.SettingsConfigDict(
