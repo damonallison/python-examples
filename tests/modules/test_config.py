@@ -1,17 +1,16 @@
-# GOAL: Prove that we can patch a single config object and all references are updated
+# GOAL: Prove that we can patch a single config object and all references are
+# updated
 #
 # How:
 #   * Import Config from multiple modules
 #   * Patch the actual config object
 #   * Verify all instances read the patched value
 
+from pytest import MonkeyPatch
+
+from tests.modules.core.appconfig import CALL_COUNT, AppConfig
 from tests.modules.pkg1 import mod1
 from tests.modules.pkg2 import mod2
-
-from tests.modules.core import config
-from tests.modules.core.appconfig import CALL_COUNT, AppConfig
-
-from pytest import MonkeyPatch
 
 
 def test_global_variable_import() -> None:

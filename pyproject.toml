@@ -69,6 +69,7 @@ inflect = "^7.2.1"
 fpdf2 = "^2.7.9"
 flask = "^3.0.3"
 flask-session = "^0.8.0"
+plotly = "^5.24.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8"
