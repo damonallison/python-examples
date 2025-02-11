@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12.4,<3.13"
-transformers = "^4.46.2"
+transformers = "^4.48.0"
 torch = "^2.5.1"
 
 
